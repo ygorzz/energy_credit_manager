@@ -4,3 +4,10 @@ dist/
 .env
 .env.*
 !.env.example
+
+/src/db/generated/prisma
+
+.agents/
+.claude/
+.windsurf/
+skills-lock.json

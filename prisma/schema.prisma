@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/db/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  ANALYST
+  CLIENT
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELED
+}
+
+enum PowerPlantSourceTypes {
+  SOLAR
+  HYDRO
+  WIND
+}
+
+enum PowerPlantStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+enum Months {
+  JANUARY
+  FEBRUARY
+  MARCH
+  APRIL
+  MAY
+  JUNE
+  JULY
+  AUGUST
+  SEPTEMBER
+  OCTOBER
+  NOVEMBER
+  DECEMBER
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  hashPassword String
+  role         UserRole   @default(CLIENT)
+  status       UserStatus @default(ACTIVE)
+
+  companyId String?
+  company   ClientCompany? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model PowerPlant {
+  id                  String                @id @default(uuid())
+  name                String
+  state               String
+  city                String
+  sourceType          PowerPlantSourceTypes @default(SOLAR)
+  installedCapacityKw Decimal
+  status              PowerPlantStatus      @default(ACTIVE)
+
+  distributorId      String
+  distributor        Distributor         @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+  monthlyGenerations MonthlyGeneration[]
+}
+
+model ClientCompany {
+  id                   String @id @default(uuid())
+  name                 String
+  cnpj                 String @unique
+  allocationPercentage Int
+
+  distributorId     String
+  distributor       Distributor         @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+  users             User[]
+  creditAllocations CreditAllocations[]
+}
+
+model Distributor {
+  id              String          @id @default(uuid())
+  name            String          @unique
+  powerPlants     PowerPlant[]
+  clientCompanies ClientCompany[]
+}
+
+model MonthlyGeneration {
+  id                String  @id @default(uuid())
+  month             Months
+  energyGeneratedKw Decimal
+
+  powerPlantId String
+  powerPlant   PowerPlant @relation(fields: [powerPlantId], references: [id], onDelete: Cascade)
+}
+
+model CreditAllocations {
+  id                String  @id @default(uuid())
+  month             Months
+  percentageApplied Decimal
+  energyAllocatedKw Decimal
+
+  clientCompanyId String
+  clientCompany   ClientCompany @relation(fields: [clientCompanyId], references: [id], onDelete: Cascade)
+}
