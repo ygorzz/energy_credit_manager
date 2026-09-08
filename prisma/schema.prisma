@@ -15,7 +15,7 @@ enum UserRole {
 
 enum UserStatus {
   ACTIVE
-  SUSPENDED
+  INACTIVE
   CANCELED
 }
 
