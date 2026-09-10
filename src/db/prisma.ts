@@ -6,6 +6,6 @@ const connectionString = `${process.env.DATABASE_URL}`;
 
 // Prisma trabalha com adapters para se vincular ao BD - nesse caso, usamos o adapter do postregsql
 const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
+const db = new PrismaClient({ adapter });
 
-export { prisma };
+export { db };
