@@ -13,7 +13,7 @@ export const registerSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number.'),
   role: z.enum(['ADMIN', 'ANALYST', 'CLIENT']).default('CLIENT'),
   status: z.enum(['ACTIVE', 'INACTIVE', 'CANCELED']).default('ACTIVE'),
-  companyId: z.string().nullish(),
+  companyId: z.string().nullable(),
 });
 
 export const loginSchema = z.object({
