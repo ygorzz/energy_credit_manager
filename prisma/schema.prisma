@@ -15,7 +15,7 @@ model User {
   hashPassword String
   role         UserRole       @default(CLIENT)
   status       UserStatus     @default(ACTIVE)
-  company      ClientCompany? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company      ClientCompany? @relation(fields: [companyId], references: [id])
 }
 
 model PowerPlant {
