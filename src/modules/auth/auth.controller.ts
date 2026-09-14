@@ -11,7 +11,6 @@ export default class AuthController {
       const userRegistered = await this.authService.register(validatedData);
       res.status(201).json({ message: 'User registered successfully!', userRegistered });
     } catch (error) {
-      console.log(error);
       next(error);
     }
   };
@@ -22,7 +21,6 @@ export default class AuthController {
       const token = await this.authService.login(validatedData);
       res.status(200).json({ message: 'User logged successfully!', token });
     } catch (error) {
-      console.log(error);
       next(error);
     }
   };

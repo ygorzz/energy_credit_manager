@@ -11,4 +11,4 @@ app.use(errorHandler);
 
 export default app;
 
-// no login validar status do user, só liber se for active
+// no login validar status do user, só liberar se for active

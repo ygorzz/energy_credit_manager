@@ -10,6 +10,6 @@ export default class BaseError extends Error {
   }
 
   sendAnswer(res: Response) {
-    return res.status(this.statusCode).json({ status: this.statusCode, message: this.message });
+    return res.status(this.statusCode).json({ statusCode: this.statusCode, message: this.message });
   }
 }

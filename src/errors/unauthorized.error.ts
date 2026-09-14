@@ -1,7 +1,7 @@
-import BaseError from './BaseError.js';
+import BaseError from './base.error.js';
 
 export default class UnauthorizedError extends BaseError {
-  constructor(message: string) {
+  constructor(message: string = 'Unauthorized') {
     super(message, 401);
   }
 }

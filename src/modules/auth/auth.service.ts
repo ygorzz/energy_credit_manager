@@ -2,8 +2,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
 import { db } from '../../db/prisma.js';
-import ConflictError from '../../errors/ConflictError.js';
-import UnauthorizedError from '../../errors/UnauthorizedError.js';
+import ConflictError from '../../errors/conflict.error.js';
+import UnauthorizedError from '../../errors/unauthorized.error.js';
 import type { LoginDTO, RegisterDto } from './auth.dto.js';
 
 export default class AuthService {
