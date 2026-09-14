@@ -2,6 +2,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
 import { db } from '../../db/prisma.js';
+import ConflictError from '../../errors/ConflictError.js';
+import UnauthorizedError from '../../errors/UnauthorizedError.js';
 import type { LoginDTO, RegisterDto } from './auth.dto.js';
 
 export default class AuthService {
@@ -11,7 +13,7 @@ export default class AuthService {
         email: data.email,
       },
     });
-    if (alreadyExists) throw new Error('Already exists a user with this email - ConflictError 409');
+    if (alreadyExists) throw new ConflictError('Already exists a user with this email');
 
     const hashPassword = await bcrypt.hash(data.password, 10);
     const { password, ...rest } = data;
@@ -24,8 +26,8 @@ export default class AuthService {
         email: true,
         role: true,
         status: true,
-        companyId: true
-      }
+        companyId: true,
+      },
     });
 
     return newUser;
@@ -37,13 +39,15 @@ export default class AuthService {
         email: data.email,
       },
     });
-    if (!userFound) throw new Error('Invalid email or password - 401 UnauthorizedError');
+    if (!userFound) throw new UnauthorizedError('Invalid email or password');
 
     const passwordIsValid = await bcrypt.compare(data.password, userFound.hashPassword);
-    if (!passwordIsValid) throw new Error('Invalid email or password - 401 UnauthorizedError');
+    if (!passwordIsValid) throw new UnauthorizedError('Invalid email or password');
 
-    // send userId as token payload
-    const token = jwt.sign({ id: userFound.id, role: userFound.role }, env.JWT_SECRET, { expiresIn: '1h' });
+    // send userId and userRole as token payload
+    const token = jwt.sign({ id: userFound.id, role: userFound.role }, env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
 
     return token;
   }
