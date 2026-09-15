@@ -5,10 +5,10 @@ import { db } from '../../db/prisma.js';
 import ConflictError from '../../errors/conflict.error.js';
 import ForbiddenError from '../../errors/forbidden.error.js';
 import UnauthorizedError from '../../errors/unauthorized.error.js';
-import type { LoginDTO, RegisterDto } from './auth.dto.js';
+import type { LoginDTO, RegisterDTO } from './auth.dto.js';
 
 export default class AuthService {
-  public async register(data: RegisterDto) {
+  public register = async (data: RegisterDTO) => {
     const alreadyExists = await db.user.findUnique({
       where: {
         email: data.email,
@@ -34,7 +34,7 @@ export default class AuthService {
     return newUser;
   }
 
-  public async login(data: LoginDTO) {
+  public login = async (data: LoginDTO) => {
     const userFound = await db.user.findFirst({
       where: {
         email: data.email,

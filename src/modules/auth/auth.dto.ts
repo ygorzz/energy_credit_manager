@@ -25,5 +25,5 @@ export const loginSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number.'),
 });
 
-export type RegisterDto = z.infer<typeof registerSchema>;
+export type RegisterDTO = z.infer<typeof registerSchema>;
 export type LoginDTO = z.infer<typeof loginSchema>;
