@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
 import { db } from '../../db/prisma.js';
 import ConflictError from '../../errors/conflict.error.js';
+import ForbiddenError from '../../errors/forbidden.error.js';
 import UnauthorizedError from '../../errors/unauthorized.error.js';
 import type { LoginDTO, RegisterDto } from './auth.dto.js';
 
@@ -43,6 +44,9 @@ export default class AuthService {
 
     const passwordIsValid = await bcrypt.compare(data.password, userFound.hashPassword);
     if (!passwordIsValid) throw new UnauthorizedError('Invalid email or password');
+
+    if (userFound.status !== 'ACTIVE')
+      throw new ForbiddenError('Your account is inactive. Please contact the administrator.');
 
     // send userId and userRole as token payload
     const token = jwt.sign({ id: userFound.id, role: userFound.role }, env.JWT_SECRET, {
