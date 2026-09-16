@@ -9,6 +9,8 @@ import type { LoginDTO, RegisterDTO } from './auth.dto.js';
 
 export default class AuthService {
   public register = async (data: RegisterDTO) => {
+    // Escapes email
+    data.email = data.email.trim().toUpperCase();
     const alreadyExists = await db.user.findUnique({
       where: {
         email: data.email,
@@ -32,7 +34,7 @@ export default class AuthService {
     });
 
     return newUser;
-  }
+  };
 
   public login = async (data: LoginDTO) => {
     const userFound = await db.user.findFirst({
@@ -54,5 +56,5 @@ export default class AuthService {
     });
 
     return token;
-  }
+  };
 }

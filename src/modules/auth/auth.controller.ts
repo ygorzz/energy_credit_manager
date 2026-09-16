@@ -8,8 +8,8 @@ export default class AuthController {
   public register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = registerSchema.parse(req.body); // If no validate, throws ZodError
-      const userRegistered = await this.authService.register(validatedData);
-      res.status(201).json({ message: 'User registered successfully!', userRegistered });
+      const newUser = await this.authService.register(validatedData);
+      res.status(201).json({ message: 'User registered successfully!', newUser });
     } catch (error) {
       next(error);
     }

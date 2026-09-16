@@ -8,10 +8,10 @@ export default class PowerPlantsController {
   public createPowerPlant = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = createPowerPlantSchema.parse(req.body);
-      const createdPowerPlant = await this.powerPlantService.create(validatedData);
+      const newPowerPlant = await this.powerPlantService.create(validatedData);
       return res
         .status(201)
-        .json({ message: 'Power Plant created successfully!', createdPowerPlant });
+        .json({ message: 'Power Plant created successfully!', newPowerPlant });
     } catch (error) {
       next(error);
     }
