@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
+import { Prisma } from '../../db/generated/prisma/client.js';
 import { db } from '../../db/prisma.js';
 import ConflictError from '../../errors/conflict.error.js';
 import ForbiddenError from '../../errors/forbidden.error.js';
@@ -9,35 +10,37 @@ import type { LoginDTO, RegisterDTO } from './auth.dto.js';
 
 export default class AuthService {
   public register = async (data: RegisterDTO) => {
-    // Escapes email
-    data.email = data.email.trim().toUpperCase();
-    const alreadyExists = await db.user.findUnique({
-      where: {
-        email: data.email,
-      },
-    });
-    if (alreadyExists) throw new ConflictError('Already exists a user with this email');
+    try {
+      // Escapes email
+      data.email = data.email.trim().toUpperCase();
 
-    const hashPassword = await bcrypt.hash(data.password, 10);
-    const { password, ...rest } = data;
-    const newData = { hashPassword: hashPassword, ...rest };
-    const newUser = await db.user.create({
-      data: newData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        companyId: true,
-      },
-    });
+      const hashPassword = await bcrypt.hash(data.password, 10);
+      const { password, ...rest } = data;
+      const newData = { hashPassword: hashPassword, ...rest };
+      const newUser = await db.user.create({
+        data: newData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          companyId: true,
+        },
+      });
 
-    return newUser;
+      return newUser;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictError('Already exists a user with this email');
+        }
+      }
+    }
   };
 
   public login = async (data: LoginDTO) => {
-    const userFound = await db.user.findFirst({
+    const userFound = await db.user.findUnique({
       where: {
         email: data.email,
       },
