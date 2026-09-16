@@ -3,7 +3,8 @@ import jwt, { type JwtPayload } from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import UnauthorizedError from '../errors/unauthorized.error.js';
 
-export default function auth(req: Request, res: Response, next: NextFunction) {
+// <P> -> adapts to the parameters coming from the route
+export default function auth<P>(req: Request<P>, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) throw new UnauthorizedError('No token provided');

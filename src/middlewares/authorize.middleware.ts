@@ -2,7 +2,11 @@ import type { NextFunction, Request, Response } from 'express';
 import ForbiddenError from '../errors/forbidden.error.js';
 import UnauthorizedError from '../errors/unauthorized.error.js';
 
-export default function authorize(req: Request, _res: Response, next: NextFunction) {
+export default function authorize<P>(
+  req: Request<P>,
+  _res: Response,
+  next: NextFunction,
+) {
   if (!req.user) throw new UnauthorizedError();
   const userRole = req.user.role;
   if (userRole !== 'ADMIN') {

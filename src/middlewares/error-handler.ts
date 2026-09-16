@@ -23,5 +23,3 @@ export default function errorHandler(
 
   return new BaseError().sendAnswer(res);
 }
-
-// Tratar erros do Prisma !!!!
