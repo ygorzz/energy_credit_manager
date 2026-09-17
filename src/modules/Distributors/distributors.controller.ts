@@ -1,5 +1,9 @@
 import type { NextFunction, Request, Response } from 'express';
-import { createDistributorSchema, updateDistributorSchema } from './distributor.dto.js';
+import {
+  createDistributorSchema,
+  listDistributorsSchema,
+  updateDistributorSchema,
+} from './distributor.dto.js';
 import type DistributorService from './distributor.service.js';
 import type { DistributorIdParams } from './distributors.types.js';
 
@@ -16,7 +20,31 @@ export default class DistributorsController {
     }
   };
 
-  // types the Request with the DistributorIdParams type
+  public listDistributors = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { page, limit } = listDistributorsSchema.parse(req.query);
+      const distributors = await this.distributorService.findAll(page, limit);
+      return res.status(200).json(distributors);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getDistributorById = async (
+    req: Request<DistributorIdParams>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { id } = req.params;
+      const distributorFound = await this.distributorService.findById(id);
+      return res.status(200).json(distributorFound);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // types the Request with the DistributorIdParams type for id: string
   public deleteDistributor = async (
     req: Request<DistributorIdParams>,
     res: Response,
@@ -40,7 +68,7 @@ export default class DistributorsController {
   ) => {
     try {
       const { id } = req.params;
-      const validatedData = updateDistributorSchema.parse(req.body)
+      const validatedData = updateDistributorSchema.parse(req.body);
       const distributorUpdated = await this.distributorService.update(id, validatedData);
       return res
         .status(201)

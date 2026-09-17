@@ -15,9 +15,6 @@ app.use(errorHandler);
 
 export default app;
 
-// tratar errros prisma em auth.service
-// CRUD Distributors (find, findById)
-    // testar endpoints
 // middleware authorze para permitir ADMIN e ANALYST
 // CRUD PowerPlants
 // CRUD Users
