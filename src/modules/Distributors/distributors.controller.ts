@@ -5,7 +5,7 @@ import {
   updateDistributorSchema,
 } from './distributor.dto.js';
 import type DistributorService from './distributor.service.js';
-import type { DistributorIdParams } from './distributors.types.js';
+import type { IdParams } from '../../types.js';
 
 export default class DistributorsController {
   constructor(private distributorService: DistributorService) {}
@@ -31,7 +31,7 @@ export default class DistributorsController {
   };
 
   public getDistributorById = async (
-    req: Request<DistributorIdParams>,
+    req: Request<IdParams>,
     res: Response,
     next: NextFunction,
   ) => {
@@ -44,9 +44,9 @@ export default class DistributorsController {
     }
   };
 
-  // types the Request with the DistributorIdParams type for id: string
+  // types the Request with the IdParams type for id: string
   public deleteDistributor = async (
-    req: Request<DistributorIdParams>,
+    req: Request<IdParams>,
     res: Response,
     next: NextFunction,
   ) => {
@@ -62,7 +62,7 @@ export default class DistributorsController {
   };
 
   public updateDistributor = async (
-    req: Request<DistributorIdParams>,
+    req: Request<IdParams>,
     res: Response,
     next: NextFunction,
   ) => {

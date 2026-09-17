@@ -1,4 +1,4 @@
-import type { JwtPayload } from 'jsonwebtoken';
+import type { JwtPayload } from "jsonwebtoken";
 
 // Extends the Express's Request type for to suport the user attribute with the id attribute
 declare global {
@@ -6,8 +6,12 @@ declare global {
     interface Request {
       user?: {
         id: string | JwtPayload;
-        role: "ADMIN" | "CLIENT" | "ANALYST"
+        role: "ADMIN" | "CLIENT" | "ANALYST";
       };
     }
   }
+}
+
+export interface IdParams {
+  id: string;
 }
