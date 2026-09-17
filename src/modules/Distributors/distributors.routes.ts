@@ -20,19 +20,19 @@ routes
   .post(
     '/',
     auth,
-    authorize(UserRoles.ADMIN, UserRoles.ANALYST),
+    authorize(UserRoles.ADMIN),
     distributorsController.createDistributor,
   )
   .delete(
     '/:id',
     auth,
-    authorize(UserRoles.ADMIN, UserRoles.ANALYST),
+    authorize(UserRoles.ADMIN),
     distributorsController.deleteDistributor,
   )
   .patch(
     '/:id',
     auth,
-    authorize(UserRoles.ADMIN, UserRoles.ANALYST),
+    authorize(UserRoles.ADMIN),
     distributorsController.updateDistributor,
   );
 

@@ -7,7 +7,6 @@ import type { CreateDistributorDTO, UpdateDistributorDTO } from './distributor.d
 export default class DistributorService {
   public create = async (data: CreateDistributorDTO) => {
     try {
-      data.name = data.name.trim().toUpperCase();
       const newDistributor = await db.distributor.create({
         data,
       });
