@@ -13,7 +13,7 @@ model User {
   email        String         @unique
   companyId    String?
   hashPassword String
-  role         UserRole       @default(CLIENT)
+  role         UserRoles       @default(CLIENT)
   status       UserStatus     @default(ACTIVE)
   company      ClientCompany? @relation(fields: [companyId], references: [id])
 }
@@ -66,7 +66,7 @@ model CreditAllocations {
   clientCompany     ClientCompany @relation(fields: [clientCompanyId], references: [id], onDelete: Cascade)
 }
 
-enum UserRole {
+enum UserRoles {
   ADMIN
   ANALYST
   CLIENT
