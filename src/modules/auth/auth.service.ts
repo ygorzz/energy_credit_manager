@@ -11,9 +11,6 @@ import type { LoginDTO, RegisterDTO } from "./auth.dto.js";
 export default class AuthService {
   public register = async (data: RegisterDTO) => {
     try {
-      // Escapes email
-      data.email = data.email.trim().toUpperCase();
-
       const hashPassword = await bcrypt.hash(data.password, 10);
       const { password, ...rest } = data;
       const newData = { hashPassword: hashPassword, ...rest };
