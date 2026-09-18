@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const registerSchema = z.object({
+export const registerUserSchema = z.object({
   name: z
     .string()
     .min(4, "Name must contain at least 4 charaters")
@@ -25,5 +25,5 @@ export const loginSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number."),
 });
 
-export type RegisterDTO = z.infer<typeof registerSchema>;
+export type RegisterDTO = z.infer<typeof registerUserSchema>;
 export type LoginDTO = z.infer<typeof loginSchema>;

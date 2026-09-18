@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { loginSchema, registerSchema } from './auth.dto.js';
+import { loginSchema, registerUserSchema } from './auth.dto.js';
 import type AuthService from './auth.service.js';
 
 export default class AuthController {
@@ -7,7 +7,7 @@ export default class AuthController {
 
   public register = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const validatedData = registerSchema.parse(req.body); // If no validate, throws ZodError
+      const validatedData = registerUserSchema.parse(req.body); // If no validate, throws ZodError
       const newUser = await this.authService.register(validatedData);
       res.status(201).json({ message: 'User registered successfully!', newUser });
     } catch (error) {
