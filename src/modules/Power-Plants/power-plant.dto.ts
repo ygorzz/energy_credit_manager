@@ -35,7 +35,7 @@ export const updatePowerPlantSchema = createPowerPlantSchema.extend({
     state: createPowerPlantSchema.shape.state.optional(),
     city: createPowerPlantSchema.shape.city.optional(),
     sourceType: createPowerPlantSchema.shape.sourceType.optional(),
-    installedCapacityKw: createPowerPlantSchema.shape.installedCapacityMw.optional(),
+    installedCapacityMw: createPowerPlantSchema.shape.installedCapacityMw.optional(),
     status: createPowerPlantSchema.shape.status.optional(),
     distributorId: createPowerPlantSchema.shape.distributorId.optional(),
 });
