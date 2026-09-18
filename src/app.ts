@@ -9,11 +9,11 @@ const app = express();
 
 app.use(express.json());
 app.use('/auth', authRoutes);
-app.use('/power-plants', powerPlantsRoutes);
 app.use('/distributors', distributorsRoutes);
+app.use('/power-plants', powerPlantsRoutes);
 app.use(errorHandler);
 
 export default app;
 
-// CRUD PowerPlants
 // CRUD Users
+// Revisar possível separação de modules dentro de Auth module

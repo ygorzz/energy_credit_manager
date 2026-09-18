@@ -1,8 +1,11 @@
-import { Prisma } from '../../db/generated/prisma/client.js';
-import { db } from '../../db/prisma.js';
-import ConflictError from '../../errors/conflict.error.js';
-import NotFoundError from '../../errors/not-found.error.js';
-import type { CreateDistributorDTO, UpdateDistributorDTO } from './distributor.dto.js';
+import { Prisma } from "../../db/generated/prisma/client.js";
+import { db } from "../../db/prisma.js";
+import ConflictError from "../../errors/conflict.error.js";
+import NotFoundError from "../../errors/not-found.error.js";
+import type {
+  CreateDistributorDTO,
+  UpdateDistributorDTO,
+} from "./distributor.dto.js";
 
 export default class DistributorService {
   public create = async (data: CreateDistributorDTO) => {
@@ -13,10 +16,13 @@ export default class DistributorService {
       return newDistributor;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ConflictError('Already exists a distributor with this name');
+        if (error.code === "P2002") {
+          throw new ConflictError(
+            "Already exists a distributor with this name",
+          );
         }
       }
+      throw error;
     }
   };
 
@@ -36,7 +42,7 @@ export default class DistributorService {
       },
     });
 
-    if (!distributorFound) throw new NotFoundError('Distributor not found');
+    if (!distributorFound) throw new NotFoundError("Distributor not found");
 
     return distributorFound;
   };
@@ -52,16 +58,17 @@ export default class DistributorService {
       return distributorDeleted;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError('Distributor not found');
+        if (error.code === "P2025") {
+          throw new NotFoundError("Distributor not found");
         }
       }
+      throw error;
     }
   };
 
   public update = async (id: string, data: UpdateDistributorDTO) => {
     try {
-      const newData = data.name === undefined ? {} : { name: data.name.trim().toUpperCase() };
+      const newData = data.name === undefined ? {} : { name: data.name };
       const distributorUpdated = await db.distributor.update({
         where: {
           id,
@@ -72,10 +79,11 @@ export default class DistributorService {
       return distributorUpdated;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError('Distributor not found');
+        if (error.code === "P2025") {
+          throw new NotFoundError("Distributor not found");
         }
       }
+      throw error;
     }
   };
 }
