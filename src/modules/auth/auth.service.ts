@@ -13,7 +13,7 @@ export default class AuthService {
     try {
       const hashPassword = await bcrypt.hash(data.password, 10);
       const { password, ...rest } = data;
-      const newData = { hashPassword: hashPassword, ...rest };
+      const newData = { hashPassword, ...rest };
       const newUser = await db.user.create({
         data: newData,
         select: {

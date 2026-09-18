@@ -24,7 +24,7 @@ model PowerPlant {
   state               States
   city                String
   sourceType          PowerPlantSourceTypes @default(SOLAR)
-  installedCapacityKw Decimal
+  installedCapacityMw Decimal
   status              PowerPlantStatus      @default(ACTIVE)
   distributorId       String
   monthlyGenerations  MonthlyGeneration[]

@@ -23,7 +23,7 @@ export const createPowerPlantSchema = z.object({
   sourceType: z.enum(PowerPlantSourceTypes, {
     error: "Invalid power plant source type",
   }),
-  installedCapacityKw: z
+  installedCapacityMw: z
     .number("Installed capacity must be a number")
     .positive("Installed capacity must be greater than zero"),
   status: z.enum(PowerPlantStatus).default(PowerPlantStatus.ACTIVE),
@@ -35,7 +35,7 @@ export const updatePowerPlantSchema = createPowerPlantSchema.extend({
     state: createPowerPlantSchema.shape.state.optional(),
     city: createPowerPlantSchema.shape.city.optional(),
     sourceType: createPowerPlantSchema.shape.sourceType.optional(),
-    installedCapacityKw: createPowerPlantSchema.shape.installedCapacityKw.optional(),
+    installedCapacityKw: createPowerPlantSchema.shape.installedCapacityMw.optional(),
     status: createPowerPlantSchema.shape.status.optional(),
     distributorId: createPowerPlantSchema.shape.distributorId.optional(),
 });

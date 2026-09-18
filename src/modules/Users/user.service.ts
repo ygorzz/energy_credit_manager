@@ -3,6 +3,7 @@ import { db } from "../../db/prisma.js";
 import ConflictError from "../../errors/conflict.error.js";
 import NotFoundError from "../../errors/not-found.error.js";
 import type { updateUserDTO } from "./user.dto.js";
+import bcrypt from "bcrypt";
 
 export default class UserService {
   public findAll = async (page: number, limit: number) => {
@@ -10,6 +11,14 @@ export default class UserService {
     const users = await db.user.findMany({
       skip,
       take: limit,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        companyId: true,
+      },
     });
     return users;
   };
@@ -18,6 +27,14 @@ export default class UserService {
     const userFound = await db.user.findUnique({
       where: {
         id,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        companyId: true,
       },
     });
 
@@ -31,6 +48,14 @@ export default class UserService {
       const userDeleted = await db.user.delete({
         where: {
           id,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          companyId: true,
         },
       });
 
@@ -47,14 +72,31 @@ export default class UserService {
 
   public update = async (id: string, data: updateUserDTO) => {
     try {
-      const newData = Object.fromEntries(
+      let newData = Object.fromEntries(
         Object.entries(data).filter((e) => e[1] !== undefined),
       );
+
+      if (newData.password) {
+        const hashPassword = await bcrypt.hash(newData.password, 10);
+        const { password, ...rest } = newData;
+        newData = {
+          hashPassword,
+          ...rest,
+        };
+      }
       const userUpdated = await db.user.update({
         where: {
           id,
         },
         data: newData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          companyId: true,
+        },
       });
 
       return userUpdated;
