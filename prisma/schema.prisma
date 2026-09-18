@@ -13,15 +13,15 @@ model User {
   email        String         @unique
   companyId    String?
   hashPassword String
-  role         UserRoles       @default(CLIENT)
+  role         UserRoles      @default(CLIENT)
   status       UserStatus     @default(ACTIVE)
   company      ClientCompany? @relation(fields: [companyId], references: [id])
 }
 
 model PowerPlant {
   id                  String                @id @default(uuid())
-  name                String
-  state               String
+  name                String                @unique
+  state               States
   city                String
   sourceType          PowerPlantSourceTypes @default(SOLAR)
   installedCapacityKw Decimal
@@ -103,4 +103,34 @@ enum Months {
   OCTOBER
   NOVEMBER
   DECEMBER
+}
+
+enum States {
+  AC
+  AL
+  AP
+  AM
+  BA
+  CE
+  DF
+  ES
+  GO
+  MA
+  MT
+  MS
+  MG
+  PA
+  PB
+  PR
+  PE
+  PI
+  RJ
+  RN
+  RS
+  RO
+  RR
+  SC
+  SP
+  SE
+  TO
 }
