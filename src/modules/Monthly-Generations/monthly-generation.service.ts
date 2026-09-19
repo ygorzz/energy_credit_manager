@@ -17,7 +17,7 @@ export default class MonthlyGenerationService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2003") {
-          throw new NotFoundError("Power plant id not found in the database");
+          throw new NotFoundError("Power plant not found in the database");
         }
         if (error.code === "P2002") {
           throw new ConflictError("Already exits a register with these data");
@@ -87,7 +87,7 @@ export default class MonthlyGenerationService {
           throw new NotFoundError("Monthly generation not found");
         }
         if (error.code === "P2003") {
-          throw new NotFoundError("Power plant id not found in the database");
+          throw new NotFoundError("Power plant not found in the database");
         }
         if (error.code === "P2002") {
           throw new ConflictError("Already exits a register with these data");

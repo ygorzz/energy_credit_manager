@@ -6,28 +6,28 @@ import {
 } from "../../db/generated/prisma/enums.js";
 
 export const createPowerPlantSchema = z.object({
-  name: z
-    .string("Invalid power plant name")
-    .trim()
-    .toUpperCase()
-    .min(2, "Name must contain at least 2 characters")
-    .max(100, "Name must contain a maximum of 100 characters"),
-  state: z.enum(States, {
-    error: "Invalid state",
-  }),
-  city: z
-    .string("Invalid city")
-    .trim()
-    .min(2, "City must contain at least 2 characters")
-    .max(100, "City must contain a maximum of 100 characters"),
-  sourceType: z.enum(PowerPlantSourceTypes, {
-    error: "Invalid power plant source type",
-  }),
-  installedCapacityMw: z
-    .number("Installed capacity must be a number")
-    .positive("Installed capacity must be greater than zero"),
-  status: z.enum(PowerPlantStatus).default(PowerPlantStatus.ACTIVE),
-  distributorId: z.uuid("Invalid distributor ID"),
+    name: z
+      .string("Invalid power plant name")
+      .trim()
+      .toUpperCase()
+      .min(2, "Name must contain at least 2 characters")
+      .max(100, "Name must contain a maximum of 100 characters"),
+    state: z.enum(States, {
+      error: "Invalid state",
+    }),
+    city: z
+      .string("Invalid city")
+      .trim()
+      .min(2, "City must contain at least 2 characters")
+      .max(100, "City must contain a maximum of 100 characters"),
+    sourceType: z.enum(PowerPlantSourceTypes, {
+      error: "Invalid power plant source type",
+    }),
+    installedCapacityMw: z
+      .number("Installed capacity must be a number")
+      .positive("Installed capacity must be greater than zero"),
+    status: z.enum(PowerPlantStatus).default(PowerPlantStatus.ACTIVE),
+    distributorId: z.uuid("Invalid distributor ID"),
 });
 
 export const updatePowerPlantSchema = createPowerPlantSchema.extend({
