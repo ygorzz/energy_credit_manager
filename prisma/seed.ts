@@ -7,7 +7,7 @@ async function seed() {
   await db.user.create({
     data: {
       name: 'Ygor',
-      email: 'y@y.com',
+      email: 'Y@Y.COM',
       hashPassword,
       role: 'ADMIN',
       status: 'ACTIVE',

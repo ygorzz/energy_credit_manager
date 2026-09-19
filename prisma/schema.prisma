@@ -32,12 +32,12 @@ model PowerPlant {
 }
 
 model ClientCompany {
-  id                   String              @id @default(uuid())
+  id                   String             @id @default(uuid())
   name                 String
-  cnpj                 String              @unique
+  cnpj                 String             @unique
   allocationPercentage Int
   distributorId        String
-  distributor          Distributor         @relation(fields: [distributorId], references: [id])
+  distributor          Distributor        @relation(fields: [distributorId], references: [id])
   creditAllocations    CreditAllocation[]
   users                User[]
 }
@@ -52,9 +52,12 @@ model Distributor {
 model MonthlyGeneration {
   id                String     @id @default(uuid())
   month             Months
+  year              Int
   energyGeneratedMw Decimal
   powerPlantId      String
   powerPlant        PowerPlant @relation(fields: [powerPlantId], references: [id])
+
+  @@unique([powerPlantId, year, month])
 }
 
 model CreditAllocation {
