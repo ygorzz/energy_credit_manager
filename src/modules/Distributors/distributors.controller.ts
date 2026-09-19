@@ -54,7 +54,7 @@ export default class DistributorsController {
       const { id } = req.params;
       const distributorDeleted = await this.distributorService.delete(id);
       return res
-        .status(201)
+        .status(200)
         .json({ message: 'Distributor deleted successfully!', distributorDeleted });
     } catch (error) {
       next(error);
@@ -71,7 +71,7 @@ export default class DistributorsController {
       const validatedData = updateDistributorSchema.parse(req.body);
       const distributorUpdated = await this.distributorService.update(id, validatedData);
       return res
-        .status(201)
+        .status(200)
         .json({ message: 'Distributor updated successfully!', distributorUpdated });
     } catch (error) {
       next(error);

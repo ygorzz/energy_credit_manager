@@ -43,7 +43,7 @@ export default class UsersController {
     try {
       const { id } = req.params;
       const userDeleted = await this.userService.delete(id);
-      return res.status(201).json({
+      return res.status(200).json({
         message: "User deleted successfully!",
         userDeleted,
       });
@@ -61,7 +61,7 @@ export default class UsersController {
       const { id } = req.params;
       const validatedData = updateUserSchema.parse(req.body);
       const userUpdated = await this.userService.update(id, validatedData);
-      return res.status(201).json({
+      return res.status(200).json({
         message: "User updated successfully!",
         userUpdated,
       });

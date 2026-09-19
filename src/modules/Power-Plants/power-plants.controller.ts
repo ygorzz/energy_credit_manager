@@ -63,7 +63,7 @@ export default class PowerPlantsController {
     try {
       const { id } = req.params;
       const powerPlantDeleted = await this.powerPlantService.delete(id);
-      return res.status(201).json({
+      return res.status(200).json({
         message: "Power plant deleted successfully!",
         powerPlantDeleted,
       });
@@ -84,7 +84,7 @@ export default class PowerPlantsController {
         id,
         validatedData,
       );
-      return res.status(201).json({
+      return res.status(200).json({
         message: "Power plant updated successfully!",
         powerPlantUpdated,
       });
