@@ -63,6 +63,7 @@ model MonthlyGeneration {
 model CreditAllocation {
   id                String        @id @default(uuid())
   month             Months
+  year              Int
   percentageApplied Decimal
   energyAllocatedMw Decimal
   clientCompanyId   String
