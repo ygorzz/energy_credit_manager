@@ -6,6 +6,7 @@ import {
   updateMonthlyGenerationSchema,
 } from "./monthly-generation.dto.js";
 import type { IdParams } from "../../types.js";
+import { uuidSchema } from "../../shared/schemas/uuid.dto.js";
 
 export default class MonthlyGenerationsController {
   constructor(private monthlyGenerationService: MonthlyGenerationService) {}
@@ -51,7 +52,8 @@ export default class MonthlyGenerationsController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
       const monthlyGenerationFound =
         await this.monthlyGenerationService.findById(id);
       return res.status(200).json(monthlyGenerationFound);
@@ -67,7 +69,8 @@ export default class MonthlyGenerationsController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
       const monthlyGenerationDeleted =
         await this.monthlyGenerationService.delete(id);
       return res.status(201).json({
@@ -85,16 +88,15 @@ export default class MonthlyGenerationsController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
       const validatedData = updateMonthlyGenerationSchema.parse(req.body);
       const monthlyGenerationUpdated =
         await this.monthlyGenerationService.update(id, validatedData);
-      return res
-        .status(201)
-        .json({
-          message: "Monthly Generation updated successfully!",
-          monthlyGenerationUpdated,
-        });
+      return res.status(201).json({
+        message: "Monthly Generation updated successfully!",
+        monthlyGenerationUpdated,
+      });
     } catch (error) {
       next(error);
     }

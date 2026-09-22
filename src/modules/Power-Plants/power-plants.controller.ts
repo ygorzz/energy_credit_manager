@@ -6,6 +6,7 @@ import {
 } from "./power-plant.dto.js";
 import type PowerPlantService from "./power-plant.service.js";
 import type { IdParams } from "../../types.js";
+import { uuidSchema } from "../../shared/schemas/uuid.dto.js";
 
 export default class PowerPlantsController {
   constructor(private powerPlantService: PowerPlantService) {}
@@ -46,7 +47,8 @@ export default class PowerPlantsController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
       const powerPlantFound = await this.powerPlantService.findById(id);
       return res.status(200).json(powerPlantFound);
     } catch (error) {
@@ -61,7 +63,8 @@ export default class PowerPlantsController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
       const powerPlantDeleted = await this.powerPlantService.delete(id);
       return res.status(200).json({
         message: "Power plant deleted successfully!",
@@ -78,7 +81,8 @@ export default class PowerPlantsController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
       const validatedData = updatePowerPlantSchema.parse(req.body);
       const powerPlantUpdated = await this.powerPlantService.update(
         id,

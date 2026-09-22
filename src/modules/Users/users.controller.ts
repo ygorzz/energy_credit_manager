@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import type UserService from "./user.service.js";
 import { listUsersSchema, updateUserSchema } from "./user.dto.js";
 import type { IdParams } from "../../types.js";
+import { uuidSchema } from "../../shared/schemas/uuid.dto.js";
 
 export default class UsersController {
   constructor(private userService: UserService) {}
@@ -26,7 +27,8 @@ export default class UsersController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
       const userFound = await this.userService.findById(id);
       return res.status(200).json(userFound);
     } catch (error) {
@@ -41,7 +43,8 @@ export default class UsersController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
       const userDeleted = await this.userService.delete(id);
       return res.status(200).json({
         message: "User deleted successfully!",
@@ -58,7 +61,8 @@ export default class UsersController {
     next: NextFunction,
   ) => {
     try {
-      const { id } = req.params;
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
       const validatedData = updateUserSchema.parse(req.body);
       const userUpdated = await this.userService.update(id, validatedData);
       return res.status(200).json({

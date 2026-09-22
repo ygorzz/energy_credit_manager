@@ -84,6 +84,12 @@ export default class PowerPlantService {
         if (error.code === "P2025") {
           throw new NotFoundError("Power plant not found");
         }
+        if (error.code === "P2003") {
+          throw new NotFoundError("Distributor id not found in the database");
+        }
+        if (error.code === "P2002") {
+          throw new ConflictError("Already exits a power plant with this name");
+        }
       }
       throw error;
     }
