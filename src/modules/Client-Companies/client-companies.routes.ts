@@ -11,6 +11,36 @@ const clientCompaniesController = new ClientCompaniesController(
   new ClientCompanyService(),
 );
 
-routes.post("/", auth, authorize(UserRoles.ADMIN), clientCompaniesController.createClientCompany);
+routes
+  .post(
+    "/",
+    auth,
+    authorize(UserRoles.ADMIN),
+    clientCompaniesController.createClientCompany,
+  )
+  .get(
+    "/",
+    auth,
+    authorize(UserRoles.ADMIN, UserRoles.ANALYST),
+    clientCompaniesController.listClientCompanies,
+  )
+  .get(
+    "/:id",
+    auth,
+    authorize(UserRoles.ADMIN, UserRoles.ANALYST),
+    clientCompaniesController.getClientCompanyById,
+  )
+  .delete(
+    "/:id",
+    auth,
+    authorize(UserRoles.ADMIN),
+    clientCompaniesController.deleteClientCompany,
+  )
+  .patch(
+    "/:id",
+    auth,
+    authorize(UserRoles.ADMIN),
+    clientCompaniesController.updateClientCompany,
+  );
 
 export default routes;

@@ -23,4 +23,18 @@ export const createClientCompanySchema = z.object({
   distributorId: z.uuid(),
 });
 
+export const updateClientCompanySchema = createClientCompanySchema.extend({
+  name: createClientCompanySchema.shape.name.optional(),
+  cnpj: createClientCompanySchema.shape.cnpj.optional(),
+  allocationPercentage:
+    createClientCompanySchema.shape.allocationPercentage.optional(),
+  distributorId: createClientCompanySchema.shape.distributorId.optional(),
+});
+
+export const listClientCompaniesSchema = z.object({
+  page: z.coerce.number().int().positive().min(1).default(1),
+  limit: z.coerce.number().int().positive().min(1).max(10).default(10),
+});
+
 export type createClientCompanyDTO = z.infer<typeof createClientCompanySchema>;
+export type updateClientCompanyDTO = z.infer<typeof updateClientCompanySchema>;
