@@ -24,12 +24,12 @@ routes
     authorize(UserRoles.ADMIN, UserRoles.ANALYST),
     creditAllocationsController.listcreditAllocations,
   )
-//   .get(
-//     "/:id",
-//     auth,
-//     authorize(UserRoles.ADMIN, UserRoles.ANALYST),
-//     creditAllocationsController.getCreditAllocationById,
-//   )
+  .get(
+    "/:id",
+    auth,
+    authorize(UserRoles.ADMIN, UserRoles.ANALYST),
+    creditAllocationsController.getCreditAllocationById,
+  )
 //   .delete(
 //     "/:id",
 //     auth,

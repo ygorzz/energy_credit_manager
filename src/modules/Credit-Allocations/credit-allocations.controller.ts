@@ -41,20 +41,20 @@ export default class CreditAllocationsController {
     }
   };
 
-//   public getClientCompanyById = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction,
-//   ) => {
-//     try {
-//       const idValidated = uuidSchema.parse(req.params);
-//       const { id } = idValidated;
-//       const clientCompanyFound = await this.creditAllocationService.findById(id);
-//       return res.status(200).json(clientCompanyFound);
-//     } catch (error) {
-//       next(error);
-//     }
-//   };
+  public getCreditAllocationById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
+      const creditAllocationFound = await this.creditAllocationService.findById(id);
+      return res.status(200).json(creditAllocationFound);
+    } catch (error) {
+      next(error);
+    }
+  };
 
 //   public deleteClientCompany = async (
 //     req: Request,

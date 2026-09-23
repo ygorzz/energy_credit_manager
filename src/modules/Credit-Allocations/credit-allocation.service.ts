@@ -34,40 +34,35 @@ export default class CreditAllocationService {
       return newCreditAllocation;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === "P2002") {
-          throw new ConflictError(
-            "Already exists a client company with this CNPJ",
-          );
-        }
         if (error.code === "P2003") {
-          throw new NotFoundError("Distributor not found in the database");
+          throw new NotFoundError("Client company id not found in the database");
         }
       }
       throw error;
     }
   };
 
-    public findAll = async (page: number, limit: number) => {
-      const skip = (page - 1) * limit;
-      const clientCompanies = await db.creditAllocation.findMany({
-        skip,
-        take: limit,
-      });
-      return clientCompanies;
-    };
+  public findAll = async (page: number, limit: number) => {
+    const skip = (page - 1) * limit;
+    const creditAllocations = await db.creditAllocation.findMany({
+      skip,
+      take: limit,
+    });
+    return creditAllocations;
+  };
 
-  //   public findById = async (id: string) => {
-  //     const CreditAllocationFound = await db.CreditAllocation.findUnique({
-  //       where: {
-  //         id,
-  //       },
-  //     });
+  public findById = async (id: string) => {
+    const creditAllocationFound = await db.creditAllocation.findUnique({
+      where: {
+        id,
+      },
+    });
 
-  //     if (!CreditAllocationFound)
-  //       throw new NotFoundError("Client company not found");
+    if (!creditAllocationFound)
+      throw new NotFoundError("Credit allocation not found");
 
-  //     return CreditAllocationFound;
-  //   };
+    return creditAllocationFound;
+  };
 
   //   public delete = async (id: string) => {
   //     try {
