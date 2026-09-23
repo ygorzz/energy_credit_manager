@@ -30,12 +30,12 @@ routes
     authorize(UserRoles.ADMIN, UserRoles.ANALYST),
     creditAllocationsController.getCreditAllocationById,
   )
-//   .delete(
-//     "/:id",
-//     auth,
-//     authorize(UserRoles.ADMIN),
-//     creditAllocationsController.deleteCreditAllocation,
-//   )
+  .delete(
+    "/:id",
+    auth,
+    authorize(UserRoles.ADMIN),
+    creditAllocationsController.deleteCreditAllocation,
+  )
 //   .patch(
 //     "/:id",
 //     auth,

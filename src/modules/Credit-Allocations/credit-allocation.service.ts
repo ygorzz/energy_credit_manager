@@ -35,7 +35,9 @@ export default class CreditAllocationService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2003") {
-          throw new NotFoundError("Client company id not found in the database");
+          throw new NotFoundError(
+            "Client company id not found in the database",
+          );
         }
       }
       throw error;
@@ -64,23 +66,24 @@ export default class CreditAllocationService {
     return creditAllocationFound;
   };
 
-  //   public delete = async (id: string) => {
-  //     try {
-  //       const CreditAllocationDeleted = db.CreditAllocation.delete({
-  //         where: {
-  //           id,
-  //         },
-  //       });
-  //       return CreditAllocationDeleted;
-  //     } catch (error) {
-  //       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-  //         if (error.code === "P2025") {
-  //           throw new NotFoundError("Client company not found");
-  //         }
-  //       }
-  //       throw error;
-  //     }
-  //   };
+  public delete = async (id: string) => {
+    try {
+      const creditAllocationDeleted = db.creditAllocation.delete({
+        where: {
+          id,
+        },
+      });
+      return creditAllocationDeleted;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new NotFoundError("Credit Allocation not found");
+        }
+      }
+      throw error;
+    }
+  };
+
   //   public update = async (id: string, data: updateCreditAllocationDTO) => {
   //     try {
   //       const newData = Object.fromEntries(

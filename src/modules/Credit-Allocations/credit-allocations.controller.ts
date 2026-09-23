@@ -56,23 +56,23 @@ export default class CreditAllocationsController {
     }
   };
 
-//   public deleteClientCompany = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction,
-//   ) => {
-//     try {
-//       const idValidated = uuidSchema.parse(req.params);
-//       const { id } = idValidated;
-//       const clientCompanyDeleted = await this.creditAllocationService.delete(id);
-//       return res.status(200).json({
-//         message: "Client company deleted successfully!",
-//         clientCompanyDeleted,
-//       });
-//     } catch (error) {
-//       next(error);
-//     }
-//   };
+  public deleteCreditAllocation = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const idValidated = uuidSchema.parse(req.params);
+      const { id } = idValidated;
+      const creditAllocationDeleted = await this.creditAllocationService.delete(id);
+      return res.status(200).json({
+        message: "Credit allocation deleted successfully!",
+        creditAllocationDeleted,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 
 //   public updateClientCompany = async (
 //     req: Request,
