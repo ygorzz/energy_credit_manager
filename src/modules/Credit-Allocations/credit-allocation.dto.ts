@@ -25,13 +25,16 @@ export const createCreditAllocationSchema = z.object({
   clientCompanyId: z.uuid("Invalid power plant ID"),
 });
 
-// export const updateCreditAllocationSchema = createCreditAllocationSchema.extend({
-//   name: createCreditAllocationSchema.shape.name.optional(),
-//   cnpj: createCreditAllocationSchema.shape.cnpj.optional(),
-//   allocationPercentage:
-//     createCreditAllocationSchema.shape.allocationPercentage.optional(),
-//   distributorId: createCreditAllocationSchema.shape.distributorId.optional(),
-// });
+export const updateCreditAllocationSchema = createCreditAllocationSchema.extend(
+  {
+    month: createCreditAllocationSchema.shape.month.optional(),
+    year: createCreditAllocationSchema.shape.year.optional(),
+    percentageApplied:
+      createCreditAllocationSchema.shape.percentageApplied.optional(),
+    clientCompanyId:
+      createCreditAllocationSchema.shape.clientCompanyId.optional(),
+  },
+);
 
 export const listCreditAllocationsSchema = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),
@@ -41,4 +44,6 @@ export const listCreditAllocationsSchema = z.object({
 export type createCreditAllocationDTO = z.infer<
   typeof createCreditAllocationSchema
 >;
-// export type updateCreditAllocationDTO = z.infer<typeof updateCreditAllocationSchema>;
+export type updateCreditAllocationDTO = z.infer<
+  typeof updateCreditAllocationSchema
+>;

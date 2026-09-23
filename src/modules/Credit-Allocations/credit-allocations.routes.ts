@@ -36,11 +36,11 @@ routes
     authorize(UserRoles.ADMIN),
     creditAllocationsController.deleteCreditAllocation,
   )
-//   .patch(
-//     "/:id",
-//     auth,
-//     authorize(UserRoles.ADMIN),
-//     creditAllocationsController.updateCreditAllocation,
-//   );
+  .patch(
+    "/:id",
+    auth,
+    authorize(UserRoles.ADMIN),
+    creditAllocationsController.updateCreditAllocation,
+  );
 
 export default routes;

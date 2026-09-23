@@ -2,7 +2,10 @@ import { Prisma } from "../../db/generated/prisma/client.js";
 import { db } from "../../db/prisma.js";
 import ConflictError from "../../errors/conflict.error.js";
 import NotFoundError from "../../errors/not-found.error.js";
-import type { createCreditAllocationDTO } from "./credit-allocation.dto.js";
+import type {
+  createCreditAllocationDTO,
+  updateCreditAllocationDTO,
+} from "./credit-allocation.dto.js";
 
 export default class CreditAllocationService {
   public create = async (data: createCreditAllocationDTO) => {
@@ -84,34 +87,31 @@ export default class CreditAllocationService {
     }
   };
 
-  //   public update = async (id: string, data: updateCreditAllocationDTO) => {
-  //     try {
-  //       const newData = Object.fromEntries(
-  //         Object.entries(data).filter((e) => e[1] !== undefined),
-  //       );
-  //       const CreditAllocationUpdated = await db.CreditAllocation.update({
-  //         where: {
-  //           id,
-  //         },
-  //         data: newData,
-  //       });
+  public update = async (id: string, data: updateCreditAllocationDTO) => {
+    try {
+      const newData = Object.fromEntries(
+        Object.entries(data).filter((e) => e[1] !== undefined),
+      );
+      const CreditAllocationUpdated = await db.creditAllocation.update({
+        where: {
+          id,
+        },
+        data: newData,
+      });
 
-  //       return CreditAllocationUpdated;
-  //     } catch (error) {
-  //       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-  //         if (error.code === "P2025") {
-  //           throw new NotFoundError("Client company not found");
-  //         }
-  //         if (error.code === "P2003") {
-  //           throw new NotFoundError("Distributor id not found in the database");
-  //         }
-  //         if (error.code === "P2002") {
-  //           throw new ConflictError(
-  //             "Already exists a client company with this CNPJ",
-  //           );
-  //         }
-  //       }
-  //       throw error;
-  //     }
-  //   };
+      return CreditAllocationUpdated;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new NotFoundError("Credit allocation not found");
+        }
+        if (error.code === "P2003") {
+          throw new NotFoundError(
+            "Client company id not found in the database",
+          );
+        }
+      }
+      throw error;
+    }
+  };
 }
