@@ -68,6 +68,8 @@ model CreditAllocation {
   energyAllocatedMw Decimal
   clientCompanyId   String
   clientCompany     ClientCompany @relation(fields: [clientCompanyId], references: [id])
+
+  @@unique([clientCompanyId, year, month])
 }
 
 enum UserRoles {

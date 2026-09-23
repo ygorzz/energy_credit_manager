@@ -54,7 +54,7 @@ export default class ClientCompanyService {
 
   public delete = async (id: string) => {
     try {
-      const clientCompanyDeleted = db.clientCompany.delete({
+      const clientCompanyDeleted = await db.clientCompany.delete({
         where: {
           id,
         },

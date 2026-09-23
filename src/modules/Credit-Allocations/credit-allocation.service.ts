@@ -11,7 +11,7 @@ export default class CreditAllocationService {
   public create = async (data: createCreditAllocationDTO) => {
     try {
       let percentageApplied;
-      if (!data.percentageApplied) {
+      if (data.percentageApplied === null) {
         const clientCompany = await db.clientCompany.findUnique({
           where: {
             id: data.clientCompanyId,
@@ -42,6 +42,9 @@ export default class CreditAllocationService {
             "Client company id not found in the database",
           );
         }
+        if (error.code === "P2002") {
+          throw new ConflictError("Already exits a register with these data");
+        }
       }
       throw error;
     }
@@ -71,7 +74,7 @@ export default class CreditAllocationService {
 
   public delete = async (id: string) => {
     try {
-      const creditAllocationDeleted = db.creditAllocation.delete({
+      const creditAllocationDeleted = await db.creditAllocation.delete({
         where: {
           id,
         },
@@ -90,7 +93,7 @@ export default class CreditAllocationService {
   public update = async (id: string, data: updateCreditAllocationDTO) => {
     try {
       const newData = Object.fromEntries(
-        Object.entries(data).filter((e) => e[1] !== undefined),
+        Object.entries(data).filter((e) => e[1] !== undefined || e[1] !== null),
       );
       const CreditAllocationUpdated = await db.creditAllocation.update({
         where: {
@@ -109,6 +112,9 @@ export default class CreditAllocationService {
           throw new NotFoundError(
             "Client company id not found in the database",
           );
+        }
+        if (error.code === "P2002") {
+          throw new ConflictError("Already exits a register with these data");
         }
       }
       throw error;

@@ -22,7 +22,7 @@ export const createCreditAllocationSchema = z.object({
     .number("Energy allocated must be a number")
     .nonnegative("Energy allocated cannot be negative"),
 
-  clientCompanyId: z.uuid("Invalid power plant ID"),
+  clientCompanyId: z.uuid("Invalid client company ID"),
 });
 
 export const updateCreditAllocationSchema = createCreditAllocationSchema.extend(
@@ -31,6 +31,8 @@ export const updateCreditAllocationSchema = createCreditAllocationSchema.extend(
     year: createCreditAllocationSchema.shape.year.optional(),
     percentageApplied:
       createCreditAllocationSchema.shape.percentageApplied.optional(),
+    energyAllocatedMw:
+      createCreditAllocationSchema.shape.energyAllocatedMw.optional(),
     clientCompanyId:
       createCreditAllocationSchema.shape.clientCompanyId.optional(),
   },
