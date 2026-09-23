@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { uuidSchema } from "../../shared/schemas/uuid.dto.js";
 import type CreditAllocationService from "./credit-allocation.service.js";
-import { createCreditAllocationSchema } from "./credit-allocation.dto.js";
+import { createCreditAllocationSchema, listCreditAllocationsSchema } from "./credit-allocation.dto.js";
 
 export default class CreditAllocationsController {
   constructor(private creditAllocationService: CreditAllocationService) {}
@@ -24,22 +24,22 @@ export default class CreditAllocationsController {
     }
   };
 
-//   public listClientCompanies = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction,
-//   ) => {
-//     try {
-//       const { page, limit } = listClientCompaniesSchema.parse(req.query);
-//       const clientCompanies = await this.creditAllocationService.findAll(
-//         page,
-//         limit,
-//       );
-//       return res.status(200).json(clientCompanies);
-//     } catch (error) {
-//       next(error);
-//     }
-//   };
+  public listcreditAllocations = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { page, limit } = listCreditAllocationsSchema.parse(req.query);
+      const creditAlocations = await this.creditAllocationService.findAll(
+        page,
+        limit,
+      );
+      return res.status(200).json(creditAlocations);
+    } catch (error) {
+      next(error);
+    }
+  };
 
 //   public getClientCompanyById = async (
 //     req: Request,

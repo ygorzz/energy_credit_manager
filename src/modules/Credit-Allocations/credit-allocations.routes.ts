@@ -18,12 +18,12 @@ routes
     authorize(UserRoles.ADMIN, UserRoles.ANALYST),
     creditAllocationsController.createCreditAllocation,
   )
-//   .get(
-//     "/",
-//     auth,
-//     authorize(UserRoles.ADMIN, UserRoles.ANALYST),
-//     creditAllocationsController.listcreditAllocations,
-//   )
+  .get(
+    "/",
+    auth,
+    authorize(UserRoles.ADMIN, UserRoles.ANALYST),
+    creditAllocationsController.listcreditAllocations,
+  )
 //   .get(
 //     "/:id",
 //     auth,

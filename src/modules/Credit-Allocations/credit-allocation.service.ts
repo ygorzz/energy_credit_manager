@@ -47,14 +47,14 @@ export default class CreditAllocationService {
     }
   };
 
-  //   public findAll = async (page: number, limit: number) => {
-  //     const skip = (page - 1) * limit;
-  //     const clientCompanies = await db.CreditAllocation.findMany({
-  //       skip,
-  //       take: limit,
-  //     });
-  //     return clientCompanies;
-  //   };
+    public findAll = async (page: number, limit: number) => {
+      const skip = (page - 1) * limit;
+      const clientCompanies = await db.creditAllocation.findMany({
+        skip,
+        take: limit,
+      });
+      return clientCompanies;
+    };
 
   //   public findById = async (id: string) => {
   //     const CreditAllocationFound = await db.CreditAllocation.findUnique({
