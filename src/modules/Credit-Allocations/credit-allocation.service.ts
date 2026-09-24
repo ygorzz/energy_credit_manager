@@ -10,7 +10,7 @@ import type {
 export default class CreditAllocationService {
   public create = async (data: createCreditAllocationDTO) => {
     try {
-      let percentageApplied;
+      let percentageApplied: number;
       if (data.percentageApplied === null) {
         const clientCompany = await db.clientCompany.findUnique({
           where: {
