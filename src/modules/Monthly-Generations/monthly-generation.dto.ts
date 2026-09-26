@@ -6,7 +6,7 @@ export const createMonthlyGenerationSchema = z.object({
     error: "Invalid month",
   }),
   year: z.number().int().min(2000).max(2100),
-  energyGeneratedMw: z
+  energyGeneratedMwh: z
     .number("Energy generated must be a number")
     .nonnegative("Energy generated must be greater than or equal to zero"),
   powerPlantId: z.uuid(),
@@ -16,8 +16,8 @@ export const updateMonthlyGenerationSchema =
   createMonthlyGenerationSchema.extend({
     month: createMonthlyGenerationSchema.shape.month.optional(),
     year: createMonthlyGenerationSchema.shape.year.optional(),
-    energyGeneratedMw:
-      createMonthlyGenerationSchema.shape.energyGeneratedMw.optional(),
+    energyGeneratedMwh:
+      createMonthlyGenerationSchema.shape.energyGeneratedMwh.optional(),
     powerPlantId: createMonthlyGenerationSchema.shape.powerPlantId.optional(),
   });
 
