@@ -28,6 +28,8 @@ export default class CreditAllocationService {
         percentageApplied = data.percentageApplied;
       }
 
+      
+
       const newCreditAllocation = await db.creditAllocation.create({
         data: {
           ...data,

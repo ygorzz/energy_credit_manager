@@ -18,7 +18,7 @@ export const createCreditAllocationSchema = z.object({
     .max(100, "Percentage applied must be at most 100")
     .nullable(),
 
-  energyAllocatedMw: z
+  energyAllocatedMwh: z
     .number("Energy allocated must be a number")
     .nonnegative("Energy allocated cannot be negative"),
 
@@ -31,8 +31,8 @@ export const updateCreditAllocationSchema = createCreditAllocationSchema.extend(
     year: createCreditAllocationSchema.shape.year.optional(),
     percentageApplied:
       createCreditAllocationSchema.shape.percentageApplied.optional(),
-    energyAllocatedMw:
-      createCreditAllocationSchema.shape.energyAllocatedMw.optional(),
+    energyAllocatedMwh:
+      createCreditAllocationSchema.shape.energyAllocatedMwh.optional(),
     clientCompanyId:
       createCreditAllocationSchema.shape.clientCompanyId.optional(),
   },

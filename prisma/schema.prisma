@@ -43,31 +43,46 @@ model ClientCompany {
 }
 
 model Distributor {
-  id              String          @id @default(uuid())
-  name            String          @unique
-  clientCompanies ClientCompany[]
-  powerPlants     PowerPlant[]
+  id                         String                      @id @default(uuid())
+  name                       String                      @unique
+  clientCompanies            ClientCompany[]
+  powerPlants                PowerPlant[]
+  monthlyDistributorBalances MonthlyDistributorBalance[]
 }
 
 model MonthlyGeneration {
-  id                String     @id @default(uuid())
-  month             Months
-  year              Int
-  energyGeneratedMw Decimal
-  powerPlantId      String
-  powerPlant        PowerPlant @relation(fields: [powerPlantId], references: [id])
+  id                 String     @id @default(uuid())
+  month              Months
+  year               Int
+  energyGeneratedMwh Decimal
+  powerPlantId       String
+  powerPlant         PowerPlant @relation(fields: [powerPlantId], references: [id])
 
   @@unique([powerPlantId, year, month])
 }
 
+model MonthlyDistributorBalance {
+  id                      String      @id @default(uuid())
+  month                   Months
+  year                    Int
+  totalEnergyGeneratedMwh Decimal     @default(0)
+  totalEnergyAllocatedMwh Decimal     @default(0)
+  avaliableEnergyMwh      Decimal
+  distributorId           String
+  distributor             Distributor @relation(fields: [distributorId], references: [id])
+
+  // creates a composting unique key -> distributorId_year_month
+  @@unique([distributorId, year, month])
+}
+
 model CreditAllocation {
-  id                String        @id @default(uuid())
-  month             Months
-  year              Int
-  percentageApplied Decimal
-  energyAllocatedMw Decimal
-  clientCompanyId   String
-  clientCompany     ClientCompany @relation(fields: [clientCompanyId], references: [id])
+  id                 String        @id @default(uuid())
+  month              Months
+  year               Int
+  percentageApplied  Decimal
+  energyAllocatedMwh Decimal
+  clientCompanyId    String
+  clientCompany      ClientCompany @relation(fields: [clientCompanyId], references: [id])
 
   @@unique([clientCompanyId, year, month])
 }
