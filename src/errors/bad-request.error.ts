@@ -1,6 +1,6 @@
 import BaseError from './base.error.js';
 
-export default class BadRequest extends BaseError {
+export default class BadRequestError extends BaseError {
   constructor(message: string) {
     super(message, 400);
   }
