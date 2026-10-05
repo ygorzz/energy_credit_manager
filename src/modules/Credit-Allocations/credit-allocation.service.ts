@@ -1,5 +1,6 @@
 import { Prisma } from "../../db/generated/prisma/client.js";
 import { db } from "../../db/prisma.js";
+import BadRequestError from "../../errors/bad-request.error.js";
 import ConflictError from "../../errors/conflict.error.js";
 import NotFoundError from "../../errors/not-found.error.js";
 import type {
@@ -10,30 +11,88 @@ import type {
 export default class CreditAllocationService {
   public create = async (data: createCreditAllocationDTO) => {
     try {
+      // 1 - Get the distributorId for update monthly distributor balance
+      const clientCompany = await db.clientCompany.findUnique({
+        where: {
+          id: data.clientCompanyId,
+        },
+      });
+      if (!clientCompany) throw new NotFoundError("Client company not found");
+
+      // 1.1 - Defines percentageApplied
       let percentageApplied: number;
       if (data.percentageApplied === null) {
-        const clientCompany = await db.clientCompany.findUnique({
-          where: {
-            id: data.clientCompanyId,
-          },
-          select: {
-            allocationPercentage: true,
-          },
-        });
-
-        if (!clientCompany) throw new NotFoundError("Client company not found");
-
         percentageApplied = clientCompany.allocationPercentage;
       } else {
         percentageApplied = data.percentageApplied;
       }
 
-      
+      // 2 - Get monthly energy balance
+      const { distributorId } = clientCompany;
+      const { month, year } = data;
+      const monthlyDistributorBalanceRecord =
+        await db.monthlyDistributorBalance.findUnique({
+          where: {
+            distributorId_year_month: {
+              distributorId,
+              year,
+              month,
+            },
+          },
+        });
+      // Only create a credit allocation if at least one monthly generation was created
+      if (!monthlyDistributorBalanceRecord)
+        throw new NotFoundError(
+          "Unable to allocate credits. No energy input yet.",
+        );
 
+      // 3 - Checks if there is avaliable energy to allocate
+      const energyToBeAllocated = new Prisma.Decimal(data.energyAllocatedMwh);
+      if (
+        energyToBeAllocated.greaterThan(
+          monthlyDistributorBalanceRecord.avaliableEnergyMwh,
+        )
+      ) {
+        throw new BadRequestError(
+          "The requested energy allocated exceeds the available energy.",
+        );
+      }
+      // 4 - Check if the requested percentage is correct
+      const totalEnergyGenerated =
+      monthlyDistributorBalanceRecord.totalEnergyGeneratedMwh;
+      const correctPercentage = energyToBeAllocated
+        .mul(100) // Prisma Decimals type methods
+        .div(totalEnergyGenerated);
+      if (data.percentageApplied !== correctPercentage.toNumber()) {
+        throw new BadRequestError(
+          "The allocation percentage does not correspond to the requested energy allocated.",
+        );
+      }
+
+      // 5 - Creates new Credit allocation
       const newCreditAllocation = await db.creditAllocation.create({
         data: {
           ...data,
           percentageApplied,
+        },
+      });
+
+      // 6 - Update monthly distributor balance
+      await db.monthlyDistributorBalance.update({
+        where: {
+          distributorId_year_month: {
+            distributorId,
+            year,
+            month,
+          },
+        },
+        data: {
+          totalEnergyAllocatedMwh: {
+            increment: data.energyAllocatedMwh,
+          },
+          avaliableEnergyMwh: {
+            decrement: data.energyAllocatedMwh,
+          },
         },
       });
       return newCreditAllocation;

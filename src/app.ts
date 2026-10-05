@@ -24,10 +24,9 @@ app.use(errorHandler);
 export default app;
 
 // PRÓXIMOS PASSOS:
-// 1 - Ao criar um credit allocation, verificar se é percentageApplied e energyAllocated são possiveis de acordo com a quantidade de geração ainda disponível
-// 2 - adicionar update em monthlyDistributorBalance ao fazer delete e update em monthlyGeneration e CreditAllocation
-// 3 - Fortalecer validação do cnpj e criar a validação da estrutura matemática no service
-// 4 - criar repositories
+// 1 - adicionar update em monthlyDistributorBalance ao fazer delete e update em monthlyGeneration e CreditAllocation
+// 2 - Fortalecer validação do cnpj e criar a validação da estrutura matemática no service
+// 3 - criar repositories
 
 // OBSERVAÇÃO:
 // Atualmente fazemos o rateio de energia baseado no calculo de gerção mensal.

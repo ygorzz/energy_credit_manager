@@ -14,18 +14,17 @@ export default class MonthlyGenerationService {
         data,
       });
 
-      // Creates/updates the monthly distributor balance record
+      // 1 - Get the distributorId for upsert monthly distributor balance
       const powerPlant = await db.powerPlant.findUnique({
         where: {
           id: data.powerPlantId,
         },
       });
-
       if (!powerPlant) throw new NotFoundError("Power plant id not found");
 
+      // 2 - Creates/updates the monthly distributor balance record
       const { distributorId } = powerPlant;
       const { month, year } = data;
-
       await db.monthlyDistributorBalance.upsert({
         where: {
           // Prisma requires a query using only one line, so we use the composting unique key: distributorId_year_month
@@ -40,7 +39,9 @@ export default class MonthlyGenerationService {
           totalEnergyGeneratedMwh: {
             increment: data.energyGeneratedMwh,
           },
-          avaliableEnergyMwh: data.energyGeneratedMwh,
+          avaliableEnergyMwh: {
+            increment: data.energyGeneratedMwh,
+          },
         },
         // if record does not exists
         create: {

@@ -12,6 +12,7 @@ export default class ClientCompanyService {
     try {
       // CNPJ VALIDATION -> math calculation
 
+
       const newClientCompany = await db.clientCompany.create({
         data,
       });
@@ -99,4 +100,8 @@ export default class ClientCompanyService {
       throw error;
     }
   };
+}
+
+function cnpjValidation(cnpj: string) {
+  
 }
