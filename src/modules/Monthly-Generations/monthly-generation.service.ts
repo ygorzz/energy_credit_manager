@@ -1,5 +1,6 @@
 import { Prisma } from "../../db/generated/prisma/client.js";
 import { db } from "../../db/prisma.js";
+import BadRequestError from "../../errors/bad-request.error.js";
 import ConflictError from "../../errors/conflict.error.js";
 import NotFoundError from "../../errors/not-found.error.js";
 import type {
@@ -93,11 +94,67 @@ export default class MonthlyGenerationService {
 
   public delete = async (id: string) => {
     try {
-      const monthlyGenerationDeleted = await db.monthlyGeneration.delete({
-        where: {
-          id,
-        },
+      // 1 - Find the monthly generation by id to get distributorId, month and year
+      const monthlyGeneration = await db.monthlyGeneration.findUnique({
+        where: { id },
+        include: { powerPlant: true },
       });
+      if (!monthlyGeneration) {
+        throw new NotFoundError("Monthly Generation not found");
+      }
+
+      const { powerPlant, month, year, energyGeneratedMwh } = monthlyGeneration;
+
+      // 2 - Find the monthly distributor balance by distributorId, year and month
+      const { distributorId } = powerPlant;
+      const monthlyDistributorBalance =
+        await db.monthlyDistributorBalance.findUnique({
+          where: {
+            distributorId_year_month: {
+              distributorId,
+              year,
+              month,
+            },
+          },
+        });
+      if (!monthlyDistributorBalance) {
+        throw new NotFoundError("Monthly distributor balance not found");
+      }
+
+      // 3 - Check if the energy to remove is greater than the available energy
+      const energyToRemove = new Prisma.Decimal(energyGeneratedMwh);
+
+      if (
+        energyToRemove.greaterThan(monthlyDistributorBalance.avaliableEnergyMwh)
+      ) {
+        throw new BadRequestError(
+          "Cannot delete this generation because allocated credits exceed the remaining available energy.",
+        );
+      }
+
+      // 4 - Delete the monthly generation and update the monthly distributor balance
+      const [monthlyGenerationDeleted] = await db.$transaction([
+        db.monthlyGeneration.delete({
+          where: { id },
+        }),
+        db.monthlyDistributorBalance.update({
+          where: {
+            distributorId_year_month: {
+              distributorId,
+              year,
+              month,
+            },
+          },
+          data: {
+            totalEnergyGeneratedMwh: {
+              decrement: energyGeneratedMwh,
+            },
+            avaliableEnergyMwh: {
+              decrement: energyGeneratedMwh,
+            },
+          },
+        }),
+      ]);
 
       return monthlyGenerationDeleted;
     } catch (error) {
