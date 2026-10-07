@@ -172,14 +172,184 @@ export default class MonthlyGenerationService {
       const newData = Object.fromEntries(
         Object.entries(data).filter((e) => e[1] !== undefined),
       );
-      const monthlyGenerationUpdated = await db.monthlyGeneration.update({
-        where: {
-          id,
-        },
-        data: newData,
-      });
 
-      return monthlyGenerationUpdated;
+      // 1 - Find the monthly generation by id 
+      const monthlyGeneration = await db.monthlyGeneration.findUnique({
+        where: { id },
+        include: { powerPlant: true },
+      });
+      if (!monthlyGeneration) {
+        throw new NotFoundError("Monthly generation not found");
+      }
+
+      const oldEnergy = new Prisma.Decimal(
+        monthlyGeneration.energyGeneratedMwh,
+      );
+      const newEnergy = new Prisma.Decimal(
+        data.energyGeneratedMwh ?? monthlyGeneration.energyGeneratedMwh,
+      );
+      const oldMonth = monthlyGeneration.month;
+      const oldYear = monthlyGeneration.year;
+      const newMonth = data.month ?? oldMonth;
+      const newYear = data.year ?? oldYear;
+      const oldPowerPlantId = monthlyGeneration.powerPlantId;
+      const oldDistributorId = monthlyGeneration.powerPlant.distributorId; // for update monthly distributor balance
+
+      // 2 - Resolve the new distributor when the power plant changes
+      let newDistributorId = oldDistributorId;
+      // 2.2 - If the power plant changes, get the new distributorId
+      if (data.powerPlantId && data.powerPlantId !== oldPowerPlantId) {
+        const newPowerPlant = await db.powerPlant.findUnique({
+          where: { id: data.powerPlantId },
+        });
+        if (!newPowerPlant) throw new NotFoundError("Power plant id not found");
+        newDistributorId = newPowerPlant.distributorId;
+      }
+
+      // 3 - Check if the distributor, month and year are the same
+      const sameBalanceKey =
+        oldDistributorId === newDistributorId &&
+        oldMonth === newMonth &&
+        oldYear === newYear;
+
+      // 4 - If the distributor, month and year are the same, apply energy delta on the existing balance
+      // delta -> newEnergy - oldEnergy
+      if (sameBalanceKey) {
+        const energyDelta = newEnergy.sub(oldEnergy);
+
+        if (!energyDelta.isZero()) {
+          const monthlyDistributorBalance =
+            await db.monthlyDistributorBalance.findUnique({
+              where: {
+                distributorId_year_month: {
+                  distributorId: oldDistributorId,
+                  year: oldYear,
+                  month: oldMonth,
+                },
+              },
+            });
+          if (!monthlyDistributorBalance) {
+            throw new NotFoundError("Monthly distributor balance not found");
+          }
+
+          // 4.1 - if it will remove energy, check if there is enough energy to remove
+          if(
+            energyDelta.isNegative() &&
+            energyDelta
+              .abs()
+              .greaterThan(monthlyDistributorBalance.avaliableEnergyMwh)
+          ) {
+            throw new BadRequestError(
+              "Cannot update this generation because allocated credits exceed the remaining available energy.",
+            );
+          }
+
+          const energyAdjustment = energyDelta.isPositive()
+            ? { increment: energyDelta }
+            : { decrement: energyDelta.abs() };
+
+          const [monthlyGenerationUpdated] = await db.$transaction([
+            db.monthlyGeneration.update({
+              where: { id },
+              data: newData,
+            }),
+            db.monthlyDistributorBalance.update({
+              where: {
+                distributorId_year_month: {
+                  distributorId: oldDistributorId,
+                  year: oldYear,
+                  month: oldMonth,
+                },
+              },
+              data: {
+                totalEnergyGeneratedMwh: energyAdjustment,
+                avaliableEnergyMwh: energyAdjustment,
+              },
+            }),
+          ]);
+
+          return monthlyGenerationUpdated;
+        }
+
+        return await db.monthlyGeneration.update({
+          where: { id },
+          data: newData,
+        });
+      }
+
+      // 4 - If the distributor/month/year are different: remove energy from the old balance
+      const oldMonthlyDistributorBalance =
+        await db.monthlyDistributorBalance.findUnique({
+          where: {
+            distributorId_year_month: {
+              distributorId: oldDistributorId,
+              year: oldYear,
+              month: oldMonth,
+            },
+          },
+        });
+      if (!oldMonthlyDistributorBalance) {
+        throw new NotFoundError("Monthly distributor balance not found");
+      }
+      if (oldEnergy.greaterThan(oldMonthlyDistributorBalance.avaliableEnergyMwh)) {
+        throw new BadRequestError(
+          "Cannot update this generation because allocated credits exceed the remaining available energy.",
+        );
+      }
+
+      // 5 - Move energy to the new monthly distributor balance
+      return await db.$transaction(async (tx) => {
+        // 5.1 update old monthly generation e monthly distributor balance 
+        const monthlyGenerationUpdated = await tx.monthlyGeneration.update({
+          where: { id },
+          data: newData,
+        });
+        await tx.monthlyDistributorBalance.update({
+          where: {
+            distributorId_year_month: {
+              distributorId: oldDistributorId,
+              year: oldYear,
+              month: oldMonth,
+            },
+          },
+          data: {
+            totalEnergyGeneratedMwh: {
+              decrement: oldEnergy,
+            },
+            avaliableEnergyMwh: {
+              decrement: oldEnergy,
+            },
+          },
+        });
+
+        await tx.monthlyDistributorBalance.upsert({
+          where: {
+            distributorId_year_month: {
+              distributorId: newDistributorId,
+              year: newYear,
+              month: newMonth,
+            },
+          },
+          update: {
+            totalEnergyGeneratedMwh: {
+              increment: newEnergy,
+            },
+            avaliableEnergyMwh: {
+              increment: newEnergy,
+            },
+          },
+          create: {
+            year: newYear,
+            month: newMonth,
+            totalEnergyGeneratedMwh: newEnergy,
+            totalEnergyAllocatedMwh: 0,
+            avaliableEnergyMwh: newEnergy,
+            distributorId: newDistributorId,
+          },
+        });
+
+        return monthlyGenerationUpdated;
+      });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
