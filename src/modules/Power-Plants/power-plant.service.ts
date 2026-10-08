@@ -9,8 +9,11 @@ export default class PowerPlantService {
   constructor(private powerPlantRepository: PowerPlantRepository) {}
   public create = async (data: createPowerPlantDTO) => {
     try {
+
       return await this.powerPlantRepository.create(data);
+
     } catch (error) {
+
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ConflictError('Already exists a power plant with this name');
@@ -35,8 +38,10 @@ export default class PowerPlantService {
 
   public delete = async (id: string) => {
     try {
+
       return await this.powerPlantRepository.delete(id);
     } catch (error) {
+      
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError('Power plant not found');
@@ -48,7 +53,7 @@ export default class PowerPlantService {
 
   public update = async (id: string, data: updatePowerPlantDTO) => {
     try {
-      
+
       const newData = Object.fromEntries(Object.entries(data).filter((e) => e[1] !== undefined));
       return await this.powerPlantRepository.update(id, newData);
 

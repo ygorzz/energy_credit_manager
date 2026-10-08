@@ -11,8 +11,10 @@ export default class DistributorService {
   constructor(private distributorRepository: DistributorRepository) {}
   public createDistributor = async (data: CreateDistributorDTO) => {
     try {
+
       return await this.distributorRepository.create(data);
     } catch (error) {
+
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
           throw new ConflictError(
@@ -27,7 +29,7 @@ export default class DistributorService {
   public listDistributors = async (page: number, limit: number) => {
     const skip = (page - 1) * limit;
     return await this.distributorRepository.findAll(
-      skip, 
+      skip,
       limit
     )
   };
@@ -42,8 +44,10 @@ export default class DistributorService {
 
   public deleteDistributor = async (id: string) => {
     try {
+
       return await this.distributorRepository.delete(id);
     } catch (error) {
+
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
           throw new NotFoundError("Distributor not found");
@@ -55,9 +59,11 @@ export default class DistributorService {
 
   public updateDistributor = async (id: string, data: UpdateDistributorDTO) => {
     try {
+
       const newData = data.name === undefined ? {} : { name: data.name };
       return await this.distributorRepository.update(id, newData);
     } catch (error) {
+      
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
           throw new NotFoundError("Distributor not found");
