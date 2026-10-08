@@ -1,19 +1,17 @@
 import { Prisma } from "../../db/generated/prisma/client.js";
-import { db } from "../../db/prisma.js";
 import ConflictError from "../../errors/conflict.error.js";
 import NotFoundError from "../../errors/not-found.error.js";
+import type DistributorRepository from "./distributor.repository.js";
 import type {
   CreateDistributorDTO,
   UpdateDistributorDTO,
 } from "./distributor.dto.js";
 
 export default class DistributorService {
-  public create = async (data: CreateDistributorDTO) => {
+  constructor(private distributorRepository: DistributorRepository) {}
+  public createDistributor = async (data: CreateDistributorDTO) => {
     try {
-      const newDistributor = await db.distributor.create({
-        data,
-      });
-      return newDistributor;
+      return await this.distributorRepository.create(data);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
@@ -26,36 +24,25 @@ export default class DistributorService {
     }
   };
 
-  public findAll = async (page: number, limit: number) => {
+  public listDistributors = async (page: number, limit: number) => {
     const skip = (page - 1) * limit;
-    const distributors = await db.distributor.findMany({
-      skip,
-      take: limit,
-    });
-    return distributors;
+    return await this.distributorRepository.findAll(
+      skip, 
+      limit
+    )
   };
 
-  public findById = async (id: string) => {
-    const distributorFound = await db.distributor.findUnique({
-      where: {
-        id,
-      },
-    });
+  public getDistributorById = async (id: string) => {
+    const distributorFound = await this.distributorRepository.findById(id);
 
     if (!distributorFound) throw new NotFoundError("Distributor not found");
 
     return distributorFound;
   };
 
-  public delete = async (id: string) => {
+  public deleteDistributor = async (id: string) => {
     try {
-      const distributorDeleted = await db.distributor.delete({
-        where: {
-          id,
-        },
-      });
-
-      return distributorDeleted;
+      return await this.distributorRepository.delete(id);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
@@ -66,17 +53,10 @@ export default class DistributorService {
     }
   };
 
-  public update = async (id: string, data: UpdateDistributorDTO) => {
+  public updateDistributor = async (id: string, data: UpdateDistributorDTO) => {
     try {
       const newData = data.name === undefined ? {} : { name: data.name };
-      const distributorUpdated = await db.distributor.update({
-        where: {
-          id,
-        },
-        data: newData,
-      });
-
-      return distributorUpdated;
+      return await this.distributorRepository.update(id, newData);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {

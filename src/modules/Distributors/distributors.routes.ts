@@ -5,11 +5,12 @@ import authorize from "../../middlewares/authorize.middleware.js";
 import DistributorService from "./distributor.service.js";
 import DistributorsController from "./distributors.controller.js";
 import * as rateLimit from "../../middlewares/rate-limit.middleware.js";
+import DistributorRepository from "./distributor.repository.js";
 
 const routes = express.Router();
 
 const distributorsController = new DistributorsController(
-  new DistributorService(),
+  new DistributorService(new DistributorRepository()),
 );
 
 routes
