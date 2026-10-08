@@ -5,11 +5,12 @@ import PowerPlantsController from "./power-plants.controller.js";
 import authorize from "../../middlewares/authorize.middleware.js";
 import { UserRoles } from "../../db/generated/prisma/enums.js";
 import * as rateLimit from "../../middlewares/rate-limit.middleware.js";
+import PowerPlantRepository from "./power-plant.repository.js";
 
 const routes = express.Router();
 
 const powerPlantsController = new PowerPlantsController(
-  new PowerPlantService(),
+  new PowerPlantService(new PowerPlantRepository),
 );
 
 routes

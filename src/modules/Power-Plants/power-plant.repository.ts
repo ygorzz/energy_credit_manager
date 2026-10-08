@@ -1,12 +1,12 @@
 import { db } from "../../db/prisma.js";
 import type {
-  CreateDistributorDTO,
-  UpdateDistributorDTO,
-} from "./distributor.dto.js";
+  createPowerPlantDTO,
+  updatePowerPlantDTO,
+} from "./power-plant.dto.js";
 
 
-export default class DistributorRepository {
-  public create = async (data: CreateDistributorDTO) => {
+export default class PowerPlantRepository {
+  public create = async (data: createPowerPlantDTO) => {
     return await db.distributor.create({
       data,
     });
@@ -35,7 +35,7 @@ export default class DistributorRepository {
     });
   };
 
-  public update = async (id: string, data: UpdateDistributorDTO) => {
+  public update = async (id: string, data: updatePowerPlantDTO) => {
     return await db.distributor.update({
       where: {
         id,
