@@ -7,20 +7,20 @@ import type {
 
 export default class ClientCompanyRepository {
   public create = async (data: createClientCompanyDTO) => {
-    return await db.distributor.create({
+    return await db.clientCompany.create({
       data,
     });
   };
 
   public findAll = async (skip: number, take: number) => {
-    return await db.distributor.findMany({
+    return await db.clientCompany.findMany({
       skip,
       take,
     });
   };
 
   public findById = async (id: string) => {
-    return await db.distributor.findUnique({
+    return await db.clientCompany.findUnique({
       where: {
         id,
       },
@@ -28,7 +28,7 @@ export default class ClientCompanyRepository {
   };
 
   public delete = async (id: string) => {
-    return await db.distributor.delete({
+    return await db.clientCompany.delete({
       where: {
         id,
       },
@@ -36,7 +36,7 @@ export default class ClientCompanyRepository {
   };
 
   public update = async (id: string, data: updateClientCompanyDTO) => {
-    return await db.distributor.update({
+    return await db.clientCompany.update({
       where: {
         id,
       },

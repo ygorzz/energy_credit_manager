@@ -7,20 +7,20 @@ import type {
 
 export default class PowerPlantRepository {
   public create = async (data: createPowerPlantDTO) => {
-    return await db.distributor.create({
+    return await db.powerPlant.create({
       data,
     });
   };
 
   public findAll = async (skip: number, take: number) => {
-    return await db.distributor.findMany({
+    return await db.powerPlant.findMany({
       skip,
       take,
     });
   };
 
   public findById = async (id: string) => {
-    return await db.distributor.findUnique({
+    return await db.powerPlant.findUnique({
       where: {
         id,
       },
@@ -28,7 +28,7 @@ export default class PowerPlantRepository {
   };
 
   public delete = async (id: string) => {
-    return await db.distributor.delete({
+    return await db.powerPlant.delete({
       where: {
         id,
       },
@@ -36,7 +36,7 @@ export default class PowerPlantRepository {
   };
 
   public update = async (id: string, data: updatePowerPlantDTO) => {
-    return await db.distributor.update({
+    return await db.powerPlant.update({
       where: {
         id,
       },
