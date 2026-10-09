@@ -24,9 +24,11 @@ app.use(errorHandler);
 export default app;
 
 // PRÓXIMOS PASSOS:
-// 1 - adicionar update em monthlyDistributorBalance ao fazer delete e update em monthlyGeneration e CreditAllocation
-// 2 - Fortalecer validação do cnpj e criar a validação da estrutura matemática no service
-// 3 - criar repositories
+// 1 - Finalizar a criação dos repositories:
+    // estou no update de monthly generation
+    // dps falta Auth, Users e Credit Allocations
+// 2 - adicionar update em monthlyDistributorBalance ao fazer delete e update em CreditAllocation
+// 3 - Fortalecer validação do cnpj e criar a validação da estrutura matemática no service
 
 // OBSERVAÇÃO:
 // Atualmente fazemos o rateio de energia baseado no calculo de gerção mensal.

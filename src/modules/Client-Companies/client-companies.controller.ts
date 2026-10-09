@@ -1,26 +1,21 @@
-import type { NextFunction, Request, Response } from "express";
-import type ClientCompanyService from "./client-company.service.js";
+import type { NextFunction, Request, Response } from 'express';
+import { uuidSchema } from '../../shared/schemas/uuid.dto.js';
 import {
   createClientCompanySchema,
   listClientCompaniesSchema,
   updateClientCompanySchema,
-} from "./client-company.dto.js";
-import { uuidSchema } from "../../shared/schemas/uuid.dto.js";
+} from './client-company.dto.js';
+import type ClientCompanyService from './client-company.service.js';
 
 export default class ClientCompaniesController {
   constructor(private clientCompanyService: ClientCompanyService) {}
 
-  public createClientCompany = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  public createClientCompany = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = createClientCompanySchema.parse(req.body);
-      const newClientCompany =
-        await this.clientCompanyService.create(validatedData);
+      const newClientCompany = await this.clientCompanyService.createClientCompany(validatedData);
       return res.status(201).json({
-        message: "Client Company created succesfully!",
+        message: 'Client Company created succesfully!',
         newClientCompany,
       });
     } catch (error) {
@@ -28,49 +23,34 @@ export default class ClientCompaniesController {
     }
   };
 
-  public listClientCompanies = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  public listClientCompanies = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = listClientCompaniesSchema.parse(req.query);
-      const clientCompanies = await this.clientCompanyService.findAll(
-        page,
-        limit,
-      );
+      const clientCompanies = await this.clientCompanyService.listClientCompanies(page, limit);
       return res.status(200).json(clientCompanies);
     } catch (error) {
       next(error);
     }
   };
 
-  public getClientCompanyById = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  public getClientCompanyById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const idValidated = uuidSchema.parse(req.params);
       const { id } = idValidated;
-      const clientCompanyFound = await this.clientCompanyService.findById(id);
+      const clientCompanyFound = await this.clientCompanyService.getClientCompanyById(id);
       return res.status(200).json(clientCompanyFound);
     } catch (error) {
       next(error);
     }
   };
 
-  public deleteClientCompany = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  public deleteClientCompany = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const idValidated = uuidSchema.parse(req.params);
       const { id } = idValidated;
-      const clientCompanyDeleted = await this.clientCompanyService.delete(id);
+      const clientCompanyDeleted = await this.clientCompanyService.deleteClientCompany(id);
       return res.status(200).json({
-        message: "Client company deleted successfully!",
+        message: 'Client company deleted successfully!',
         clientCompanyDeleted,
       });
     } catch (error) {
@@ -78,21 +58,14 @@ export default class ClientCompaniesController {
     }
   };
 
-  public updateClientCompany = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  public updateClientCompany = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const idValidated = uuidSchema.parse(req.params);
       const validatedData = updateClientCompanySchema.parse(req.body);
       const { id } = idValidated;
-      const clientCompanyUpdated = await this.clientCompanyService.update(
-        id,
-        validatedData,
-      );
+      const clientCompanyUpdated = await this.clientCompanyService.updateClientCompany(id, validatedData);
       return res.status(200).json({
-        message: "Client company updated successfully!",
+        message: 'Client company updated successfully!',
         clientCompanyUpdated,
       });
     } catch (error) {

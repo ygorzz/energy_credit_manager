@@ -7,7 +7,7 @@ import type ClientCompanyRepository from './client-company.repository.js';
 
 export default class ClientCompanyService {
   constructor(private clientCompanyRepository: ClientCompanyRepository) {}
-  public create = async (data: createClientCompanyDTO) => {
+  public createClientCompany = async (data: createClientCompanyDTO) => {
     try {
       // CNPJ VALIDATION -> math calculation
 
@@ -24,12 +24,12 @@ export default class ClientCompanyService {
     }
   };
 
-  public findAll = async (page: number, limit: number) => {
+  public listClientCompanies = async (page: number, limit: number) => {
     const skip = (page - 1) * limit;
     return await this.clientCompanyRepository.findAll(skip, limit);
   };
 
-  public findById = async (id: string) => {
+  public getClientCompanyById = async (id: string) => {
     const clientCompanyFound = await this.clientCompanyRepository.findById(id);
 
     if (!clientCompanyFound) throw new NotFoundError('Client company not found');
@@ -37,7 +37,7 @@ export default class ClientCompanyService {
     return clientCompanyFound;
   };
 
-  public delete = async (id: string) => {
+  public deleteClientCompany = async (id: string) => {
     try {
       return await this.clientCompanyRepository.delete(id);
     } catch (error) {
@@ -50,7 +50,7 @@ export default class ClientCompanyService {
     }
   };
 
-  public update = async (id: string, data: updateClientCompanyDTO) => {
+  public updateClientCompany = async (id: string, data: updateClientCompanyDTO) => {
     try {
       const newData = Object.fromEntries(Object.entries(data).filter((e) => e[1] !== undefined));
       return await this.clientCompanyRepository.update(id, newData);

@@ -1,3 +1,4 @@
+import type { Prisma } from "../../db/generated/prisma/client.js";
 import { db } from "../../db/prisma.js";
 import type {
   createPowerPlantDTO,
@@ -19,8 +20,10 @@ export default class PowerPlantRepository {
     });
   };
 
-  public findById = async (id: string) => {
-    return await db.powerPlant.findUnique({
+  // tx for $transactions
+  public findById = async (id: string, tx?: Prisma.TransactionClient) => {
+    const prisma = tx ?? db
+    return await prisma.powerPlant.findUnique({
       where: {
         id,
       },

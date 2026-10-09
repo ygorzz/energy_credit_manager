@@ -7,7 +7,7 @@ import type PowerPlantRepository from './power-plant.repository.js';
 
 export default class PowerPlantService {
   constructor(private powerPlantRepository: PowerPlantRepository) {}
-  public create = async (data: createPowerPlantDTO) => {
+  public createPowerPlant = async (data: createPowerPlantDTO) => {
     try {
 
       return await this.powerPlantRepository.create(data);
@@ -23,12 +23,12 @@ export default class PowerPlantService {
     }
   };
 
-  public findAll = async (page: number, limit: number) => {
+  public listPowerPlants = async (page: number, limit: number) => {
     const skip = (page - 1) * limit;
     return await this.powerPlantRepository.findAll(skip, limit);
   };
 
-  public findById = async (id: string) => {
+  public getPowerPlantById = async (id: string) => {
     const powerPlantFound = await this.powerPlantRepository.findById(id);
 
     if (!powerPlantFound) throw new NotFoundError('Power Plant not found');
@@ -36,12 +36,12 @@ export default class PowerPlantService {
     return powerPlantFound;
   };
 
-  public delete = async (id: string) => {
+  public deletePowerPlant = async (id: string) => {
     try {
 
       return await this.powerPlantRepository.delete(id);
     } catch (error) {
-      
+
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError('Power plant not found');
@@ -51,7 +51,7 @@ export default class PowerPlantService {
     }
   };
 
-  public update = async (id: string, data: updatePowerPlantDTO) => {
+  public updatePowerPlant = async (id: string, data: updatePowerPlantDTO) => {
     try {
 
       const newData = Object.fromEntries(Object.entries(data).filter((e) => e[1] !== undefined));
