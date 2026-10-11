@@ -1,48 +1,55 @@
-import express from "express";
-import { UserRoles } from "../../db/generated/prisma/enums.js";
-import auth from "../../middlewares/auth.middleware.js";
-import authorize from "../../middlewares/authorize.middleware.js";
-import MonthlyGenerationService from "./monthly-generation.service.js";
-import MonthlyGenerationsController from "./monthly-generations.controller.js";
-import * as rateLimit from "../../middlewares/rate-limit.middleware.js";
+import express from 'express';
+import { UserRoles } from '../../db/generated/prisma/enums.js';
+import auth from '../../middlewares/auth.middleware.js';
+import authorize from '../../middlewares/authorize.middleware.js';
+import * as rateLimit from '../../middlewares/rate-limit.middleware.js';
+import MonthlyDistributorBalanceRepository from '../Distributors/distributor-balance.repository.js';
+import PowerPlantRepository from '../Power-Plants/power-plant.repository.js';
+import MonthlyGenerationRepository from './monthly-generation.repository.js';
+import MonthlyGenerationService from './monthly-generation.service.js';
+import MonthlyGenerationsController from './monthly-generations.controller.js';
 
 const routes = express.Router();
 
 const monthlyGenerationsController = new MonthlyGenerationsController(
-  new MonthlyGenerationService(),
+  new MonthlyGenerationService(
+    new MonthlyGenerationRepository(),
+    new PowerPlantRepository(),
+    new MonthlyDistributorBalanceRepository(),
+  ),
 );
 
 routes
   .get(
-    "/",
+    '/',
     rateLimit.getLimiter,
     auth,
     authorize(UserRoles.ADMIN, UserRoles.ANALYST),
     monthlyGenerationsController.listMonthlyGenerations,
   )
   .get(
-    "/:id",
+    '/:id',
     rateLimit.getLimiter,
     auth,
     authorize(UserRoles.ADMIN, UserRoles.ANALYST),
     monthlyGenerationsController.getMonthlyGenerationById,
   )
   .post(
-    "/",
+    '/',
     rateLimit.creationLimiter,
     auth,
     authorize(UserRoles.ADMIN),
     monthlyGenerationsController.createMonthlyGeneration,
   )
   .delete(
-    "/:id",
+    '/:id',
     rateLimit.deleteLimiter,
     auth,
     authorize(UserRoles.ADMIN),
     monthlyGenerationsController.deleteMonthlyGeneration,
   )
   .patch(
-    "/:id",
+    '/:id',
     rateLimit.updateLimiter,
     auth,
     authorize(UserRoles.ADMIN),
