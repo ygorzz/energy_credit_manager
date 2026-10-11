@@ -1,5 +1,4 @@
 import { Prisma } from '../../db/generated/prisma/client.js';
-import { db } from '../../db/prisma.js';
 import ConflictError from '../../errors/conflict.error.js';
 import NotFoundError from '../../errors/not-found.error.js';
 import type { createPowerPlantDTO, updatePowerPlantDTO } from './power-plant.dto.js';
