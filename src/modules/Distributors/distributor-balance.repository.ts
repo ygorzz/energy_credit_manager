@@ -2,7 +2,6 @@ import type { Months, Prisma } from '../../db/generated/prisma/client.js';
 import { db } from '../../db/prisma.js';
 import type {
   CreateMonthlyGenerationDTO,
-  UpdateMonthlyGenerationDTO,
 } from '../Monthly-Generations/monthly-generation.dto.js';
 
 export default class MonthlyDistributorBalanceRepository {
