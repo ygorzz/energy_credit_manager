@@ -24,8 +24,6 @@ app.use(errorHandler);
 export default app;
 
 // PRÓXIMOS PASSOS:
-// 1 - Finalizar a criação dos repositories:
-    // falta Credit Allocations
 // 3 - Fortalecer validação do cnpj e criar a validação da estrutura matemática no service
 
 // OBSERVAÇÃO:

@@ -1,9 +1,8 @@
 import type { Prisma } from '../../db/generated/prisma/client.js';
 import { db } from '../../db/prisma.js';
-import type { createClientCompanyDTO, updateClientCompanyDTO } from './client-company.dto.js';
 
 export default class ClientCompanyRepository {
-  public create = async (data: createClientCompanyDTO) => {
+  public create = async (data: Prisma.ClientCompanyUncheckedCreateInput) => {
     return await db.clientCompany.create({
       data,
     });
@@ -33,14 +32,12 @@ export default class ClientCompanyRepository {
     });
   };
 
-  public update = async (id: string, data: updateClientCompanyDTO) => {
+  public update = async (id: string, data: Prisma.ClientCompanyUncheckedUpdateInput) => {
     return await db.clientCompany.update({
       where: {
         id,
       },
-      data: {
-        data,
-      },
+      data,
     });
   };
 }

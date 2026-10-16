@@ -28,7 +28,15 @@ export default class MonthlyGenerationService {
 
         // 2 - Creates/updates the monthly distributor balance record
         const { distributorId } = powerPlant;
-        await this.monthlyDistributorBalanceRepository.upsert(distributorId, data, tx);
+        const balanceData: Prisma.MonthlyDistributorBalanceUncheckedCreateInput = {
+          distributorId,
+          month: data.month,
+          year: data.year,
+          totalEnergyGeneratedMwh: data.energyGeneratedMwh,
+          totalEnergyAllocatedMwh: 0,
+          avaliableEnergyMwh: data.energyGeneratedMwh,
+        };
+        await this.monthlyDistributorBalanceRepository.upsert(balanceData, tx);
 
         return generation;
       });
@@ -242,18 +250,16 @@ export default class MonthlyGenerationService {
         );
 
         // 5.2 upsert monthly distributor balance
-        const distributorBalanceData: CreateMonthlyGenerationDTO = {
+        const distributorBalanceData: Prisma.MonthlyDistributorBalanceUncheckedCreateInput = {
+          distributorId: newDistributorId,
           year: newYear,
           month: newMonth,
-          energyGeneratedMwh: Number(newEnergy),
-          powerPlantId: data.powerPlantId ?? oldPowerPlantId,
+          totalEnergyGeneratedMwh: newEnergy,
+          totalEnergyAllocatedMwh: 0,
+          avaliableEnergyMwh: newEnergy,
         };
 
-        await this.monthlyDistributorBalanceRepository.upsert(
-          newDistributorId,
-          distributorBalanceData,
-          tx,
-        );
+        await this.monthlyDistributorBalanceRepository.upsert(distributorBalanceData, tx);
 
         return monthlyGenerationUpdated;
       });

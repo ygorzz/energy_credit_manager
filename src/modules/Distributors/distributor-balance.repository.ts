@@ -1,41 +1,20 @@
 import type { Months, Prisma } from '../../db/generated/prisma/client.js';
 import { db } from '../../db/prisma.js';
-import type { CreateMonthlyGenerationDTO } from '../Monthly-Generations/monthly-generation.dto.js';
 
 export default class MonthlyDistributorBalanceRepository {
   public upsert = async (
-    distributorId: string,
-    data: CreateMonthlyGenerationDTO,
+    data: Prisma.MonthlyDistributorBalanceUncheckedCreateInput,
     tx: Prisma.TransactionClient,
   ) => {
-    const { month, year } = data;
-    await tx.monthlyDistributorBalance.upsert({
-      where: {
-        // Prisma requires a query using only one line, so we use the composting unique key: distributorId_year_month
-        distributorId_year_month: {
-          distributorId,
-          year,
-          month,
-        },
-      },
-      // if record already exists
+    const { distributorId, month, year } = data;
+    const energyGeneratedMwh = data.totalEnergyGeneratedMwh ?? 0;
+    return await tx.monthlyDistributorBalance.upsert({
+      where: { distributorId_year_month: { distributorId, year, month } },
       update: {
-        totalEnergyGeneratedMwh: {
-          increment: data.energyGeneratedMwh,
-        },
-        avaliableEnergyMwh: {
-          increment: data.energyGeneratedMwh,
-        },
+        totalEnergyGeneratedMwh: { increment: energyGeneratedMwh },
+        avaliableEnergyMwh: { increment: energyGeneratedMwh },
       },
-      // if record does not exists
-      create: {
-        year,
-        month,
-        totalEnergyGeneratedMwh: data.energyGeneratedMwh,
-        totalEnergyAllocatedMwh: 0,
-        avaliableEnergyMwh: data.energyGeneratedMwh,
-        distributorId,
-      },
+      create: data,
     });
   };
 
@@ -76,7 +55,7 @@ export default class MonthlyDistributorBalanceRepository {
     distributorId: string,
     year: number,
     month: Months,
-    data: Prisma.MonthlyDistributorBalanceUpdateInput,
+    data: Prisma.MonthlyDistributorBalanceUncheckedUpdateInput,
     tx?: Prisma.TransactionClient,
   ) => {
     const prisma = tx ?? db;

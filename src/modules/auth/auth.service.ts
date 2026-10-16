@@ -15,7 +15,7 @@ export default class AuthService {
     try {
       const hashPassword = await bcrypt.hash(data.password, 10);
       const { password, ...rest } = data;
-      const newData = { password: hashPassword, ...rest };
+      const newData = { hashPassword, ...rest };
       return await this.userRepository.create(newData);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

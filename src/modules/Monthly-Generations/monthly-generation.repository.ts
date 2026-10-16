@@ -1,12 +1,11 @@
 import type { Prisma } from '../../db/generated/prisma/client.js';
 import { db } from '../../db/prisma.js';
-import type {
-  CreateMonthlyGenerationDTO,
-  UpdateMonthlyGenerationDTO,
-} from './monthly-generation.dto.js';
 
 export default class MonthlyGenerationRepository {
-  public create = async (data: CreateMonthlyGenerationDTO, tx?: Prisma.TransactionClient) => {
+  public create = async (
+    data: Prisma.MonthlyGenerationUncheckedCreateInput,
+    tx?: Prisma.TransactionClient,
+  ) => {
     const prisma = tx ?? db;
     return await prisma.monthlyGeneration.create({
       data,
@@ -42,7 +41,7 @@ export default class MonthlyGenerationRepository {
 
   public update = async (
     id: string,
-    data: UpdateMonthlyGenerationDTO,
+    data: Prisma.MonthlyGenerationUncheckedUpdateInput,
     tx?: Prisma.TransactionClient,
   ) => {
     const prisma = tx ?? db;
@@ -50,9 +49,7 @@ export default class MonthlyGenerationRepository {
       where: {
         id,
       },
-      data: {
-        data,
-      },
+      data,
     });
   };
 }

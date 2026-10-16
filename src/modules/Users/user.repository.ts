@@ -1,14 +1,10 @@
+import type { Prisma } from '../../db/generated/prisma/client.js';
 import { db } from '../../db/prisma.js';
-import type { RegisterUserDTO, UpdateUserDTO } from './user.dto.js';
 
 export default class UserRepository {
-  public create = async (data: RegisterUserDTO) => {
-    const { password, ...rest } = data;
+  public create = async (data: Prisma.UserUncheckedCreateInput) => {
     return await db.user.create({
-      data: {
-        ...rest,
-        hashPassword: password,
-      },
+      data,
       select: {
         id: true,
         name: true,
@@ -75,14 +71,12 @@ export default class UserRepository {
     });
   };
 
-  public update = async (id: string, data: UpdateUserDTO) => {
+  public update = async (id: string, data: Prisma.UserUncheckedUpdateInput) => {
     return await db.user.update({
       where: {
         id,
       },
-      data: {
-        data,
-      },
+      data,
       select: {
         id: true,
         name: true,

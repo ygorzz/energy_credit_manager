@@ -1,13 +1,8 @@
-import type { Prisma } from "../../db/generated/prisma/client.js";
-import { db } from "../../db/prisma.js";
-import type {
-  createPowerPlantDTO,
-  updatePowerPlantDTO,
-} from "./power-plant.dto.js";
-
+import type { Prisma } from '../../db/generated/prisma/client.js';
+import { db } from '../../db/prisma.js';
 
 export default class PowerPlantRepository {
-  public create = async (data: createPowerPlantDTO) => {
+  public create = async (data: Prisma.PowerPlantUncheckedCreateInput) => {
     return await db.powerPlant.create({
       data,
     });
@@ -22,7 +17,7 @@ export default class PowerPlantRepository {
 
   // tx for $transactions
   public findById = async (id: string, tx?: Prisma.TransactionClient) => {
-    const prisma = tx ?? db
+    const prisma = tx ?? db;
     return await prisma.powerPlant.findUnique({
       where: {
         id,
@@ -38,14 +33,12 @@ export default class PowerPlantRepository {
     });
   };
 
-  public update = async (id: string, data: updatePowerPlantDTO) => {
+  public update = async (id: string, data: Prisma.PowerPlantUncheckedUpdateInput) => {
     return await db.powerPlant.update({
       where: {
         id,
       },
-      data: {
-        data,
-      },
+      data,
     });
   };
 }

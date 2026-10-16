@@ -1,12 +1,8 @@
-import { db } from "../../db/prisma.js";
-import type {
-  CreateDistributorDTO,
-  UpdateDistributorDTO,
-} from "./distributor.dto.js";
-
+import type { Prisma } from '../../db/generated/prisma/client.js';
+import { db } from '../../db/prisma.js';
 
 export default class DistributorRepository {
-  public create = async (data: CreateDistributorDTO) => {
+  public create = async (data: Prisma.DistributorUncheckedCreateInput) => {
     return await db.distributor.create({
       data,
     });
@@ -35,14 +31,12 @@ export default class DistributorRepository {
     });
   };
 
-  public update = async (id: string, data: UpdateDistributorDTO) => {
+  public update = async (id: string, data: Prisma.DistributorUncheckedUpdateInput) => {
     return await db.distributor.update({
       where: {
         id,
       },
-      data: {
-        data,
-      },
+      data,
     });
   };
 }
