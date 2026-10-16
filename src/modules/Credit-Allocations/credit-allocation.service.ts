@@ -3,22 +3,30 @@ import { db } from '../../db/prisma.js';
 import BadRequestError from '../../errors/bad-request.error.js';
 import ConflictError from '../../errors/conflict.error.js';
 import NotFoundError from '../../errors/not-found.error.js';
+import type ClientCompanyRepository from '../Client-Companies/client-company.repository.js';
+import type MonthlyDistributorBalanceRepository from '../Distributors/distributor-balance.repository.js';
 import type {
   createCreditAllocationDTO,
   updateCreditAllocationDTO,
 } from './credit-allocation.dto.js';
+import type CreditAllocationRepository from './credit-allocation.repository.js';
 
 export default class CreditAllocationService {
-  public create = async (data: createCreditAllocationDTO) => {
+  constructor(
+    private creditAllocationRepository: CreditAllocationRepository,
+    private clientCompanyRepository: ClientCompanyRepository,
+    private monthlyDistributorBalanceRepository: MonthlyDistributorBalanceRepository,
+  ) {}
+
+  public createCreditAllocation = async (data: createCreditAllocationDTO) => {
     try {
       return await db.$transaction(
         async (tx) => {
           // 1 - Get the distributorId for update monthly distributor balance
-          const clientCompany = await tx.clientCompany.findUnique({
-            where: {
-              id: data.clientCompanyId,
-            },
-          });
+          const clientCompany = await this.clientCompanyRepository.findById(
+            data.clientCompanyId,
+            tx,
+          );
           if (!clientCompany) throw new NotFoundError('Client company not found');
 
           // 1.1 - Defines percentageApplied
@@ -32,15 +40,8 @@ export default class CreditAllocationService {
           // 2 - Get monthly energy balance
           const { distributorId } = clientCompany;
           const { month, year } = data;
-          const monthlyDistributorBalanceRecord = await tx.monthlyDistributorBalance.findUnique({
-            where: {
-              distributorId_year_month: {
-                distributorId,
-                year,
-                month,
-              },
-            },
-          });
+          const monthlyDistributorBalanceRecord =
+            await this.monthlyDistributorBalanceRepository.findById(distributorId, year, month, tx);
           // Only create a credit allocation if at least one monthly generation was created
           if (!monthlyDistributorBalanceRecord)
             throw new NotFoundError('Unable to allocate credits. No energy input yet.');
@@ -64,31 +65,22 @@ export default class CreditAllocationService {
           }
 
           // 5 - Creates new Credit allocation
-          const newCreditAllocation = await tx.creditAllocation.create({
-            data: {
-              ...data,
-              percentageApplied,
-            },
-          });
+          const newCreditAllocation = await this.creditAllocationRepository.create(
+            { ...data, percentageApplied },
+            tx,
+          );
 
           // 6 - Update monthly distributor balance
-          await tx.monthlyDistributorBalance.update({
-            where: {
-              distributorId_year_month: {
-                distributorId,
-                year,
-                month,
-              },
+          await this.monthlyDistributorBalanceRepository.update(
+            distributorId,
+            year,
+            month,
+            {
+              totalEnergyAllocatedMwh: { increment: energyToBeAllocated },
+              avaliableEnergyMwh: { decrement: energyToBeAllocated },
             },
-            data: {
-              totalEnergyAllocatedMwh: {
-                increment: data.energyAllocatedMwh,
-              },
-              avaliableEnergyMwh: {
-                decrement: data.energyAllocatedMwh,
-              },
-            },
-          });
+            tx,
+          );
           return newCreditAllocation;
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
@@ -109,36 +101,26 @@ export default class CreditAllocationService {
     }
   };
 
-  public findAll = async (page: number, limit: number) => {
+  public listCreditAllocations = async (page: number, limit: number) => {
     const skip = (page - 1) * limit;
-    const creditAllocations = await db.creditAllocation.findMany({
-      skip,
-      take: limit,
-    });
+    const creditAllocations = await this.creditAllocationRepository.findAll(skip, limit);
     return creditAllocations;
   };
 
-  public findById = async (id: string) => {
-    const creditAllocationFound = await db.creditAllocation.findUnique({
-      where: {
-        id,
-      },
-    });
+  public getCreditAllocationById = async (id: string) => {
+    const creditAllocationFound = await this.creditAllocationRepository.findById(id);
 
     if (!creditAllocationFound) throw new NotFoundError('Credit allocation not found');
 
     return creditAllocationFound;
   };
 
-  public delete = async (id: string) => {
+  public deleteCreditAllocation = async (id: string) => {
     try {
       return await db.$transaction(
         async (tx) => {
           // 1 - get the credit allocation
-          const allocation = await tx.creditAllocation.findUnique({
-            where: { id },
-            include: { clientCompany: true },
-          });
+          const allocation = await this.creditAllocationRepository.findByIdWithCompany(id, tx);
           if (!allocation) throw new NotFoundError('Credit allocation not found');
 
           const balanceKey = {
@@ -147,9 +129,12 @@ export default class CreditAllocationService {
             month: allocation.month,
           };
           // 2 - get the monthly distributor balance to update
-          const balance = await tx.monthlyDistributorBalance.findUnique({
-            where: { distributorId_year_month: balanceKey },
-          });
+          const balance = await this.monthlyDistributorBalanceRepository.findById(
+            balanceKey.distributorId,
+            balanceKey.year,
+            balanceKey.month,
+            tx,
+          );
           if (!balance) throw new NotFoundError('Monthly distributor balance not found');
           // 3 - check if has avliable energy to delete
           if (balance.totalEnergyAllocatedMwh.lessThan(allocation.energyAllocatedMwh)) {
@@ -159,14 +144,17 @@ export default class CreditAllocationService {
           }
 
           // 4 - delete and update data
-          const deletedAllocation = await tx.creditAllocation.delete({ where: { id } });
-          await tx.monthlyDistributorBalance.update({
-            where: { distributorId_year_month: balanceKey },
-            data: {
+          const deletedAllocation = await this.creditAllocationRepository.delete(id, tx);
+          await this.monthlyDistributorBalanceRepository.update(
+            balanceKey.distributorId,
+            balanceKey.year,
+            balanceKey.month,
+            {
               totalEnergyAllocatedMwh: { decrement: allocation.energyAllocatedMwh },
               avaliableEnergyMwh: { increment: allocation.energyAllocatedMwh },
             },
-          });
+            tx,
+          );
           return deletedAllocation;
         },
         // 5 - define DB Isolation level = Serializable
@@ -187,15 +175,12 @@ export default class CreditAllocationService {
     }
   };
 
-  public update = async (id: string, data: updateCreditAllocationDTO) => {
+  public updateCreditAllocation = async (id: string, data: updateCreditAllocationDTO) => {
     try {
       return await db.$transaction(
         async (tx) => {
           // 1 - get the credit allocation
-          const allocation = await tx.creditAllocation.findUnique({
-            where: { id },
-            include: { clientCompany: true },
-          });
+          const allocation = await this.creditAllocationRepository.findByIdWithCompany(id, tx);
           if (!allocation) throw new NotFoundError('Credit allocation not found');
 
           // 2 - get the new or the same client company
@@ -203,7 +188,7 @@ export default class CreditAllocationService {
           const clientCompany =
             clientCompanyId === allocation.clientCompanyId
               ? allocation.clientCompany
-              : await tx.clientCompany.findUnique({ where: { id: clientCompanyId } });
+              : await this.clientCompanyRepository.findById(clientCompanyId, tx);
           if (!clientCompany) throw new NotFoundError('Client company not found');
 
           const month = data.month ?? allocation.month;
@@ -222,9 +207,12 @@ export default class CreditAllocationService {
             oldKey.month === newKey.month;
 
           // 3 - get the old distributor monthly balance
-          const oldBalance = await tx.monthlyDistributorBalance.findUnique({
-            where: { distributorId_year_month: oldKey },
-          });
+          const oldBalance = await this.monthlyDistributorBalanceRepository.findById(
+            oldKey.distributorId,
+            oldKey.year,
+            oldKey.month,
+            tx,
+          );
           if (!oldBalance)
             throw new NotFoundError('Original monthly distributor balance not found');
           if (oldBalance.totalEnergyAllocatedMwh.lessThan(oldEnergy)) {
@@ -235,9 +223,12 @@ export default class CreditAllocationService {
 
           const targetBalance = sameBalance
             ? oldBalance
-            : await tx.monthlyDistributorBalance.findUnique({
-                where: { distributorId_year_month: newKey },
-              });
+            : await this.monthlyDistributorBalanceRepository.findById(
+                newKey.distributorId,
+                newKey.year,
+                newKey.month,
+                tx,
+              );
           if (!targetBalance)
             throw new NotFoundError('Target monthly distributor balance not found');
 
@@ -253,42 +244,46 @@ export default class CreditAllocationService {
             data.percentageApplied === null
               ? clientCompany.allocationPercentage
               : (data.percentageApplied ?? allocation.percentageApplied);
-          const updatedAllocation = await tx.creditAllocation.update({
-            where: { id },
-            data: {
-              clientCompanyId,
-              month,
-              year,
-              energyAllocatedMwh: newEnergy,
-              percentageApplied,
-            },
-          });
+          const updatedAllocation = await this.creditAllocationRepository.update(
+            id,
+            { clientCompanyId, month, year, energyAllocatedMwh: newEnergy, percentageApplied },
+            tx,
+          );
 
           if (sameBalance) {
             if (!delta.isZero()) {
-              await tx.monthlyDistributorBalance.update({
-                where: { distributorId_year_month: oldKey },
-                data: {
+              await this.monthlyDistributorBalanceRepository.update(
+                oldKey.distributorId,
+                oldKey.year,
+                oldKey.month,
+                {
                   totalEnergyAllocatedMwh: { increment: delta },
                   avaliableEnergyMwh: { decrement: delta },
                 },
-              });
+                tx,
+              );
             }
           } else {
-            await tx.monthlyDistributorBalance.update({
-              where: { distributorId_year_month: oldKey },
-              data: {
+            await this.monthlyDistributorBalanceRepository.update(
+              oldKey.distributorId,
+              oldKey.year,
+              oldKey.month,
+              {
                 totalEnergyAllocatedMwh: { decrement: oldEnergy },
                 avaliableEnergyMwh: { increment: oldEnergy },
               },
-            });
-            await tx.monthlyDistributorBalance.update({
-              where: { distributorId_year_month: newKey },
-              data: {
+              tx,
+            );
+            await this.monthlyDistributorBalanceRepository.update(
+              newKey.distributorId,
+              newKey.year,
+              newKey.month,
+              {
                 totalEnergyAllocatedMwh: { increment: newEnergy },
                 avaliableEnergyMwh: { decrement: newEnergy },
               },
-            });
+              tx,
+            );
           }
           return updatedAllocation;
         },

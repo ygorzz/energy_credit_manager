@@ -99,7 +99,10 @@ export default class MonthlyGenerationService {
           distributorId,
           year,
           month,
-          energyAdjustment,
+          {
+            totalEnergyGeneratedMwh: energyAdjustment,
+            avaliableEnergyMwh: energyAdjustment,
+          },
           tx,
         );
         return generationDeleted;
@@ -186,7 +189,10 @@ export default class MonthlyGenerationService {
               oldDistributorId,
               oldYear,
               oldMonth,
-              energyAdjustment,
+              {
+                totalEnergyGeneratedMwh: energyAdjustment,
+                avaliableEnergyMwh: energyAdjustment,
+              },
               tx,
             );
           });
@@ -228,7 +234,10 @@ export default class MonthlyGenerationService {
           oldDistributorId,
           oldYear,
           oldMonth,
-          energyAdjustment,
+          {
+            totalEnergyGeneratedMwh: energyAdjustment,
+            avaliableEnergyMwh: energyAdjustment,
+          },
           tx,
         );
 

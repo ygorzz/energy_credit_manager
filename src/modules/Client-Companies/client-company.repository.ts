@@ -1,9 +1,6 @@
-import { db } from "../../db/prisma.js";
-import type {
-  createClientCompanyDTO,
-  updateClientCompanyDTO,
-} from "./client-company.dto.js";
-
+import type { Prisma } from '../../db/generated/prisma/client.js';
+import { db } from '../../db/prisma.js';
+import type { createClientCompanyDTO, updateClientCompanyDTO } from './client-company.dto.js';
 
 export default class ClientCompanyRepository {
   public create = async (data: createClientCompanyDTO) => {
@@ -19,8 +16,9 @@ export default class ClientCompanyRepository {
     });
   };
 
-  public findById = async (id: string) => {
-    return await db.clientCompany.findUnique({
+  public findById = async (id: string, tx?: Prisma.TransactionClient) => {
+    const prisma = tx ?? db;
+    return await prisma.clientCompany.findUnique({
       where: {
         id,
       },

@@ -1,8 +1,6 @@
 import type { Months, Prisma } from '../../db/generated/prisma/client.js';
 import { db } from '../../db/prisma.js';
-import type {
-  CreateMonthlyGenerationDTO,
-} from '../Monthly-Generations/monthly-generation.dto.js';
+import type { CreateMonthlyGenerationDTO } from '../Monthly-Generations/monthly-generation.dto.js';
 
 export default class MonthlyDistributorBalanceRepository {
   public upsert = async (
@@ -48,8 +46,14 @@ export default class MonthlyDistributorBalanceRepository {
     });
   };
 
-  public findById = async (distributorId: string, year: number, month: Months) => {
-    return await db.monthlyDistributorBalance.findUnique({
+  public findById = async (
+    distributorId: string,
+    year: number,
+    month: Months,
+    tx?: Prisma.TransactionClient,
+  ) => {
+    const prisma = tx ?? db;
+    return await prisma.monthlyDistributorBalance.findUnique({
       where: {
         distributorId_year_month: {
           distributorId,
@@ -72,7 +76,7 @@ export default class MonthlyDistributorBalanceRepository {
     distributorId: string,
     year: number,
     month: Months,
-    energyAdjustment: EnergyAdjustmentType,
+    data: Prisma.MonthlyDistributorBalanceUpdateInput,
     tx?: Prisma.TransactionClient,
   ) => {
     const prisma = tx ?? db;
@@ -84,15 +88,7 @@ export default class MonthlyDistributorBalanceRepository {
           month,
         },
       },
-      data: {
-        totalEnergyGeneratedMwh: energyAdjustment,
-        avaliableEnergyMwh: energyAdjustment,
-      },
+      data,
     });
   };
-}
-
-interface EnergyAdjustmentType {
-  increment?: number;
-  decrement?: number;
 }

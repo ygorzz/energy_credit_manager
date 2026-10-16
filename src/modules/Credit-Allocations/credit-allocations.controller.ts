@@ -13,7 +13,8 @@ export default class CreditAllocationsController {
   public createCreditAllocation = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = createCreditAllocationSchema.parse(req.body);
-      const newCreditAllocation = await this.creditAllocationService.create(validatedData);
+      const newCreditAllocation =
+        await this.creditAllocationService.createCreditAllocation(validatedData);
       return res.status(201).json({
         message: 'Credit allocation created succesfully!',
         newCreditAllocation,
@@ -23,10 +24,13 @@ export default class CreditAllocationsController {
     }
   };
 
-  public listcreditAllocations = async (req: Request, res: Response, next: NextFunction) => {
+  public listCreditAllocations = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = listCreditAllocationsSchema.parse(req.query);
-      const creditAlocations = await this.creditAllocationService.findAll(page, limit);
+      const creditAlocations = await this.creditAllocationService.listCreditAllocations(
+        page,
+        limit,
+      );
       return res.status(200).json(creditAlocations);
     } catch (error) {
       next(error);
@@ -37,7 +41,7 @@ export default class CreditAllocationsController {
     try {
       const idValidated = uuidSchema.parse(req.params);
       const { id } = idValidated;
-      const creditAllocationFound = await this.creditAllocationService.findById(id);
+      const creditAllocationFound = await this.creditAllocationService.getCreditAllocationById(id);
       return res.status(200).json(creditAllocationFound);
     } catch (error) {
       next(error);
@@ -48,7 +52,7 @@ export default class CreditAllocationsController {
     try {
       const idValidated = uuidSchema.parse(req.params);
       const { id } = idValidated;
-      const creditAllocationDeleted = await this.creditAllocationService.delete(id);
+      const creditAllocationDeleted = await this.creditAllocationService.deleteCreditAllocation(id);
       return res.status(200).json({
         message: 'Credit allocation deleted successfully!',
         creditAllocationDeleted,
@@ -63,7 +67,10 @@ export default class CreditAllocationsController {
       const idValidated = uuidSchema.parse(req.params);
       const validatedData = updateCreditAllocationSchema.parse(req.body);
       const { id } = idValidated;
-      const creditAllocationUpdated = await this.creditAllocationService.update(id, validatedData);
+      const creditAllocationUpdated = await this.creditAllocationService.updateCreditAllocation(
+        id,
+        validatedData,
+      );
       return res.status(200).json({
         message: 'Credit allocation updated successfully!',
         creditAllocationUpdated,
