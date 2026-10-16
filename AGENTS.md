@@ -1,0 +1,40 @@
+# Repository Guidelines
+
+## Project Structure & Module Organization
+
+This Express 5 API manages energy generation and credit allocations using TypeScript, Prisma, and PostgreSQL.
+
+- `src/app.ts` configures middleware and routes; `src/server.ts` starts the server on port 3000.
+- `src/modules/` groups features such as `Users` and `Power-Plants`. Follow routes → controller → service → repository; credit allocations still lack a repository layer.
+- `src/middlewares/`, `src/errors/`, and `src/shared/schemas/` contain shared request handling, application errors, and validation.
+- `prisma/` contains the schema, migration history, and seed script. Prisma generates its client into `src/db/generated/prisma/`.
+- `dist/` contains compiled output. No test or static asset directories exist.
+
+## Build, Test, and Development Commands
+
+- `npm ci`: install dependencies from the lockfile.
+- `npm run dev`: run the API with automatic reload through `tsx`.
+- `npm run check`: type-check without emitting files.
+- `npm run build`: compile TypeScript into `dist/`.
+- `npm start`: run the compiled server after building.
+- `npm run lint`: lint `src/` with Biome; `npm run lint:fix` applies fixes.
+- `npm run format:check`: check formatting; `npm run format` rewrites files.
+- `npm run biome:check`: check formatting, lint rules, and imports together.
+
+## Coding Style & Naming Conventions
+
+Use two spaces, single quotes, semicolons, trailing commas, and a 100-character line width, as configured in `biome.json`. Keep TypeScript strict and use `import type` for type-only imports. Relative imports use `.js` extensions for NodeNext compatibility.
+
+Follow existing feature directory names and kebab-case filenames such as `power-plant.service.ts`. Use PascalCase classes, camelCase methods, Zod schemas in `*.dto.ts`, and shared error classes for expected failures.
+
+## Testing Guidelines
+
+No test runner, `npm test` script, or coverage threshold is configured. Run type, lint, formatting, and build checks before submitting. Manually verify affected endpoints, including validation failures and authorization. For energy calculations, verify monthly balances after create, update, and delete operations. Document verification steps in the PR.
+
+## Commit & Pull Request Guidelines
+
+History uses English messages with `feat:`, `fix:`, and `refactor:` prefixes. Keep commits focused and imperative. PRs should explain behavior changes, link issues, list verification results, and identify migrations or API contract changes. Include request/response examples.
+
+## Security & Configuration
+
+Configure `DATABASE_URL` and `JWT_SECRET` in a local `.env`; never commit credentials. Commit schema changes with their migrations. Regenerate the Prisma client after schema changes; do not edit or commit generated client files. Review the seed script's fixed administrator credentials before using it outside disposable local databases.
