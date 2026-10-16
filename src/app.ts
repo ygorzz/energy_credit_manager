@@ -26,7 +26,6 @@ export default app;
 // PRÓXIMOS PASSOS:
 // 1 - Finalizar a criação dos repositories:
     // falta Credit Allocations
-// 2 - adicionar update em monthlyDistributorBalance ao fazer delete e update em CreditAllocation
 // 3 - Fortalecer validação do cnpj e criar a validação da estrutura matemática no service
 
 // OBSERVAÇÃO:
