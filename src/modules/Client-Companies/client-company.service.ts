@@ -1,4 +1,5 @@
 import { Prisma } from '../../db/generated/prisma/client.js';
+import BadRequestError from '../../errors/bad-request.error.js';
 import ConflictError from '../../errors/conflict.error.js';
 import NotFoundError from '../../errors/not-found.error.js';
 import type { createClientCompanyDTO, updateClientCompanyDTO } from './client-company.dto.js';
@@ -8,7 +9,7 @@ export default class ClientCompanyService {
   constructor(private clientCompanyRepository: ClientCompanyRepository) {}
   public createClientCompany = async (data: createClientCompanyDTO) => {
     try {
-      // CNPJ VALIDATION -> math calculation
+      cnpjValidation(data.cnpj);
 
       return await this.clientCompanyRepository.create(data);
     } catch (error) {
@@ -20,6 +21,7 @@ export default class ClientCompanyService {
           throw new NotFoundError('Distributor not found in the database');
         }
       }
+      throw error;
     }
   };
 
@@ -51,6 +53,8 @@ export default class ClientCompanyService {
 
   public updateClientCompany = async (id: string, data: updateClientCompanyDTO) => {
     try {
+      if (data.cnpj !== undefined) cnpjValidation(data.cnpj);
+
       const newData = Object.fromEntries(Object.entries(data).filter((e) => e[1] !== undefined));
       return await this.clientCompanyRepository.update(id, newData);
     } catch (error) {
@@ -70,4 +74,28 @@ export default class ClientCompanyService {
   };
 }
 
-function cnpjValidation(cnpj: string) {}
+function cnpjValidation(cnpj: string): void {
+
+  if (cnpj.length !== 14 || !/^\d{14}$/.test(cnpj) || /^(\d)\1{13}$/.test(cnpj)) {
+    throw new BadRequestError('Invalid CNPJ');
+  }
+
+  // Executes the algorithm two times -> two check digits
+  for (let digitIndex = 12; digitIndex < 14; digitIndex++) {
+    let sum = 0;
+    let weight = digitIndex - 7; // each check digit starts with a weight (5 and 6)
+
+    // algorithm core
+    for (const digit of cnpj.slice(0, digitIndex)) {
+      sum += Number(digit) * weight;
+      weight = weight === 2 ? 9 : weight - 1; // update weight
+    }
+
+    // defines the check digit
+    const remainder = sum % 11;
+    const expectedDigit = remainder < 2 ? 0 : 11 - remainder;
+    if (Number(cnpj.charAt(digitIndex)) !== expectedDigit) {
+      throw new BadRequestError('Invalid CNPJ');
+    }
+  }
+}

@@ -24,7 +24,8 @@ app.use(errorHandler);
 export default app;
 
 // PRÓXIMOS PASSOS:
-// 3 - Fortalecer validação do cnpj e criar a validação da estrutura matemática no service
+// 2 - revisar fluxo de desenvolvimento e lógica
+// 3 - testes automatizados
 
 // OBSERVAÇÃO:
 // Atualmente fazemos o rateio de energia baseado no calculo de gerção mensal.
