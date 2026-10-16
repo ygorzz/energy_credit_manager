@@ -11,83 +11,93 @@ import type {
 export default class CreditAllocationService {
   public create = async (data: createCreditAllocationDTO) => {
     try {
-      // 1 - Get the distributorId for update monthly distributor balance
-      const clientCompany = await db.clientCompany.findUnique({
-        where: {
-          id: data.clientCompanyId,
-        },
-      });
-      if (!clientCompany) throw new NotFoundError('Client company not found');
+      return await db.$transaction(
+        async (tx) => {
+          // 1 - Get the distributorId for update monthly distributor balance
+          const clientCompany = await tx.clientCompany.findUnique({
+            where: {
+              id: data.clientCompanyId,
+            },
+          });
+          if (!clientCompany) throw new NotFoundError('Client company not found');
 
-      // 1.1 - Defines percentageApplied
-      let percentageApplied: number;
-      if (data.percentageApplied === null) {
-        percentageApplied = clientCompany.allocationPercentage;
-      } else {
-        percentageApplied = data.percentageApplied;
-      }
+          // 1.1 - Defines percentageApplied
+          let percentageApplied: number;
+          if (data.percentageApplied === null) {
+            percentageApplied = clientCompany.allocationPercentage;
+          } else {
+            percentageApplied = data.percentageApplied;
+          }
 
-      // 2 - Get monthly energy balance
-      const { distributorId } = clientCompany;
-      const { month, year } = data;
-      const monthlyDistributorBalanceRecord = await db.monthlyDistributorBalance.findUnique({
-        where: {
-          distributorId_year_month: {
-            distributorId,
-            year,
-            month,
-          },
-        },
-      });
-      // Only create a credit allocation if at least one monthly generation was created
-      if (!monthlyDistributorBalanceRecord)
-        throw new NotFoundError('Unable to allocate credits. No energy input yet.');
+          // 2 - Get monthly energy balance
+          const { distributorId } = clientCompany;
+          const { month, year } = data;
+          const monthlyDistributorBalanceRecord = await tx.monthlyDistributorBalance.findUnique({
+            where: {
+              distributorId_year_month: {
+                distributorId,
+                year,
+                month,
+              },
+            },
+          });
+          // Only create a credit allocation if at least one monthly generation was created
+          if (!monthlyDistributorBalanceRecord)
+            throw new NotFoundError('Unable to allocate credits. No energy input yet.');
 
-      // 3 - Checks if there is avaliable energy to allocate
-      const energyToBeAllocated = new Prisma.Decimal(data.energyAllocatedMwh);
-      if (energyToBeAllocated.greaterThan(monthlyDistributorBalanceRecord.avaliableEnergyMwh)) {
-        throw new BadRequestError('The requested energy allocated exceeds the available energy.');
-      }
-      // 4 - Check if the requested percentage is correct
-      const totalEnergyGenerated = monthlyDistributorBalanceRecord.totalEnergyGeneratedMwh;
-      const correctPercentage = energyToBeAllocated
-        .mul(100) // Prisma Decimals type methods
-        .div(totalEnergyGenerated);
-      if (data.percentageApplied !== correctPercentage.toNumber()) {
-        throw new BadRequestError(
-          'The allocation percentage does not correspond to the requested energy allocated.',
-        );
-      }
+          // 3 - Checks if there is avaliable energy to allocate
+          const energyToBeAllocated = new Prisma.Decimal(data.energyAllocatedMwh);
+          if (energyToBeAllocated.greaterThan(monthlyDistributorBalanceRecord.avaliableEnergyMwh)) {
+            throw new BadRequestError(
+              'The requested energy allocated exceeds the available energy.',
+            );
+          }
+          // 4 - Check if the requested percentage is correct
+          const totalEnergyGenerated = monthlyDistributorBalanceRecord.totalEnergyGeneratedMwh;
+          const correctPercentage = energyToBeAllocated
+            .mul(100) // Prisma Decimals type methods
+            .div(totalEnergyGenerated);
+          if (data.percentageApplied !== correctPercentage.toNumber()) {
+            throw new BadRequestError(
+              'The allocation percentage does not correspond to the requested energy allocated.',
+            );
+          }
 
-      // 5 - Creates new Credit allocation
-      const newCreditAllocation = await db.creditAllocation.create({
-        data: {
-          ...data,
-          percentageApplied,
-        },
-      });
+          // 5 - Creates new Credit allocation
+          const newCreditAllocation = await tx.creditAllocation.create({
+            data: {
+              ...data,
+              percentageApplied,
+            },
+          });
 
-      // 6 - Update monthly distributor balance
-      await db.monthlyDistributorBalance.update({
-        where: {
-          distributorId_year_month: {
-            distributorId,
-            year,
-            month,
-          },
+          // 6 - Update monthly distributor balance
+          await tx.monthlyDistributorBalance.update({
+            where: {
+              distributorId_year_month: {
+                distributorId,
+                year,
+                month,
+              },
+            },
+            data: {
+              totalEnergyAllocatedMwh: {
+                increment: data.energyAllocatedMwh,
+              },
+              avaliableEnergyMwh: {
+                decrement: data.energyAllocatedMwh,
+              },
+            },
+          });
+          return newCreditAllocation;
         },
-        data: {
-          totalEnergyAllocatedMwh: {
-            increment: data.energyAllocatedMwh,
-          },
-          avaliableEnergyMwh: {
-            decrement: data.energyAllocatedMwh,
-          },
-        },
-      });
-      return newCreditAllocation;
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2034') {
+          throw new ConflictError('The allocation or balance changed concurrently. Please retry.');
+        }
         if (error.code === 'P2003') {
           throw new NotFoundError('Client company id not found in the database');
         }
