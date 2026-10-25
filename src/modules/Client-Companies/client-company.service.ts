@@ -1,4 +1,5 @@
 import { Prisma } from '../../db/generated/prisma/client.js';
+import isTransactionConflict from '../../db/is-transaction-conflict.js';
 import { db } from '../../db/prisma.js';
 import BadRequestError from '../../errors/bad-request.error.js';
 import ConflictError from '../../errors/conflict.error.js';
@@ -14,6 +15,9 @@ export default class ClientCompanyService {
 
       return await this.clientCompanyRepository.create(data);
     } catch (error) {
+      if (isTransactionConflict(error)) {
+        throw new ConflictError('The energy data changed concurrently. Please retry.');
+      }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ConflictError('Already exists a client company with this CNPJ');
@@ -43,6 +47,9 @@ export default class ClientCompanyService {
     try {
       return await this.clientCompanyRepository.delete(id);
     } catch (error) {
+      if (isTransactionConflict(error)) {
+        throw new ConflictError('The energy data changed concurrently. Please retry.');
+      }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError('Client company not found');
@@ -76,10 +83,10 @@ export default class ClientCompanyService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
+      if (isTransactionConflict(error)) {
+        throw new ConflictError('The energy data changed concurrently. Please retry.');
+      }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2034') {
-          throw new ConflictError('The company changed concurrently. Please retry.');
-        }
         if (error.code === 'P2025') {
           throw new NotFoundError('Client company not found');
         }

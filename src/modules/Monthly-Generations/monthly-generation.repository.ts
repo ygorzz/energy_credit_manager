@@ -19,8 +19,9 @@ export default class MonthlyGenerationRepository {
     });
   };
 
-  public findById = async (id: string) => {
-    return await db.monthlyGeneration.findUnique({
+  public findById = async (id: string, tx?: Prisma.TransactionClient) => {
+    const prisma = tx ?? db;
+    return await prisma.monthlyGeneration.findUnique({
       where: {
         id,
       },

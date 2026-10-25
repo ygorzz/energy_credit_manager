@@ -27,3 +27,14 @@ Transação Serializable verifica o cadastro e suas alocações antes de permiti
 Histórico existente bloqueia a mudança com 409; mesmo vínculo e outros campos continuam
 permitidos. Cinco cenários em memória e checagem de tipos passaram. Não há transferência
 retroativa de saldos ou reatribuição de alocações antigas.
+
+### F04 — transações completas e conflitos concorrentes
+
+Leituras, validações e gravações de geração agora usam a mesma transação Serializable.
+O repositório recebe `tx` também na leitura; falhas de serialização do Prisma e o conflito
+estruturado `TransactionWriteConflict` do driver são reconhecidos sem mascarar outros erros.
+Quatro pares concorrentes reais passaram no PostgreSQL 18 descartável: duas correções de
+geração, exclusão versus alocação, troca de distribuidora da usina versus geração e troca
+da empresa versus alocação. Conferidas as somas de geração/alocação e disponibilidade,
+incluindo movimento de competência e os bloqueios F02/F03. Checagem de tipos passou.
+O replay completo das 14 migrações também passou no banco vazio isolado.
