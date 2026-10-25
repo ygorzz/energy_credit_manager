@@ -1,6 +1,6 @@
 import z from 'zod';
 
-export const registerUserSchema = z.object({
+const userFieldsSchema = z.object({
   name: z
     .string()
     .min(4, 'Name must contain at least 4 charaters')
@@ -11,19 +11,23 @@ export const registerUserSchema = z.object({
     .min(4, 'Password must contain at least 4 characters')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter.')
     .regex(/[0-9]/, 'Password must contain at least one number.'),
-  role: z.enum(['ADMIN', 'ANALYST', 'CLIENT']).default('CLIENT'),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'CANCELED']).default('ACTIVE'),
-  companyId: z.string().nullable(),
+  role: z.enum(['ADMIN', 'ANALYST', 'CLIENT']),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'CANCELED']),
+  companyId: z.uuid('Invalid company ID').nullable(),
 });
 
-export const updateUserSchema = registerUserSchema.extend({
-  name: registerUserSchema.shape.name.optional(),
-  email: registerUserSchema.shape.email.optional(),
-  password: registerUserSchema.shape.password.optional(),
-  role: registerUserSchema.shape.role.optional(),
-  status: registerUserSchema.shape.status.optional(),
-  companyId: registerUserSchema.shape.companyId.optional(),
-});
+export const registerUserSchema = userFieldsSchema
+  .extend({
+    role: userFieldsSchema.shape.role.default('CLIENT'),
+    status: userFieldsSchema.shape.status.default('ACTIVE'),
+  })
+  .refine((data) => data.role !== 'CLIENT' || data.companyId !== null, {
+    path: ['companyId'],
+    message: 'A client user must be linked to a company',
+  });
+
+// PATCH must not reapply registration defaults and silently change role or status.
+export const updateUserSchema = userFieldsSchema.partial();
 
 export const listUsersSchema = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),

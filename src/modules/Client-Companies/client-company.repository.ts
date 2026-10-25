@@ -24,8 +24,13 @@ export default class ClientCompanyRepository {
     });
   };
 
-  public delete = async (id: string) => {
-    return await db.clientCompany.delete({
+  public hasClientUsers = async (id: string, tx: Prisma.TransactionClient) => {
+    return (await tx.user.count({ where: { companyId: id, role: 'CLIENT' } })) > 0;
+  };
+
+  public delete = async (id: string, tx?: Prisma.TransactionClient) => {
+    const prisma = tx ?? db;
+    return await prisma.clientCompany.delete({
       where: {
         id,
       },

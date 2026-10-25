@@ -2,8 +2,9 @@ import type { Prisma } from '../../db/generated/prisma/client.js';
 import { db } from '../../db/prisma.js';
 
 export default class UserRepository {
-  public create = async (data: Prisma.UserUncheckedCreateInput) => {
-    return await db.user.create({
+  public create = async (data: Prisma.UserUncheckedCreateInput, tx?: Prisma.TransactionClient) => {
+    const prisma = tx ?? db;
+    return await prisma.user.create({
       data,
       select: {
         id: true,
@@ -31,8 +32,9 @@ export default class UserRepository {
     });
   };
 
-  public findById = async (id: string) => {
-    return await db.user.findUnique({
+  public findById = async (id: string, tx?: Prisma.TransactionClient) => {
+    const prisma = tx ?? db;
+    return await prisma.user.findUnique({
       where: {
         id,
       },
@@ -71,8 +73,13 @@ export default class UserRepository {
     });
   };
 
-  public update = async (id: string, data: Prisma.UserUncheckedUpdateInput) => {
-    return await db.user.update({
+  public update = async (
+    id: string,
+    data: Prisma.UserUncheckedUpdateInput,
+    tx?: Prisma.TransactionClient,
+  ) => {
+    const prisma = tx ?? db;
+    return await prisma.user.update({
       where: {
         id,
       },

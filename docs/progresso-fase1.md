@@ -78,3 +78,12 @@ POST/PATCH da empresa exigem percentual padrão inteiro entre 0 e 100, coerente 
 Verificados 0/1/100 válidos e negativos, frações, acima de 100 e não finitos inválidos nos
 dois DTOs. Tipos passaram. Nenhuma alteração de schema; percentual explícito de alocação
 continua decimal. Lote 1.3 encerrado.
+
+### F10 — vínculo obrigatório e consistente do usuário cliente
+
+CLIENT exige UUID de empresa existente na criação e no estado efetivo do PATCH. Cadastro,
+atualização e exclusão de empresa usam transações Serializable, e a exclusão bloqueia
+empresas com clientes vinculados. As rotas injetam os repositórios explicitamente.
+O DTO de PATCH não reaplica defaults de role/status: alterar só nome preserva o ADMIN.
+Cadastro válido/inválido, troca parcial de perfil, remoção de vínculo, exclusão e concorrência
+foram exercitados no PostgreSQL isolado; nenhum CLIENT órfão. Tipos e Biome passaram.

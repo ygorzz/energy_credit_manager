@@ -2,22 +2,39 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env.js';
 import { Prisma } from '../../db/generated/prisma/client.js';
+import isTransactionConflict from '../../db/is-transaction-conflict.js';
+import { db } from '../../db/prisma.js';
 import ConflictError from '../../errors/conflict.error.js';
 import ForbiddenError from '../../errors/forbidden.error.js';
 import UnauthorizedError from '../../errors/unauthorized.error.js';
+import type ClientCompanyRepository from '../Client-Companies/client-company.repository.js';
 import type { RegisterUserDTO } from '../Users/user.dto.js';
 import type UserRepository from '../Users/user.repository.js';
+import validateUserCompany from '../Users/user-company.validation.js';
 import type { LoginDTO } from './auth.dto.js';
 
 export default class AuthService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private clientCompanyRepository: ClientCompanyRepository,
+  ) {}
   public registerUser = async (data: RegisterUserDTO) => {
     try {
       const hashPassword = await bcrypt.hash(data.password, 10);
       const { password, ...rest } = data;
       const newData = { hashPassword, ...rest };
-      return await this.userRepository.create(newData);
+      return await db.$transaction(
+        async (tx) => {
+          // Validate the company link and create the user in one transaction to protect against deletions.
+          await validateUserCompany(data.role, data.companyId, this.clientCompanyRepository, tx);
+          return await this.userRepository.create(newData, tx);
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
     } catch (error) {
+      if (isTransactionConflict(error)) {
+        throw new ConflictError('The user or company changed concurrently. Please retry.');
+      }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ConflictError('Already exists a user with this email');

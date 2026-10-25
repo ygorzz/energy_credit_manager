@@ -45,7 +45,16 @@ export default class ClientCompanyService {
 
   public deleteClientCompany = async (id: string) => {
     try {
-      return await this.clientCompanyRepository.delete(id);
+      return await db.$transaction(
+        async (tx) => {
+          // Do not delete a company if that would leave CLIENT users without a company.
+          if (await this.clientCompanyRepository.hasClientUsers(id, tx)) {
+            throw new ConflictError('Cannot delete a company with linked client users');
+          }
+          return await this.clientCompanyRepository.delete(id, tx);
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
     } catch (error) {
       if (isTransactionConflict(error)) {
         throw new ConflictError('The energy data changed concurrently. Please retry.');
