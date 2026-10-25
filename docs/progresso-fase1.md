@@ -71,3 +71,10 @@ ou validar disponibilidade. O PATCH também exige base positiva. Verificadas qua
 e positiva sobre bases ausentes/zero, além de alocação zero válida sobre base positiva,
 no PostgreSQL isolado. Tipos passaram. Mudança de contrato: ausência de geração no POST
 passa de 404 para 400; referências de empresa e outros recursos continuam com seu tratamento.
+
+### F09 — limites do percentual padrão
+
+POST/PATCH da empresa exigem percentual padrão inteiro entre 0 e 100, coerente com o banco.
+Verificados 0/1/100 válidos e negativos, frações, acima de 100 e não finitos inválidos nos
+dois DTOs. Tipos passaram. Nenhuma alteração de schema; percentual explícito de alocação
+continua decimal. Lote 1.3 encerrado.
