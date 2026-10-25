@@ -5,10 +5,25 @@
 This Express 5 API manages energy generation and credit allocations using TypeScript, Prisma, and PostgreSQL.
 
 - `src/app.ts` configures middleware and routes; `src/server.ts` starts the server on port 3000.
-- `src/modules/` groups features such as `Users` and `Power-Plants`. Follow routes → controller → service → repository; credit allocations still lack a repository layer.
+- `src/modules/` groups features such as `Users` and `Power-Plants`. Follow routes → controller → service → repository, including credit allocations.
 - `src/middlewares/`, `src/errors/`, and `src/shared/schemas/` contain shared request handling, application errors, and validation.
 - `prisma/` contains the schema, migration history, and seed script. Prisma generates its client into `src/db/generated/prisma/`.
-- `dist/` contains compiled output. No test or static asset directories exist.
+- `dist/` contains compiled output. `test/e2e/` is currently empty; no automated test suite is configured.
+
+## Current Delivery Priorities
+
+Follow `docs/plano-operacao.md` for the persistent delivery sequence and product decisions.
+First fix the existing API issues recorded in `docs/auditoria-tecnica.md`, then implement
+and pass automated tests for all 31 existing routes. Only afterward implement the approved
+MVP requirements preserved in `docs/requisitos-mvp.md`. Do not introduce new MVP features
+while the correction and existing-route testing phases remain incomplete.
+
+During Phase 1 only, execute batches sequentially and address one finding at a time.
+After verifying each finding, commit its changes with a focused English message and continue
+without requesting intermediate review or acceptance. Do not combine findings or include
+unrelated changes. Stop after Phase 1 and request the user's code review and approval before
+starting Phase 2 or any later work. This exception does not authorize automatic advancement
+or commits beyond Phase 1.
 
 ## Build, Test, and Development Commands
 
