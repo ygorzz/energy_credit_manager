@@ -93,3 +93,9 @@ foram exercitados no PostgreSQL isolado; nenhum CLIENT órfão. Tipos e Biome pa
 O caminho de alteração de quantidade na mesma competência retorna o registro atualizado.
 Verificados mudança de quantidade, atualização sem delta e movimento de mês no PostgreSQL
 isolado; todos retornaram o registro e preservaram os saldos. Tipos passaram.
+
+### F12 — status HTTP da geração
+
+PATCH e DELETE respondem 200 com o corpo existente; POST permanece 201. Os três métodos
+foram exercitados por HTTP com autenticação e PostgreSQL isolado, conferindo também o
+registro atualizado e os saldos. Tipos passaram.

@@ -14,7 +14,8 @@ export default class MonthlyGenerationsController {
   public createMonthlyGeneration = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = createMonthlyGenerationSchema.parse(req.body);
-      const newMonthlyGeneration = await this.monthlyGenerationService.createMonthlyGeneration(validatedData);
+      const newMonthlyGeneration =
+        await this.monthlyGenerationService.createMonthlyGeneration(validatedData);
       return res.status(201).json({
         message: 'Monthly Generation created successfully!',
         newMonthlyGeneration,
@@ -27,7 +28,10 @@ export default class MonthlyGenerationsController {
   public listMonthlyGenerations = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = listMonthlyGenerationsSchema.parse(req.query);
-      const monthlyGenerations = await this.monthlyGenerationService.listMonthlyGenerations(page, limit);
+      const monthlyGenerations = await this.monthlyGenerationService.listMonthlyGenerations(
+        page,
+        limit,
+      );
       return res.status(200).json(monthlyGenerations);
     } catch (error) {
       next(error);
@@ -42,7 +46,8 @@ export default class MonthlyGenerationsController {
     try {
       const idValidated = uuidSchema.parse(req.params);
       const { id } = idValidated;
-      const monthlyGenerationFound = await this.monthlyGenerationService.getMonthlyGenerationById(id);
+      const monthlyGenerationFound =
+        await this.monthlyGenerationService.getMonthlyGenerationById(id);
       return res.status(200).json(monthlyGenerationFound);
     } catch (error) {
       next(error);
@@ -58,8 +63,10 @@ export default class MonthlyGenerationsController {
     try {
       const idValidated = uuidSchema.parse(req.params);
       const { id } = idValidated;
-      const monthlyGenerationDeleted = await this.monthlyGenerationService.deleteMonthlyGeneration(id);
-      return res.status(201).json({
+      const monthlyGenerationDeleted =
+        await this.monthlyGenerationService.deleteMonthlyGeneration(id);
+      // Deletion with a response body returns 200; reserve 201 for creation.
+      return res.status(200).json({
         message: 'Monthly generation deleted successfully!',
         monthlyGenerationDeleted,
       });
@@ -81,7 +88,8 @@ export default class MonthlyGenerationsController {
         id,
         validatedData,
       );
-      return res.status(201).json({
+      // Updates return 200 with the persisted generation.
+      return res.status(200).json({
         message: 'Monthly Generation updated successfully!',
         monthlyGenerationUpdated,
       });
