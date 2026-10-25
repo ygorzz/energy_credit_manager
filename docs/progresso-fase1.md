@@ -38,3 +38,9 @@ geração, exclusão versus alocação, troca de distribuidora da usina versus g
 da empresa versus alocação. Conferidas as somas de geração/alocação e disponibilidade,
 incluindo movimento de competência e os bloqueios F02/F03. Checagem de tipos passou.
 O replay completo das 14 migrações também passou no banco vazio isolado.
+
+### F13 — precisão dos ajustes de energia
+
+Removidas conversões `Number` dos deltas e decrementos de geração. Alteração de 10 para
+`1e-16`, movimento para outro mês com `2e-16` e exclusão passaram no PostgreSQL isolado,
+sempre conferindo somas e disponibilidade exatas. Tipos e Biome passaram. Lote 1.2 encerrado.

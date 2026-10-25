@@ -84,7 +84,8 @@ export default class MonthlyGenerationService {
           }
           // 4 - Delete the monthly generation and update the monthly distributor balance
           const deleted = await this.monthlyGenerationRepository.delete(id, tx);
-          const adjustment = { decrement: Number(energyGeneratedMwh) };
+          // Keep balance adjustments as Decimal values to avoid precision loss.
+          const adjustment = { decrement: energyGeneratedMwh };
           await this.monthlyDistributorBalanceRepository.update(
             powerPlant.distributorId,
             year,
@@ -115,6 +116,7 @@ export default class MonthlyGenerationService {
           const newData = Object.fromEntries(
             Object.entries(data).filter((entry) => entry[1] !== undefined),
           );
+          // Keep calculations and adjustments in Decimal without converting to Number.
           const oldEnergy = new Prisma.Decimal(generation.energyGeneratedMwh);
           const newEnergy = new Prisma.Decimal(data.energyGeneratedMwh ?? oldEnergy);
           const oldDistributorId = generation.powerPlant.distributorId; // for update monthly distributor balance
@@ -153,8 +155,8 @@ export default class MonthlyGenerationService {
               );
             }
             const adjustment = delta.isPositive()
-              ? { increment: Number(delta) }
-              : { decrement: Number(delta.abs()) };
+              ? { increment: delta }
+              : { decrement: delta.abs() };
             await this.monthlyGenerationRepository.update(id, newData, tx);
             await this.monthlyDistributorBalanceRepository.update(
               distributorId,
@@ -178,7 +180,7 @@ export default class MonthlyGenerationService {
           // 5 - Move energy to the new monthly distributor balance
           // 5.1 update old monthly generation e monthly distributor balance
           const updated = await this.monthlyGenerationRepository.update(id, newData, tx);
-          const adjustment = { decrement: Number(oldEnergy) };
+          const adjustment = { decrement: oldEnergy };
           await this.monthlyDistributorBalanceRepository.update(
             oldDistributorId,
             generation.year,
