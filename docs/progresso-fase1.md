@@ -12,3 +12,11 @@ O banco atual não deve ser usado para dados destrutivos de verificação.
 ## Correções
 
 Os registros abaixo documentam cada achado conforme sua implementação.
+
+### F02 — bloqueio da troca de distribuidora da usina
+
+Consulta da usina, verificação do histórico e atualização na mesma transação Serializable.
+Troca com geração existente retorna 409; mesmo vínculo e alterações de outros campos continuam
+permitidos. O repositório aceita o cliente da transação. Conflitos concorrentes retornam 409.
+Verificados cinco cenários em memória e a checagem de tipos. Proteção concorrente integrada
+com os lançamentos energéticos será exercitada após F04, que fecha as transações da geração.

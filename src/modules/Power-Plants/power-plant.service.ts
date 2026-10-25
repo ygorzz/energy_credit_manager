@@ -1,4 +1,5 @@
 import { Prisma } from '../../db/generated/prisma/client.js';
+import { db } from '../../db/prisma.js';
 import ConflictError from '../../errors/conflict.error.js';
 import NotFoundError from '../../errors/not-found.error.js';
 import type { createPowerPlantDTO, updatePowerPlantDTO } from './power-plant.dto.js';
@@ -8,11 +9,8 @@ export default class PowerPlantService {
   constructor(private powerPlantRepository: PowerPlantRepository) {}
   public createPowerPlant = async (data: createPowerPlantDTO) => {
     try {
-
       return await this.powerPlantRepository.create(data);
-
     } catch (error) {
-
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ConflictError('Already exists a power plant with this name');
@@ -37,10 +35,8 @@ export default class PowerPlantService {
 
   public deletePowerPlant = async (id: string) => {
     try {
-
       return await this.powerPlantRepository.delete(id);
     } catch (error) {
-
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError('Power plant not found');
@@ -52,13 +48,30 @@ export default class PowerPlantService {
 
   public updatePowerPlant = async (id: string, data: updatePowerPlantDTO) => {
     try {
-
       const newData = Object.fromEntries(Object.entries(data).filter((e) => e[1] !== undefined));
-      return await this.powerPlantRepository.update(id, newData);
-
+      return await db.$transaction(
+        async (tx) => {
+          const plant = await this.powerPlantRepository.findById(id, tx);
+          if (!plant) throw new NotFoundError('Power plant not found');
+          // Plants with generation records keep their distributor to preserve historical ownership.
+          if (
+            data.distributorId !== undefined &&
+            data.distributorId !== plant.distributorId &&
+            (await this.powerPlantRepository.hasMonthlyGenerations(id, tx))
+          ) {
+            throw new ConflictError(
+              'Cannot change distributor of a power plant with generation history',
+            );
+          }
+          return await this.powerPlantRepository.update(id, newData, tx);
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
     } catch (error) {
-
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2034') {
+          throw new ConflictError('The power plant changed concurrently. Please retry.');
+        }
         if (error.code === 'P2025') {
           throw new NotFoundError('Power plant not found');
         }

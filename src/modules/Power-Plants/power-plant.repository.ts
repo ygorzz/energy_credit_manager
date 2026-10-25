@@ -33,8 +33,17 @@ export default class PowerPlantRepository {
     });
   };
 
-  public update = async (id: string, data: Prisma.PowerPlantUncheckedUpdateInput) => {
-    return await db.powerPlant.update({
+  public hasMonthlyGenerations = async (id: string, tx: Prisma.TransactionClient) => {
+    return (await tx.monthlyGeneration.count({ where: { powerPlantId: id } })) > 0;
+  };
+
+  public update = async (
+    id: string,
+    data: Prisma.PowerPlantUncheckedUpdateInput,
+    tx?: Prisma.TransactionClient,
+  ) => {
+    const prisma = tx ?? db;
+    return await prisma.powerPlant.update({
       where: {
         id,
       },
