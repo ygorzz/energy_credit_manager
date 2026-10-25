@@ -149,3 +149,14 @@ reescrever o histórico. Aplicação incremental no banco isolado e replay das 1
 em outro banco vazio do mesmo cluster passaram. Ambos terminaram sem diferenças em relação
 ao schema Prisma; defaults conferidos no catálogo e prisma validate passou. O banco da
 aplicação não foi acessado nem migrado; a migração acompanha o código para aplicação posterior.
+
+### F20 — bootstrap administrativo configurável e repetível
+
+Removidas credenciais fixas. `.env.example` documenta as variáveis BOOTSTRAP_ADMIN_*;
+email/senha são explícitos, e a criação segue a validação do cadastro. O seed usa conexão
+própria com encerramento garantido e não exige JWT_SECRET. Reexecução preserva senha,
+perfil e status; colisão com outro perfil falha sem promovê-lo. Upsert vazio evita sobrescrita
+também na disputa pela criação. Falhas não registram valores sensíveis.
+Verificados criação, hash, reexecução com senha diferente/ausente, preservação de INACTIVE,
+configuração ausente e colisão com CLIENT no PostgreSQL isolado. A CLI Prisma passou duas
+vezes com PATH equivalente ao npx. Tipos da aplicação e do seed e Biome passaram.
