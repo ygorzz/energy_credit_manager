@@ -1,26 +1,34 @@
 import type { NextFunction, Request, Response } from 'express';
-import jwt, { type JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import ForbiddenError from '../errors/forbidden.error.js';
 import UnauthorizedError from '../errors/unauthorized.error.js';
 import UserRepository from '../modules/Users/user.repository.js';
+import {
+  type AuthTokenPayloadDTO,
+  authTokenPayloadSchema,
+} from '../shared/schemas/auth-token.dto.js';
 
 const userRepository = new UserRepository();
 
 // <P> -> adapts to the parameters coming from the route
 export default async function auth<P>(req: Request<P>, res: Response, next: NextFunction) {
-  let decoded: NewJwtPayload;
+  let decoded: AuthTokenPayloadDTO;
 
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) throw new UnauthorizedError('No token provided');
 
-    const token = authHeader.split(' ')[1];
+    // Accept only Bearer followed by a single token.
+    const token = /^Bearer +(\S+)$/i.exec(authHeader)?.[1];
     if (!token) throw new UnauthorizedError('Malformed token');
 
     // return the decoded payload -> payload contains the users infos
     // the payload contain the userId sended on the login service
-    decoded = jwt.verify(token, env.JWT_SECRET) as NewJwtPayload;
+    // Validate the signature, expiration and claim types before looking up the user.
+    const payload = authTokenPayloadSchema.safeParse(jwt.verify(token, env.JWT_SECRET));
+    if (!payload.success) throw new UnauthorizedError('Invalid token payload');
+    decoded = payload.data;
   } catch (error) {
     // Preserve known authentication errors; use a generic response for JWT failures.
     const authError =
@@ -49,10 +57,4 @@ export default async function auth<P>(req: Request<P>, res: Response, next: Next
   } catch (error) {
     next(error);
   }
-}
-
-// Create a new type because jwt.verify doesn't know that I added id and role on the payload. So, it's throw an error without a new type like this:
-interface NewJwtPayload extends JwtPayload {
-  id: string;
-  role: 'ADMIN' | 'CLIENT' | 'ANALYST';
 }
