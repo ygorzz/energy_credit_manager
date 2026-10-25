@@ -133,3 +133,11 @@ Os sete repositórios de listagem ordenam por ID crescente antes de aplicar skip
 Páginas consecutivas e leituras repetidas foram comparadas à ordem global no PostgreSQL
 isolado; todos passaram, assim como os tipos. Paginação por offset ainda pode se deslocar
 com inserções/exclusões concorrentes. Lote 1.4 encerrado.
+
+### F18 — capitalização dos caminhos
+
+Import do app e diretório local alinhados ao caminho `src/modules/auth` já registrado no Git.
+Os 168 imports relativos próprios correspondem exatamente aos caminhos versionados.
+Tipos e build passaram no Windows. Docker Linux está indisponível; Ubuntu/WSL está instalado,
+mas não disponibiliza Node Linux no PATH. A execução completa em Linux permanece como
+verificação de ambiente da fase 2; a divergência concreta de capitalização foi corrigida.

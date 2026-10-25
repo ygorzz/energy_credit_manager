@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import errorHandler from './middlewares/error-handler.middleware.js';
-import authRoutes from './modules/Auth/auth.routes.js';
+import authRoutes from './modules/auth/auth.routes.js';
 import clientCompaniesRoutes from './modules/Client-Companies/client-companies.routes.js';
 import creaditAllocationnRoutes from './modules/Credit-Allocations/credit-allocations.routes.js';
 import distributorsRoutes from './modules/Distributors/distributors.routes.js';
