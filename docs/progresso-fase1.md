@@ -118,3 +118,11 @@ A revisão sem helper passou em 133 cenários de diagnóstico em memória, cobri
 12 operações alteradas, status/mensagens pelo handler HTTP, ambos os formatos de conflito,
 retornos de sucesso e preservação de erros. Esses cenários não acessaram o banco e não
 substituem a suíte permanente da fase 2. Tipos, build, lint, formatação e Biome passaram.
+
+### F15 — erros do parser e logs
+
+Mapeamento limitado aos tipos/status conhecidos de body-parser mantém 400 para JSON inválido,
+413 para corpo excessivo e 415 para encoding/charset não suportado. Erros desconhecidos
+continuam 500. Logs não incluem corpo, mensagem bruta, credenciais ou query string; respostas
+já iniciadas são encaminhadas ao Express. Quatro casos HTTP reais e erro com status arbitrário
+passaram, com verificação de sentinela sensível ausente dos logs. Tipos passaram.
