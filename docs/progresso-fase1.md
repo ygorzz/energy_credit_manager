@@ -44,3 +44,10 @@ O replay completo das 14 migrações também passou no banco vazio isolado.
 Removidas conversões `Number` dos deltas e decrementos de geração. Alteração de 10 para
 `1e-16`, movimento para outro mês com `2e-16` e exclusão passaram no PostgreSQL isolado,
 sempre conferindo somas e disponibilidade exatas. Tipos e Biome passaram. Lote 1.2 encerrado.
+
+### F05 — consistência do percentual no PATCH de alocação
+
+POST e PATCH compartilham a mesma verificação numérica. O PATCH valida os valores efetivos,
+inclusive mudança de empresa/competência. Rejeições de alterações parciais incompatíveis,
+atualização válida e mudança para empresa com base distinta passaram no PostgreSQL isolado,
+com conferência dos saldos. Tipos e Biome passaram.

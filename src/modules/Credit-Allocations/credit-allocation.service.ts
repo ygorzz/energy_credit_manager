@@ -57,14 +57,11 @@ export default class CreditAllocationService {
           }
           // 4 - Check if the requested percentage is correct
           const totalEnergyGenerated = monthlyDistributorBalanceRecord.totalEnergyGeneratedMwh;
-          const correctPercentage = energyToBeAllocated
-            .mul(100) // Prisma Decimals type methods
-            .div(totalEnergyGenerated);
-          if (data.percentageApplied !== correctPercentage.toNumber()) {
-            throw new BadRequestError(
-              'The allocation percentage does not correspond to the requested energy allocated.',
-            );
-          }
+          this.validatePercentage(
+            energyToBeAllocated,
+            totalEnergyGenerated,
+            data.percentageApplied,
+          );
 
           // 5 - Creates new Credit allocation
           const newCreditAllocation = await this.creditAllocationRepository.create(
@@ -242,10 +239,17 @@ export default class CreditAllocationService {
             );
           }
 
+          // PATCH preserves omitted percentages; null requests the current company default.
           const percentageApplied =
             data.percentageApplied === null
               ? clientCompany.allocationPercentage
               : (data.percentageApplied ?? allocation.percentageApplied);
+          // Validate effective values against destination generation, including partial updates.
+          this.validatePercentage(
+            newEnergy,
+            targetBalance.totalEnergyGeneratedMwh,
+            percentageApplied,
+          );
           const updatedAllocation = await this.creditAllocationRepository.update(
             id,
             { clientCompanyId, month, year, energyAllocatedMwh: newEnergy, percentageApplied },
@@ -309,4 +313,18 @@ export default class CreditAllocationService {
       throw error;
     }
   };
+
+  private validatePercentage(
+    energy: Prisma.Decimal,
+    total: Prisma.Decimal,
+    percentage: number | Prisma.Decimal | null | undefined,
+  ): void {
+    // The percentage base is total distributor generation, not remaining availability.
+    const expected = energy.mul(100).div(total); // Prisma Decimals type methods
+    if (percentage == null || new Prisma.Decimal(percentage).toNumber() !== expected.toNumber()) {
+      throw new BadRequestError(
+        'The allocation percentage does not correspond to the requested energy allocated.',
+      );
+    }
+  }
 }
