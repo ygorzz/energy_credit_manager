@@ -57,3 +57,9 @@ com conferência dos saldos. Tipos e Biome passaram.
 O DTO aceita omissão e null, e a criação valida o percentual já resolvido a partir do
 cadastro. Verificados os três caminhos (omitido, null e explícito) no PostgreSQL isolado,
 conferindo a gravação do percentual e os saldos. Checagem de tipos passou.
+
+### F07 — comparação decimal e arredondamento
+
+Comparação usa Decimal com duas casas e ROUND_HALF_UP. POST/PATCH de 1/3 e 2/3,
+rejeição de percentual divergente e a fronteira de 0,005% passaram no PostgreSQL isolado.
+A quantidade informada não é arredondada para forçar correspondência. Tipos passaram.

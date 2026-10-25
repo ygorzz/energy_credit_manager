@@ -313,7 +313,13 @@ export default class CreditAllocationService {
   ): void {
     // The percentage base is total distributor generation, not remaining availability.
     const expected = energy.mul(100).div(total); // Prisma Decimals type methods
-    if (percentage == null || new Prisma.Decimal(percentage).toNumber() !== expected.toNumber()) {
+    // Compare percentages at two decimal places with half-up rounding; keep energy unchanged.
+    if (
+      percentage == null ||
+      !new Prisma.Decimal(percentage)
+        .toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_UP)
+        .equals(expected.toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_UP))
+    ) {
       throw new BadRequestError(
         'The allocation percentage does not correspond to the requested energy allocated.',
       );
