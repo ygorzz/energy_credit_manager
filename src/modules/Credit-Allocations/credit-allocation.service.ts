@@ -32,12 +32,8 @@ export default class CreditAllocationService {
           if (!clientCompany) throw new NotFoundError('Client company not found');
 
           // 1.1 - Defines percentageApplied
-          let percentageApplied: number;
-          if (data.percentageApplied === null) {
-            percentageApplied = clientCompany.allocationPercentage;
-          } else {
-            percentageApplied = data.percentageApplied;
-          }
+          // On creation, omitted and null percentages use the company default.
+          const percentageApplied = data.percentageApplied ?? clientCompany.allocationPercentage;
 
           // 2 - Get monthly energy balance
           const { distributorId } = clientCompany;
@@ -57,11 +53,7 @@ export default class CreditAllocationService {
           }
           // 4 - Check if the requested percentage is correct
           const totalEnergyGenerated = monthlyDistributorBalanceRecord.totalEnergyGeneratedMwh;
-          this.validatePercentage(
-            energyToBeAllocated,
-            totalEnergyGenerated,
-            data.percentageApplied,
-          );
+          this.validatePercentage(energyToBeAllocated, totalEnergyGenerated, percentageApplied);
 
           // 5 - Creates new Credit allocation
           const newCreditAllocation = await this.creditAllocationRepository.create(

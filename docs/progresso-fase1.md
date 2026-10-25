@@ -51,3 +51,9 @@ POST e PATCH compartilham a mesma verificação numérica. O PATCH valida os val
 inclusive mudança de empresa/competência. Rejeições de alterações parciais incompatíveis,
 atualização válida e mudança para empresa com base distinta passaram no PostgreSQL isolado,
 com conferência dos saldos. Tipos e Biome passaram.
+
+### F06 — percentual opcional e padrão cadastrado
+
+O DTO aceita omissão e null, e a criação valida o percentual já resolvido a partir do
+cadastro. Verificados os três caminhos (omitido, null e explícito) no PostgreSQL isolado,
+conferindo a gravação do percentual e os saldos. Checagem de tipos passou.
