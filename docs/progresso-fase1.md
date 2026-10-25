@@ -126,3 +126,10 @@ Mapeamento limitado aos tipos/status conhecidos de body-parser mantém 400 para 
 continuam 500. Logs não incluem corpo, mensagem bruta, credenciais ou query string; respostas
 já iniciadas são encaminhadas ao Express. Quatro casos HTTP reais e erro com status arbitrário
 passaram, com verificação de sentinela sensível ausente dos logs. Tipos passaram.
+
+### F17 — ordenação da paginação
+
+Os sete repositórios de listagem ordenam por ID crescente antes de aplicar skip/take.
+Páginas consecutivas e leituras repetidas foram comparadas à ordem global no PostgreSQL
+isolado; todos passaram, assim como os tipos. Paginação por offset ainda pode se deslocar
+com inserções/exclusões concorrentes. Lote 1.4 encerrado.

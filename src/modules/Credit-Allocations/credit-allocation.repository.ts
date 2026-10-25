@@ -11,7 +11,8 @@ export default class CreditAllocationRepository {
   };
 
   public findAll = async (skip: number, take: number) => {
-    return await db.creditAllocation.findMany({ skip, take });
+    // Order by ID for deterministic pages while the underlying data remains unchanged.
+    return await db.creditAllocation.findMany({ skip, take, orderBy: { id: 'asc' } });
   };
 
   public findById = async (id: string, tx?: Prisma.TransactionClient) => {

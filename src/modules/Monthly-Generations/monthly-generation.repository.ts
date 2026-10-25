@@ -13,9 +13,11 @@ export default class MonthlyGenerationRepository {
   };
 
   public findAll = async (skip: number, take: number) => {
+    // Order by ID for deterministic pages while the underlying data remains unchanged.
     return await db.monthlyGeneration.findMany({
       skip,
       take,
+      orderBy: { id: 'asc' },
     });
   };
 

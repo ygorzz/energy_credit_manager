@@ -19,9 +19,11 @@ export default class MonthlyDistributorBalanceRepository {
   };
 
   public findAll = async (skip: number, take: number) => {
+    // Order by ID for deterministic pages while the underlying data remains unchanged.
     return await db.monthlyDistributorBalance.findMany({
       skip,
       take,
+      orderBy: { id: 'asc' },
     });
   };
 

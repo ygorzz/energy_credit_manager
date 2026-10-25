@@ -9,9 +9,11 @@ export default class DistributorRepository {
   };
 
   public findAll = async (skip: number, take: number) => {
+    // Order by ID for deterministic pages while the underlying data remains unchanged.
     return await db.distributor.findMany({
       skip,
       take,
+      orderBy: { id: 'asc' },
     });
   };
 
