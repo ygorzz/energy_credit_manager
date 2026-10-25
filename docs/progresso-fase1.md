@@ -141,3 +141,11 @@ Os 168 imports relativos próprios correspondem exatamente aos caminhos versiona
 Tipos e build passaram no Windows. Docker Linux está indisponível; Ubuntu/WSL está instalado,
 mas não disponibiliza Node Linux no PATH. A execução completa em Linux permanece como
 verificação de ambiente da fase 2; a divergência concreta de capitalização foi corrigida.
+
+### F19 — defaults reproduzíveis por migração
+
+Migração nova adiciona default zero aos dois totais de MonthlyDistributorBalance, sem
+reescrever o histórico. Aplicação incremental no banco isolado e replay das 15 migrações
+em outro banco vazio do mesmo cluster passaram. Ambos terminaram sem diferenças em relação
+ao schema Prisma; defaults conferidos no catálogo e prisma validate passou. O banco da
+aplicação não foi acessado nem migrado; a migração acompanha o código para aplicação posterior.
