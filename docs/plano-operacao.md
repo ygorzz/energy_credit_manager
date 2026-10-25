@@ -14,10 +14,11 @@ as correções e a suíte da API existente não estiverem concluídas.
 Reproduções pontuais durante a auditoria/correção são verificações de diagnóstico;
 a suíte completa e permanente pertence à fase 2 abaixo.
 
-Estado atual: F01 e F16 concluídos e commitados pelo responsável (`0456a14` e `e1df062`).
-O lote 1.1 está encerrado. Seguir para F02 no lote 1.2 com a autorização de executar e
-commitar achado por achado, sem revisões intermediárias, exclusivamente durante a fase 1.
-Ao concluir a fase 1, parar e solicitar revisão antes de iniciar qualquer fase seguinte.
+Estado atual: F01–F21 implementados e commitados, encerrando os lotes 1.1–1.5.
+F01/F16 foram commitados pelo responsável; as outras 19 correções têm commits individuais.
+Verificações e limitações estão em [progresso-fase1.md](progresso-fase1.md).
+Aguardar revisão e aceite do responsável. Não iniciar testes permanentes da fase 2 ou
+requisitos da fase 3 sem nova autorização após essa avaliação.
 
 ## 2. Memória das decisões de produto
 
@@ -181,9 +182,9 @@ a infraestrutura da fase 2. Não reintroduzir contratos, cobranças ou métricas
 
 ## 7. Próxima ação ao retomar
 
-F01 e F16 foram commitados pelo responsável (`0456a14`, `e1df062`). Seguir a partir de
-F02, mantendo um commit por achado e a ordem dos lotes, sem revisões intermediárias.
-O progresso da execução e as verificações ficam em [progresso-fase1.md](progresso-fase1.md).
-Ao final da fase 1, parar para revisão do responsável antes de qualquer nova fase.
-Atualizar a auditoria com status e evidência de cada correção, preservando a descrição original
-do problema. Decisões adicionais de negócio devem ser registradas aqui antes de mudar regras.
+Solicitar e aguardar revisão do código da fase 1, com base nos commits e nas evidências em
+[progresso-fase1.md](progresso-fase1.md). As implementações F01–F21 estão concluídas;
+as fases 2 e 3 não foram iniciadas. Tratar eventuais ajustes dessa revisão antes de avançar.
+Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
+O banco existente não foi auditado nem migrado. R01/R02 e decisões D01–D03 continuam explícitos
+na auditoria; nenhuma correção de dados ou nova regra de produto foi aplicada por suposição.

@@ -3,6 +3,8 @@
 Execução sequencial, um commit por achado. Autorização para seguir sem revisão intermediária
 válida somente nesta fase. Parar ao concluí-la; não implementar fases 2 ou 3 sem avaliação.
 
+Estado de entrega: F01–F21 implementados e commitados; aguardando revisão do responsável.
+
 F01: concluído pelo responsável em `0456a14`.
 F16: concluído pelo responsável em `e1df062`.
 
@@ -171,3 +173,49 @@ Passaram check, build, lint, format:check e biome:check, sem diagnósticos. O Bi
 Após a normalização, 24 requisições HTTP reais passaram com autenticação, bloqueios de
 vínculo, POST/PATCH/DELETE energéticos, percentuais padrão/null/decimal, rejeições e parsing;
 as somas e disponibilidades do banco isolado permaneceram consistentes. Lote 1.5 encerrado.
+
+## Commits para revisão
+
+| Lote | Achado | Commit |
+| --- | --- | --- |
+| 1.1 | F01 | `0456a14` |
+| 1.1 | F16 | `e1df062` |
+| 1.2 | F02 | `e95c73a` |
+| 1.2 | F03 | `72b1484` |
+| 1.2 | F04 | `b483aaa` |
+| 1.2 | F13 | `4f07a34` |
+| 1.3 | F05 | `2b31e1f` |
+| 1.3 | F06 | `b1fb85d` |
+| 1.3 | F07 | `43ff1f6` |
+| 1.3 | F08 | `4963d80` |
+| 1.3 | F09 | `eeba794` |
+| 1.4 | F10 | `39e33c1` |
+| 1.4 | F11 | `f5cf64d` |
+| 1.4 | F12 | `273aa17` |
+| 1.4 | F14 | `0d019c0` |
+| 1.4 | F15 | `912adb1` |
+| 1.4 | F17 | `7174091` |
+| 1.5 | F18 | `8fa914e` |
+| 1.5 | F19 | `3ed5015` |
+| 1.5 | F20 | `9978e82` |
+| 1.5 | F21 | `85fcbda` |
+
+## Limites e passagem de fase
+
+- Verificações com banco usaram exclusivamente PostgreSQL 18 descartável em loopback,
+  porta 55439, com bancos `phase1` e `phase1_replay`. O cluster foi encerrado ao final.
+- Não houve acesso ou migração do banco configurado para a aplicação. A migração F19
+  está versionada, mas sua aplicação nesse ambiente ainda precisa ser realizada.
+- A execução Linux completa não foi possível no runtime disponível. Imports próprios
+  foram comparados com o Git, e tipos/build passaram no Windows. Validar Linux na fase 2.
+- R01/R02 exigem conhecer migrações aplicadas e dados existentes antes de qualquer reparo.
+  O replay vazio não demonstra segurança de upgrades históricos com tabelas populadas.
+- D01 permanece para decisão de produto: alterações de geração preservam os percentuais
+  históricos gravados, como antes; não houve recálculo silencioso. Quantidades e saldos
+  são ajustados transacionalmente. D02/D03 também não receberam regras novas.
+- Nenhuma suíte permanente, dashboard, consumo ou acesso novo de cliente foi implementado.
+  Os requisitos aprovados continuam preservados em `requisitos-mvp.md`.
+
+Próxima ação: revisão e avaliação do código pelo responsável. Aguardar autorização antes
+de iniciar a fase 2. Os diagnósticos desta fase não representam cobertura automatizada de
+todas as 31 rotas.

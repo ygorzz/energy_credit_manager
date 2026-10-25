@@ -1,9 +1,13 @@
 # Auditoria técnica da API atual
 
-Data: 24/10/2026. Estado: F01/F16 commitados; demais correções da fase 1 em execução.
+Data: 24/10/2026. Estado: F01–F21 implementados e commitados; aguardando revisão da fase 1.
 
 Consultar [progresso-fase1.md](progresso-fase1.md) para o estado das correções e evidências.
 As descrições abaixo preservam a situação encontrada na auditoria inicial.
+
+O acompanhamento contém a correspondência achado/commit, as verificações reais no PostgreSQL
+isolado e os limites da entrega. Build Linux e análise do banco existente permanecem pendentes;
+não inferir que riscos R01/R02 ou decisões D01–D03 foram resolvidos pelas correções.
 
 Sequência de trabalho: [plano de operação](plano-operacao.md).
 Requisitos futuros preservados: [MVP de métricas energéticas](requisitos-mvp.md).
