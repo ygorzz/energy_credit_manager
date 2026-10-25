@@ -1,4 +1,5 @@
 import { Prisma } from '../../db/generated/prisma/client.js';
+import { db } from '../../db/prisma.js';
 import BadRequestError from '../../errors/bad-request.error.js';
 import ConflictError from '../../errors/conflict.error.js';
 import NotFoundError from '../../errors/not-found.error.js';
@@ -56,9 +57,29 @@ export default class ClientCompanyService {
       if (data.cnpj !== undefined) cnpjValidation(data.cnpj);
 
       const newData = Object.fromEntries(Object.entries(data).filter((e) => e[1] !== undefined));
-      return await this.clientCompanyRepository.update(id, newData);
+      return await db.$transaction(
+        async (tx) => {
+          const company = await this.clientCompanyRepository.findById(id, tx);
+          if (!company) throw new NotFoundError('Client company not found');
+          // Existing allocations prevent changing the distributor of historical balances.
+          if (
+            data.distributorId !== undefined &&
+            data.distributorId !== company.distributorId &&
+            (await this.clientCompanyRepository.hasCreditAllocations(id, tx))
+          ) {
+            throw new ConflictError(
+              'Cannot change distributor of a company with allocation history',
+            );
+          }
+          return await this.clientCompanyRepository.update(id, newData, tx);
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2034') {
+          throw new ConflictError('The company changed concurrently. Please retry.');
+        }
         if (error.code === 'P2025') {
           throw new NotFoundError('Client company not found');
         }
@@ -75,7 +96,6 @@ export default class ClientCompanyService {
 }
 
 function cnpjValidation(cnpj: string): void {
-
   if (cnpj.length !== 14 || !/^\d{14}$/.test(cnpj) || /^(\d)\1{13}$/.test(cnpj)) {
     throw new BadRequestError('Invalid CNPJ');
   }

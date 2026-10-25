@@ -20,3 +20,10 @@ Troca com geração existente retorna 409; mesmo vínculo e alterações de outr
 permitidos. O repositório aceita o cliente da transação. Conflitos concorrentes retornam 409.
 Verificados cinco cenários em memória e a checagem de tipos. Proteção concorrente integrada
 com os lançamentos energéticos será exercitada após F04, que fecha as transações da geração.
+
+### F03 — bloqueio da troca de distribuidora da empresa
+
+Transação Serializable verifica o cadastro e suas alocações antes de permitir a troca.
+Histórico existente bloqueia a mudança com 409; mesmo vínculo e outros campos continuam
+permitidos. Cinco cenários em memória e checagem de tipos passaram. Não há transferência
+retroativa de saldos ou reatribuição de alocações antigas.

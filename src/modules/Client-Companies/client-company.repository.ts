@@ -32,8 +32,17 @@ export default class ClientCompanyRepository {
     });
   };
 
-  public update = async (id: string, data: Prisma.ClientCompanyUncheckedUpdateInput) => {
-    return await db.clientCompany.update({
+  public hasCreditAllocations = async (id: string, tx: Prisma.TransactionClient) => {
+    return (await tx.creditAllocation.count({ where: { clientCompanyId: id } })) > 0;
+  };
+
+  public update = async (
+    id: string,
+    data: Prisma.ClientCompanyUncheckedUpdateInput,
+    tx?: Prisma.TransactionClient,
+  ) => {
+    const prisma = tx ?? db;
+    return await prisma.clientCompany.update({
       where: {
         id,
       },
