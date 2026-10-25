@@ -42,7 +42,10 @@ export default class CreditAllocationService {
             await this.monthlyDistributorBalanceRepository.findById(distributorId, year, month, tx);
           // Only create a credit allocation if at least one monthly generation was created
           if (!monthlyDistributorBalanceRecord)
-            throw new NotFoundError('Unable to allocate credits. No energy input yet.');
+            throw new BadRequestError(
+              'Unable to allocate credits. No positive generation in this period.',
+            );
+          this.validateGeneration(monthlyDistributorBalanceRecord.totalEnergyGeneratedMwh);
 
           // 3 - Checks if there is avaliable energy to allocate
           const energyToBeAllocated = new Prisma.Decimal(data.energyAllocatedMwh);
@@ -222,6 +225,7 @@ export default class CreditAllocationService {
               );
           if (!targetBalance)
             throw new NotFoundError('Target monthly distributor balance not found');
+          this.validateGeneration(targetBalance.totalEnergyGeneratedMwh);
 
           const delta = newEnergy.sub(oldEnergy);
           const requiredEnergy = sameBalance ? delta : newEnergy;
@@ -305,6 +309,15 @@ export default class CreditAllocationService {
       throw error;
     }
   };
+
+  private validateGeneration(total: Prisma.Decimal): void {
+    // Require positive generation before division, including zero-energy allocations.
+    if (!total.isFinite() || total.lessThanOrEqualTo(0)) {
+      throw new BadRequestError(
+        'Unable to allocate credits. No positive generation in this period.',
+      );
+    }
+  }
 
   private validatePercentage(
     energy: Prisma.Decimal,

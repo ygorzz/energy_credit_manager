@@ -63,3 +63,11 @@ conferindo a gravação do percentual e os saldos. Checagem de tipos passou.
 Comparação usa Decimal com duas casas e ROUND_HALF_UP. POST/PATCH de 1/3 e 2/3,
 rejeição de percentual divergente e a fronteira de 0,005% passaram no PostgreSQL isolado.
 A quantidade informada não é arredondada para forçar correspondência. Tipos passaram.
+
+### F08 — base de geração positiva
+
+Criação sem geração ou com total zero retorna 400 com mensagem explícita, antes de dividir
+ou validar disponibilidade. O PATCH também exige base positiva. Verificadas quantidades zero
+e positiva sobre bases ausentes/zero, além de alocação zero válida sobre base positiva,
+no PostgreSQL isolado. Tipos passaram. Mudança de contrato: ausência de geração no POST
+passa de 404 para 400; referências de empresa e outros recursos continuam com seu tratamento.
