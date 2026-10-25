@@ -31,6 +31,10 @@ export default class UserService {
     try {
       return await this.userRepository.delete(id);
     } catch (error) {
+      // A concurrent write can invalidate the deletion even after the user was found.
+      if (isTransactionConflict(error)) {
+        throw new ConflictError('The user changed concurrently. Please retry.');
+      }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError('User not found');
@@ -72,6 +76,13 @@ export default class UserService {
         throw new ConflictError('The user or company changed concurrently. Please retry.');
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        // Updates must preserve email uniqueness and an existing company reference.
+        if (error.code === 'P2002') {
+          throw new ConflictError('Already exists a user with this email');
+        }
+        if (error.code === 'P2003') {
+          throw new NotFoundError('Client company not found');
+        }
         if (error.code === 'P2025') {
           throw new NotFoundError('User not found');
         }

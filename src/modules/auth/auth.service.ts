@@ -6,6 +6,7 @@ import isTransactionConflict from '../../db/is-transaction-conflict.js';
 import { db } from '../../db/prisma.js';
 import ConflictError from '../../errors/conflict.error.js';
 import ForbiddenError from '../../errors/forbidden.error.js';
+import NotFoundError from '../../errors/not-found.error.js';
 import UnauthorizedError from '../../errors/unauthorized.error.js';
 import type ClientCompanyRepository from '../Client-Companies/client-company.repository.js';
 import type { RegisterUserDTO } from '../Users/user.dto.js';
@@ -38,6 +39,10 @@ export default class AuthService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ConflictError('Already exists a user with this email');
+        }
+        // The company must still exist when the user is persisted.
+        if (error.code === 'P2003') {
+          throw new NotFoundError('Client company not found');
         }
       }
       throw error;

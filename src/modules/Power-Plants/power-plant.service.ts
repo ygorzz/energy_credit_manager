@@ -19,6 +19,10 @@ export default class PowerPlantService {
         if (error.code === 'P2002') {
           throw new ConflictError('Already exists a power plant with this name');
         }
+        // A plant can only be created under an existing distributor.
+        if (error.code === 'P2003') {
+          throw new NotFoundError('Distributor not found in the database');
+        }
       }
       throw error;
     }
@@ -47,6 +51,10 @@ export default class PowerPlantService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new NotFoundError('Power plant not found');
+        }
+        // Generation history prevents deleting the plant that owns it.
+        if (error.code === 'P2003') {
+          throw new ConflictError('Cannot delete a power plant with generation history');
         }
       }
       throw error;

@@ -99,3 +99,22 @@ isolado; todos retornaram o registro e preservaram os saldos. Tipos passaram.
 PATCH e DELETE respondem 200 com o corpo existente; POST permanece 201. Os três métodos
 foram exercitados por HTTP com autenticação e PostgreSQL isolado, conferindo também o
 registro atualizado e os saldos. Tipos passaram.
+
+### F14 — erros esperados de persistência
+
+Por decisão do responsável na revisão de 25/10/2026, os erros são tratados diretamente
+nos `catch` dos serviços de distribuidoras, usinas, empresas, usuários e registro de usuário.
+O helper compartilhado `rethrowPersistenceError` foi removido. Unicidade (`P2002`) retorna
+409; registro ausente em alteração/exclusão (`P2025`) retorna 404; referência inexistente
+em criação/alteração (`P2003`) retorna 404; exclusão impedida por vínculos (`P2003`) retorna
+409. Cada operação trata os códigos pertinentes ao schema e às consultas que executa,
+com mensagens específicas por entidade. Usuários não possuem dependentes que impeçam
+exclusão no schema atual; distribuidoras não recebem referências externas na criação.
+Conflitos transacionais continuam 409, reconhecidos por `isTransactionConflict`.
+Erros de negócio e falhas desconhecidas são relançados sem substituição.
+
+A implementação inicial foi exercitada com violações reais no PostgreSQL isolado.
+A revisão sem helper passou em 133 cenários de diagnóstico em memória, cobrindo as
+12 operações alteradas, status/mensagens pelo handler HTTP, ambos os formatos de conflito,
+retornos de sucesso e preservação de erros. Esses cenários não acessaram o banco e não
+substituem a suíte permanente da fase 2. Tipos, build, lint, formatação e Biome passaram.

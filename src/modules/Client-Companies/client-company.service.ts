@@ -63,6 +63,10 @@ export default class ClientCompanyService {
         if (error.code === 'P2025') {
           throw new NotFoundError('Client company not found');
         }
+        // Allocation history prevents deleting the company that owns it.
+        if (error.code === 'P2003') {
+          throw new ConflictError('Cannot delete a client company with allocation history');
+        }
       }
       throw error;
     }
