@@ -160,3 +160,14 @@ também na disputa pela criação. Falhas não registram valores sensíveis.
 Verificados criação, hash, reexecução com senha diferente/ausente, preservação de INACTIVE,
 configuração ausente e colisão com CLIENT no PostgreSQL isolado. A CLI Prisma passou duas
 vezes com PATH equivalente ao npx. Tipos da aplicação e do seed e Biome passaram.
+
+### F21 — formatação, imports e orientações
+
+Normalizados os arquivos próprios com Biome, sem mudança das regras de negócio. Código
+gerado e o diretório de diagnóstico descartável ficam fora dessa ferramenta. Orientação
+de bootstrap no AGENTS alinhada ao seed configurável, e acesso a DATABASE_URL padronizado.
+Passaram check, build, lint, format:check e biome:check, sem diagnósticos. O Biome verificou
+63 arquivos próprios/configurações e o lint verificou 55 arquivos de src.
+Após a normalização, 24 requisições HTTP reais passaram com autenticação, bloqueios de
+vínculo, POST/PATCH/DELETE energéticos, percentuais padrão/null/decimal, rejeições e parsing;
+as somas e disponibilidades do banco isolado permaneceram consistentes. Lote 1.5 encerrado.

@@ -5,4 +5,3 @@ export default class BadRequestError extends BaseError {
     super(message, 400);
   }
 }
-

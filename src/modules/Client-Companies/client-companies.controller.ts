@@ -63,7 +63,10 @@ export default class ClientCompaniesController {
       const idValidated = uuidSchema.parse(req.params);
       const validatedData = updateClientCompanySchema.parse(req.body);
       const { id } = idValidated;
-      const clientCompanyUpdated = await this.clientCompanyService.updateClientCompany(id, validatedData);
+      const clientCompanyUpdated = await this.clientCompanyService.updateClientCompany(
+        id,
+        validatedData,
+      );
       return res.status(200).json({
         message: 'Client company updated successfully!',
         clientCompanyUpdated,

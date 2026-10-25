@@ -1,49 +1,49 @@
-import express from "express";
-import auth from "../../middlewares/auth.middleware.js";
-import PowerPlantService from "./power-plant.service.js";
-import PowerPlantsController from "./power-plants.controller.js";
-import authorize from "../../middlewares/authorize.middleware.js";
-import { UserRoles } from "../../db/generated/prisma/enums.js";
-import * as rateLimit from "../../middlewares/rate-limit.middleware.js";
-import PowerPlantRepository from "./power-plant.repository.js";
+import express from 'express';
+import { UserRoles } from '../../db/generated/prisma/enums.js';
+import auth from '../../middlewares/auth.middleware.js';
+import authorize from '../../middlewares/authorize.middleware.js';
+import * as rateLimit from '../../middlewares/rate-limit.middleware.js';
+import PowerPlantRepository from './power-plant.repository.js';
+import PowerPlantService from './power-plant.service.js';
+import PowerPlantsController from './power-plants.controller.js';
 
 const routes = express.Router();
 
 const powerPlantsController = new PowerPlantsController(
-  new PowerPlantService(new PowerPlantRepository),
+  new PowerPlantService(new PowerPlantRepository()),
 );
 
 routes
   .get(
-    "/",
+    '/',
     rateLimit.getLimiter,
     auth,
     authorize(UserRoles.ADMIN, UserRoles.ANALYST),
     powerPlantsController.listPowerPlants,
   )
   .get(
-    "/:id",
+    '/:id',
     rateLimit.getLimiter,
     auth,
     authorize(UserRoles.ADMIN, UserRoles.ANALYST),
     powerPlantsController.getPowerPlantById,
   )
   .post(
-    "/",
+    '/',
     rateLimit.creationLimiter,
     auth,
     authorize(UserRoles.ADMIN),
     powerPlantsController.createPowerPlant,
   )
   .delete(
-    "/:id",
+    '/:id',
     rateLimit.deleteLimiter,
     auth,
     authorize(UserRoles.ADMIN),
     powerPlantsController.deletePowerPlant,
   )
   .patch(
-    "/:id",
+    '/:id',
     rateLimit.updateLimiter,
     auth,
     authorize(UserRoles.ADMIN),

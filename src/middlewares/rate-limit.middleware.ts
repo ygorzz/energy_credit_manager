@@ -1,14 +1,10 @@
-import { rateLimit } from "express-rate-limit";
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from 'express';
+import { rateLimit } from 'express-rate-limit';
 
 const WINDOW_IN_MINUTE: number = 1;
 const LIMIT_MESSAGE: string = `Too many requests from this IP. Try again after ${WINDOW_IN_MINUTE} minute`;
 
-type RouteRateLimiter = <P>(
-  req: Request<P>,
-  res: Response,
-  next: NextFunction,
-) => void;
+type RouteRateLimiter = <P>(req: Request<P>, res: Response, next: NextFunction) => void;
 
 function createLimiter(max: number): RouteRateLimiter {
   return rateLimit({

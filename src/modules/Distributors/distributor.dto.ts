@@ -1,12 +1,12 @@
-import z from "zod";
+import z from 'zod';
 
 export const createDistributorSchema = z.object({
   name: z
-    .string("Invalid distributor.")
+    .string('Invalid distributor.')
     .trim()
     .toUpperCase()
-    .min(2, "Name must contain at least 2 characters")
-    .max(50, "Name must contain a maximum of 50 characters"),
+    .min(2, 'Name must contain at least 2 characters')
+    .max(50, 'Name must contain a maximum of 50 characters'),
 });
 
 export const updateDistributorSchema = createDistributorSchema.extend({

@@ -42,6 +42,13 @@ Use two spaces, single quotes, semicolons, trailing commas, and a 100-character 
 
 Follow existing feature directory names and kebab-case filenames such as `power-plant.service.ts`. Use PascalCase classes, camelCase methods, Zod schemas in `*.dto.ts`, and shared error classes for expected failures.
 
+Preserve existing code comments. Delete a comment only when its associated code block is
+also deleted; move it with the corresponding block during refactoring. Write new code
+comments and commit messages in English. Add short comments to the main business rules
+and significant implementation changes, including Phase 1 corrections and all future
+implementations. Summarize the rule or purpose of the block without long explanations
+or line-by-line narration. Preserve existing comment wording.
+
 ## Testing Guidelines
 
 No test runner, `npm test` script, or coverage threshold is configured. Run type, lint, formatting, and build checks before submitting. Manually verify affected endpoints, including validation failures and authorization. For energy calculations, verify monthly balances after create, update, and delete operations. Document verification steps in the PR.
@@ -52,4 +59,4 @@ History uses English messages with `feat:`, `fix:`, and `refactor:` prefixes. Ke
 
 ## Security & Configuration
 
-Configure `DATABASE_URL` and `JWT_SECRET` in a local `.env`; never commit credentials. Commit schema changes with their migrations. Regenerate the Prisma client after schema changes; do not edit or commit generated client files. Review the seed script's fixed administrator credentials before using it outside disposable local databases.
+Configure `DATABASE_URL` and `JWT_SECRET` in a local `.env`; never commit credentials. Commit schema changes with their migrations. Regenerate the Prisma client after schema changes; do not edit or commit generated client files. Configure `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` locally before initial administrative seeding; see `.env.example`. Existing administrator credentials and status are preserved on subsequent runs.
