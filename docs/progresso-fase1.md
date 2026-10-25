@@ -87,3 +87,9 @@ empresas com clientes vinculados. As rotas injetam os repositórios explicitamen
 O DTO de PATCH não reaplica defaults de role/status: alterar só nome preserva o ADMIN.
 Cadastro válido/inválido, troca parcial de perfil, remoção de vínculo, exclusão e concorrência
 foram exercitados no PostgreSQL isolado; nenhum CLIENT órfão. Tipos e Biome passaram.
+
+### F11 — retorno da atualização de geração
+
+O caminho de alteração de quantidade na mesma competência retorna o registro atualizado.
+Verificados mudança de quantidade, atualização sem delta e movimento de mês no PostgreSQL
+isolado; todos retornaram o registro e preservaram os saldos. Tipos passaram.

@@ -157,7 +157,7 @@ export default class MonthlyGenerationService {
             const adjustment = delta.isPositive()
               ? { increment: delta }
               : { decrement: delta.abs() };
-            await this.monthlyGenerationRepository.update(id, newData, tx);
+            const updated = await this.monthlyGenerationRepository.update(id, newData, tx);
             await this.monthlyDistributorBalanceRepository.update(
               distributorId,
               year,
@@ -168,7 +168,8 @@ export default class MonthlyGenerationService {
               },
               tx,
             );
-            return;
+            // Return the persisted generation after quantity adjustments as well.
+            return updated;
           }
           // 4 - If the distributor/month/year are different: remove energy from the old balance
           // if the energy to remove is greater than monthly balance avaliable energy
