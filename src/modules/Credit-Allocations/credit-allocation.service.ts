@@ -319,6 +319,7 @@ export default class CreditAllocationService {
     }
   }
 
+  // Check if percentage corresponds to the energy applied amount
   private validatePercentage(
     energy: Prisma.Decimal,
     total: Prisma.Decimal,

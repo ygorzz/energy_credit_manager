@@ -33,7 +33,7 @@ async function seed() {
     const hashPassword = await bcrypt.hash(password, 10);
     const admin = await db.user.upsert({
       where: { email },
-      // Concurrent bootstrap runs must not overwrite an existing account.
+      // Using upsert with update and create -> Concurrent bootstrap runs must not overwrite an existing account.
       update: {},
       create: { ...data, hashPassword },
     });
@@ -44,6 +44,7 @@ async function seed() {
   }
 }
 
+// Catches any error threw by seed function
 seed().catch(() => {
   // Report invalid configuration without exposing passwords or connection details.
   console.error(

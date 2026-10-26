@@ -1,5 +1,6 @@
 import { Prisma } from './generated/prisma/client.js';
 
+// This function was created to cover the two cases that throw a transaction error (Prisma and Adapters) instead only the P2034 error
 export default function isTransactionConflict(error: unknown): boolean {
   if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034') {
     return true;

@@ -22,6 +22,8 @@ export default function errorHandler(
     });
   }
 
+  // Check and throw personalized errors messages caught by Express express.json() middleware
+  // it happens before reaching the endpoint
   if (error instanceof Error && 'type' in error && 'status' in error) {
     // Preserve 400/413/415 only for known parser error types and matching statuses.
     const parserErrors: Record<string, { status: number; message: string }> = {

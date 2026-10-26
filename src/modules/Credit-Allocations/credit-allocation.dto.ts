@@ -17,8 +17,7 @@ export const createCreditAllocationSchema = z.object({
     .number('Percentage applied must be a number')
     .min(0, 'Percentage applied must be at least 0')
     .max(100, 'Percentage applied must be at most 100')
-    .nullable()
-    .optional(),
+    .nullish(),
 
   energyAllocatedMwh: z
     .number('Energy allocated must be a number')
