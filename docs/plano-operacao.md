@@ -6,8 +6,14 @@ Data: 24/10/2026. Prioridade definida pelo responsável pelo projeto.
 
 1. Auditar a implementação existente e registrar inconsistências.
 2. Corrigir os erros da API atual, preservando as regras de negócio já confirmadas.
-3. Implementar e executar testes automatizados para todas as rotas existentes.
-4. Somente depois implementar os novos requisitos do MVP.
+3. Após o responsável concluir a revisão da fase 1, padronizar os nomes das variáveis
+   nos módulos e endpoints existentes, conforme a tarefa P01 abaixo.
+4. Analisar a possibilidade de abstrair o bloco de código dentro do catch nos services para uma função
+  'reThrowWriteError' em todos os services, conforme a versão antiga da P02. Essa abordagem apenas
+  abstrai todo o código do catch para uma função e não padroniza necessariamente todas as mensagens de erros, como
+  fazia a função deletada 'reThrowPersistenceError'.
+4. Implementar e executar testes automatizados para todas as rotas existentes.
+5. Somente depois implementar os novos requisitos do MVP.
 
 Não iniciar consumo mensal, dashboards, novos filtros ou endpoints do cliente enquanto
 as correções e a suíte da API existente não estiverem concluídas.
@@ -39,9 +45,30 @@ Fonte de problemas atuais: [auditoria-tecnica.md](auditoria-tecnica.md).
   utilizados e saldo acumulado do cliente. Operação diária é evolução posterior.
 - Preservar a matriz atual de ADMIN/ANALYST/CLIENT durante as correções; não liberar rotas
   ao CLIENT como atalho para implementar o produto futuro.
+- Orientação de 25/10/2026: preservar comentários existentes, removendo-os somente se o bloco
+  correspondente também for removido. Em refatorações, acompanhar o bloco com seu comentário.
+  Comentar de forma breve, em inglês, as principais regras e alterações da fase 1 e de toda implementação
+  futura; resumir a finalidade do bloco sem explicações longas.
+  Comentários novos e mensagens de commit devem ser escritos em inglês; preservar os comentários originais.
+- Em 25/10/2026, o responsável priorizou como implementação futura o fluxo dedicado de
+  transferência de usina com histórico entre distribuidoras (EF01, seção 11 dos requisitos).
+  Definir vigência e tratamento dos históricos, alocações e saldos antes de implementar.
+  O bloqueio F02 permanece até esse fluxo existir; a sequência das fases continua igual.
 
 Esta é memória persistida no repositório. Novas sessões devem ler este plano e os documentos
 referenciados antes de retomar tarefas; não depender somente do histórico do chat.
+
+### Regra permanente para dúvidas delegadas a subagentes
+
+Definida pelo responsável em 25/10/2026. Sempre que ele solicitar a delegação de uma dúvida:
+
+- Fornecer ao subagente o contexto necessário dos requisitos e das decisões já tomadas.
+- Restringir a tarefa à análise, sem alterar arquivos.
+- Manter a investigação detalhada no contexto do subagente.
+- Trazer ao chat principal somente a conclusão, a justificativa resumida e eventuais impactos
+  nos requisitos, no plano de operação ou no desenvolvimento.
+
+Aplicar a regra a cada solicitação desse tipo; ela não autoriza delegações por iniciativa própria.
 
 ## 3. Fase 0 — Auditoria da base existente
 
@@ -116,6 +143,45 @@ Aceite da fase: todos os F01–F21 resolvidos ou, para dependência externa espe
 avaliados com o responsável; verificações apropriadas concluídas e sem divergências de saldo
 nos cenários exercitados. Não considerar risco pendente como corrigido apenas por leitura de código.
 
+### P01 — Padronização de variáveis após a revisão da fase 1
+
+Status: **a fazer**, solicitado pelo responsável em 25/10/2026. Executar logo após ele
+concluir a revisão da fase 1 e tratar os ajustes decorrentes, antes de iniciar a fase 2.
+Não executar durante a revisão em andamento.
+
+- Revisar todos os módulos e endpoints existentes para uniformizar os nomes das variáveis
+  locais equivalentes, incluindo os trechos que não receberam essa padronização na fase 1.
+- Preferir nomes curtos e claros no contexto, como `generation` para o registro consultado
+  e `deleted` para o resultado de uma exclusão, em lugar de nomes como
+  `monthlyGenerationFound` e `monthlyGenerationDeleted`.
+- Aplicar o mesmo critério às demais entidades e operações; manter nomes específicos quando
+  necessários para distinguir registros, origens e destinos no mesmo escopo.
+- Limitar a alteração à nomenclatura interna, preservando comportamento, contratos da API,
+  campos persistidos e comentários existentes, conforme a regra de preservação de comentários.
+- Conferir o diff e executar as verificações de tipos, lint, formatação e build.
+
+Aceite: nomenclatura consistente entre operações equivalentes em todos os módulos,
+sem mudanças funcionais. Esta tarefa não inicia a suíte permanente nem os requisitos do MVP;
+a autorização de commits automáticos exclusiva da fase 1 não se estende a ela.
+
+### P02 — Proposta substituída pela revisão da F14
+
+Status: **substituída**, por decisão do responsável em 25/10/2026. A proposta anterior
+de centralizar tratamentos e extrair novos métodos `rethrowWriteError` não será executada.
+O responsável solicitou a reimplementação da F14 durante a revisão, incorporada ao commit
+correspondente: remover `rethrowPersistenceError` e tratar os erros pertinentes diretamente
+nos `catch` dos serviços, com mensagens específicas de cada operação.
+
+Preservar os status 409 para unicidade/dependências/conflitos transacionais e 404 para
+registros/referências inexistentes, conforme a operação. Erros de negócio e desconhecidos
+continuam sendo propagados. Manter `isTransactionConflict`, que apenas identifica os dois
+formatos de conflito. O método privado já existente em geração antecede a F14 e não foi
+alterado nesta revisão. Não reintroduzir o tradutor compartilhado como refatoração futura.
+
+Verificações desta revisão constam em [progresso-fase1.md](progresso-fase1.md).
+Os mapeamentos pertinentes devem integrar a suíte permanente da fase 2. P01 continua pendente;
+esta revisão não autoriza iniciar fases posteriores.
+
 ## 5. Fase 2 — Testes automatizados de todas as rotas existentes
 
 ### Ferramentas e isolamento
@@ -180,11 +246,20 @@ Somente após o aceite das fases 1 e 2, seguir o documento de requisitos preserv
 Cada funcionalidade nova passa a incluir seus testes desde a implementação, aproveitando
 a infraestrutura da fase 2. Não reintroduzir contratos, cobranças ou métricas financeiras.
 
+Na retomada do planejamento de funcionalidades, detalhar também a evolução prioritária
+EF01: transferência de usina com histórico entre distribuidoras, descrita na seção 11 de
+[requisitos-mvp.md](requisitos-mvp.md). Sua posição na entrega será definida nesse planejamento,
+após a fase 2. A necessidade do fluxo foi confirmada; as regras temporais e retroativas
+ainda precisam de definição. Não liberar a troca por simples remoção do bloqueio F02.
+
 ## 7. Próxima ação ao retomar
 
 Solicitar e aguardar revisão do código da fase 1, com base nos commits e nas evidências em
 [progresso-fase1.md](progresso-fase1.md). As implementações F01–F21 estão concluídas;
 as fases 2 e 3 não foram iniciadas. Tratar eventuais ajustes dessa revisão antes de avançar.
+Após a conclusão da revisão pelo responsável, executar P01 (padronização de variáveis)
+antes de iniciar a fase 2, que continua dependendo de autorização para prosseguir.
+P02 foi substituída pela revisão da F14; não executar sua proposta anterior de centralização.
 Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
 O banco existente não foi auditado nem migrado. R01/R02 e decisões D01–D03 continuam explícitos
 na auditoria; nenhuma correção de dados ou nova regra de produto foi aplicada por suposição.

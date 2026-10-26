@@ -25,6 +25,15 @@ unrelated changes. Stop after Phase 1 and request the user's code review and app
 starting Phase 2 or any later work. This exception does not authorize automatic advancement
 or commits beyond Phase 1.
 
+## Delegated Questions
+
+Whenever the user asks to delegate a question to a subagent, provide the context needed
+about the requirements and decisions already made. Scope the subagent task to analysis
+only, without modifying files. Keep the detailed investigation in the subagent's context.
+Bring back to the main chat only the conclusion, a brief justification, and any impact
+on requirements, the operation plan, or development. Apply this rule to every such request;
+it does not authorize delegation unless the user requests it.
+
 ## Build, Test, and Development Commands
 
 - `npm ci`: install dependencies from the lockfile.

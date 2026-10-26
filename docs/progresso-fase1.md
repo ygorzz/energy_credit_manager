@@ -219,3 +219,20 @@ as somas e disponibilidades do banco isolado permaneceram consistentes. Lote 1.5
 Próxima ação: revisão e avaliação do código pelo responsável. Aguardar autorização antes
 de iniciar a fase 2. Os diagnósticos desta fase não representam cobertura automatizada de
 todas as 31 rotas.
+
+## Ajustes de revisão — comentários (25/10/2026)
+
+Por solicitação do responsável, comentários dos blocos mantidos foram restaurados após a
+reorganização da geração e da autenticação. Acrescentadas explicações breves, em inglês, às principais
+regras e correções da fase 1, incluindo vínculos históricos, transações, precisão, percentuais,
+usuários, erros, ordenação e bootstrap. A orientação de preservação e comentários curtos
+para implementações futuras está registrada no AGENTS e na memória do plano de operação.
+Alterações restritas a comentários e documentação; nenhuma regra executável mudou.
+Tipos, build, lint, format:check e biome:check passaram. A fase 2 continua aguardando aceite.
+
+Em 25/10/2026, o responsável autorizou incorporar os comentários em inglês aos commits dos
+respectivos achados. Os 23 commits da sequência foram reconstruídos preservando autoria,
+mensagens e código executável; os hashes da tabela de revisão foram atualizados.
+O histórico anterior está preservado em `codex/phase1-before-comments-20261025`.
+Consultar [mapa-commits-fase1.md](mapa-commits-fase1.md) para a correspondência entre hashes.
+O remoto não foi atualizado. As demais alterações documentais em revisão permanecem separadas.

@@ -285,3 +285,35 @@ Fora do escopo:
 
 A evolução para dados diários será tratada posteriormente. Este MVP não exige migração
 antecipada dos lançamentos mensais para uma estrutura diária.
+
+## 11. Implementações futuras priorizadas
+
+### EF01 — Transferência de usina com histórico entre distribuidoras
+
+Registrado em 25/10/2026 por solicitação do responsável. Prioridade alta.
+
+Disponibilizar ao administrador um fluxo próprio para transferir uma usina que já possui
+gerações registradas para outra distribuidora, preservando a integridade dos históricos,
+das alocações existentes e dos saldos operacionais de origem e destino.
+
+A F02 mantém o bloqueio dessa troca pelo PATCH cadastral enquanto o fluxo dedicado não
+for implementado. Esse bloqueio é a proteção atual, não a solução definitiva de transferência.
+
+Antes da implementação, definir:
+
+- A competência de vigência e se o fluxo atenderá mudança futura, correção retroativa ou ambas.
+- Como representar o vínculo da usina em cada período, sem reatribuir silenciosamente o histórico.
+- O tratamento de gerações e alocações já existentes, inclusive quando a mudança afetar
+  disponibilidade ou a base dos percentuais. Não presumir recálculo automático de percentuais.
+
+O fluxo deve apresentar os impactos antes da confirmação, registrar responsável, origem,
+destino e vigência, e aplicar conjuntamente os ajustes necessários. Deve impedir disponibilidade
+negativa e alterações parciais, inclusive sob concorrência. Consultas e correções/exclusões
+posteriores de geração precisam respeitar a distribuidora correspondente ao período.
+
+O aceite deverá cobrir transferência com histórico, períodos anteriores e posteriores à
+vigência, alocações existentes, falta de disponibilidade, correções após transferência,
+concorrência e rollback. Os resultados esperados dependerão das regras de vigência aprovadas.
+
+Esta é uma implementação futura a detalhar após a fase 2, sem alterar a sequência atual
+de revisão das correções, testes das rotas existentes e implementação dos requisitos.
