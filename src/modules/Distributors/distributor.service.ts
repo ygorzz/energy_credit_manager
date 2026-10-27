@@ -30,11 +30,11 @@ export default class DistributorService {
   };
 
   public getDistributorById = async (id: string) => {
-    const distributorFound = await this.distributorRepository.findById(id);
+    const distributor = await this.distributorRepository.findById(id);
 
-    if (!distributorFound) throw new NotFoundError('Distributor not found');
+    if (!distributor) throw new NotFoundError('Distributor not found');
 
-    return distributorFound;
+    return distributor;
   };
 
   public deleteDistributor = async (id: string) => {

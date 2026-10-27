@@ -20,11 +20,11 @@ export default class UserService {
   };
 
   public getUserById = async (id: string) => {
-    const userFound = await this.userRepository.findById(id);
+    const user = await this.userRepository.findById(id);
 
-    if (!userFound) throw new NotFoundError('User not found');
+    if (!user) throw new NotFoundError('User not found');
 
-    return userFound;
+    return user;
   };
 
   public deleteUser = async (id: string) => {
@@ -46,7 +46,9 @@ export default class UserService {
 
   public updateUser = async (id: string, data: UpdateUserDTO) => {
     try {
-      let newData = Object.fromEntries(Object.entries(data).filter((e) => e[1] !== undefined));
+      let newData = Object.fromEntries(
+        Object.entries(data).filter((entry) => entry[1] !== undefined),
+      );
 
       if (newData.password) {
         const hashPassword = await bcrypt.hash(newData.password, 10);

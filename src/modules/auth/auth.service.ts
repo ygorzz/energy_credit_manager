@@ -50,17 +50,17 @@ export default class AuthService {
   };
 
   public login = async (data: LoginDTO) => {
-    const userFound = await this.userRepository.findByEmail(data.email);
-    if (!userFound) throw new UnauthorizedError('Invalid email or password');
+    const user = await this.userRepository.findByEmail(data.email);
+    if (!user) throw new UnauthorizedError('Invalid email or password');
 
-    const passwordIsValid = await bcrypt.compare(data.password, userFound.hashPassword);
+    const passwordIsValid = await bcrypt.compare(data.password, user.hashPassword);
     if (!passwordIsValid) throw new UnauthorizedError('Invalid email or password');
 
-    if (userFound.status !== 'ACTIVE')
+    if (user.status !== 'ACTIVE')
       throw new ForbiddenError('Your account is inactive. Please contact the administrator.');
 
     // send userId and userRole as token payload
-    const token = jwt.sign({ id: userFound.id, role: userFound.role }, env.JWT_SECRET, {
+    const token = jwt.sign({ id: user.id, role: user.role }, env.JWT_SECRET, {
       expiresIn: '1h',
     });
 

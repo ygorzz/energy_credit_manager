@@ -11,11 +11,14 @@ import type PowerPlantService from './power-plant.service.js';
 export default class PowerPlantsController {
   constructor(private powerPlantService: PowerPlantService) {}
 
+  // Preserve response keys while using concise local result names.
   public createPowerPlant = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = createPowerPlantSchema.parse(req.body);
-      const newPowerPlant = await this.powerPlantService.createPowerPlant(validatedData);
-      return res.status(201).json({ message: 'Power Plant created successfully!', newPowerPlant });
+      const created = await this.powerPlantService.createPowerPlant(validatedData);
+      return res
+        .status(201)
+        .json({ message: 'Power Plant created successfully!', created });
     } catch (error) {
       next(error);
     }
@@ -24,8 +27,8 @@ export default class PowerPlantsController {
   public listPowerPlants = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = listPowerPlantsSchema.parse(req.query);
-      const powerPlants = await this.powerPlantService.listPowerPlants(page, limit);
-      return res.status(200).json(powerPlants);
+      const plants = await this.powerPlantService.listPowerPlants(page, limit);
+      return res.status(200).json(plants);
     } catch (error) {
       next(error);
     }
@@ -33,10 +36,10 @@ export default class PowerPlantsController {
 
   public getPowerPlantById = async (req: Request<IdParams>, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const powerPlantFound = await this.powerPlantService.getPowerPlantById(id);
-      return res.status(200).json(powerPlantFound);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const plant = await this.powerPlantService.getPowerPlantById(id);
+      return res.status(200).json(plant);
     } catch (error) {
       next(error);
     }
@@ -45,12 +48,12 @@ export default class PowerPlantsController {
   // types the Request with the IdParams type for id: string
   public deletePowerPlant = async (req: Request<IdParams>, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const powerPlantDeleted = await this.powerPlantService.deletePowerPlant(id);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const deleted = await this.powerPlantService.deletePowerPlant(id);
       return res.status(200).json({
         message: 'Power plant deleted successfully!',
-        powerPlantDeleted,
+        deleted,
       });
     } catch (error) {
       next(error);
@@ -59,13 +62,13 @@ export default class PowerPlantsController {
 
   public updatePowerPlant = async (req: Request<IdParams>, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
       const validatedData = updatePowerPlantSchema.parse(req.body);
-      const powerPlantUpdated = await this.powerPlantService.updatePowerPlant(id, validatedData);
+      const updated = await this.powerPlantService.updatePowerPlant(id, validatedData);
       return res.status(200).json({
         message: 'Power plant updated successfully!',
-        powerPlantUpdated,
+        updated,
       });
     } catch (error) {
       next(error);

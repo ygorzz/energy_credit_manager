@@ -27,7 +27,7 @@ export default class MonthlyGenerationService {
           // 1 - Get the distributorId for upsert monthly distributor balance
           const plant = await this.powerPlantRepository.findById(data.powerPlantId, tx);
           if (!plant) throw new NotFoundError('Power plant id not found');
-          const generation = await this.monthlyGenerationRepository.create(data, tx);
+          const created = await this.monthlyGenerationRepository.create(data, tx);
           // 2 - Creates/updates the monthly distributor balance record
           await this.monthlyDistributorBalanceRepository.upsert(
             {
@@ -40,7 +40,7 @@ export default class MonthlyGenerationService {
             },
             tx,
           );
-          return generation;
+          return created;
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );

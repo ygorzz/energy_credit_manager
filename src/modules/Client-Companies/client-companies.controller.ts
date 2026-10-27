@@ -10,13 +10,14 @@ import type ClientCompanyService from './client-company.service.js';
 export default class ClientCompaniesController {
   constructor(private clientCompanyService: ClientCompanyService) {}
 
+  // Preserve response keys while using concise local result names.
   public createClientCompany = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = createClientCompanySchema.parse(req.body);
-      const newClientCompany = await this.clientCompanyService.createClientCompany(validatedData);
+      const created = await this.clientCompanyService.createClientCompany(validatedData);
       return res.status(201).json({
         message: 'Client Company created succesfully!',
-        newClientCompany,
+        created,
       });
     } catch (error) {
       next(error);
@@ -26,8 +27,8 @@ export default class ClientCompaniesController {
   public listClientCompanies = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = listClientCompaniesSchema.parse(req.query);
-      const clientCompanies = await this.clientCompanyService.listClientCompanies(page, limit);
-      return res.status(200).json(clientCompanies);
+      const companies = await this.clientCompanyService.listClientCompanies(page, limit);
+      return res.status(200).json(companies);
     } catch (error) {
       next(error);
     }
@@ -35,10 +36,10 @@ export default class ClientCompaniesController {
 
   public getClientCompanyById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const clientCompanyFound = await this.clientCompanyService.getClientCompanyById(id);
-      return res.status(200).json(clientCompanyFound);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const company = await this.clientCompanyService.getClientCompanyById(id);
+      return res.status(200).json(company);
     } catch (error) {
       next(error);
     }
@@ -46,12 +47,12 @@ export default class ClientCompaniesController {
 
   public deleteClientCompany = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const clientCompanyDeleted = await this.clientCompanyService.deleteClientCompany(id);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const deleted = await this.clientCompanyService.deleteClientCompany(id);
       return res.status(200).json({
         message: 'Client company deleted successfully!',
-        clientCompanyDeleted,
+        deleted,
       });
     } catch (error) {
       next(error);
@@ -60,16 +61,13 @@ export default class ClientCompaniesController {
 
   public updateClientCompany = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
+      const validatedParams = uuidSchema.parse(req.params);
       const validatedData = updateClientCompanySchema.parse(req.body);
-      const { id } = idValidated;
-      const clientCompanyUpdated = await this.clientCompanyService.updateClientCompany(
-        id,
-        validatedData,
-      );
+      const { id } = validatedParams;
+      const updated = await this.clientCompanyService.updateClientCompany(id, validatedData);
       return res.status(200).json({
         message: 'Client company updated successfully!',
-        clientCompanyUpdated,
+        updated,
       });
     } catch (error) {
       next(error);

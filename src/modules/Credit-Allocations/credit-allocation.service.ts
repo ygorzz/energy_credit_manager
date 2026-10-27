@@ -25,41 +25,42 @@ export default class CreditAllocationService {
       return await db.$transaction(
         async (tx) => {
           // 1 - Get the distributorId for update monthly distributor balance
-          const clientCompany = await this.clientCompanyRepository.findById(
-            data.clientCompanyId,
-            tx,
-          );
-          if (!clientCompany) throw new NotFoundError('Client company not found');
+          const company = await this.clientCompanyRepository.findById(data.clientCompanyId, tx);
+          if (!company) throw new NotFoundError('Client company not found');
 
           // 1.1 - Defines percentageApplied
           // On creation, omitted and null percentages use the company default.
-          const percentageApplied = data.percentageApplied ?? clientCompany.allocationPercentage;
+          const percentageApplied = data.percentageApplied ?? company.allocationPercentage;
 
           // 2 - Get monthly energy balance
-          const { distributorId } = clientCompany;
+          const { distributorId } = company;
           const { month, year } = data;
-          const monthlyDistributorBalanceRecord =
-            await this.monthlyDistributorBalanceRepository.findById(distributorId, year, month, tx);
+          const balance = await this.monthlyDistributorBalanceRepository.findById(
+            distributorId,
+            year,
+            month,
+            tx,
+          );
           // Only create a credit allocation if at least one monthly generation was created
-          if (!monthlyDistributorBalanceRecord)
+          if (!balance)
             throw new BadRequestError(
               'Unable to allocate credits. No positive generation in this period.',
             );
-          this.validateGeneration(monthlyDistributorBalanceRecord.totalEnergyGeneratedMwh);
+          this.validateGeneration(balance.totalEnergyGeneratedMwh);
 
           // 3 - Checks if there is avaliable energy to allocate
-          const energyToBeAllocated = new Prisma.Decimal(data.energyAllocatedMwh);
-          if (energyToBeAllocated.greaterThan(monthlyDistributorBalanceRecord.avaliableEnergyMwh)) {
+          const energy = new Prisma.Decimal(data.energyAllocatedMwh);
+          if (energy.greaterThan(balance.avaliableEnergyMwh)) {
             throw new BadRequestError(
               'The requested energy allocated exceeds the available energy.',
             );
           }
           // 4 - Check if the requested percentage is correct
-          const totalEnergyGenerated = monthlyDistributorBalanceRecord.totalEnergyGeneratedMwh;
-          this.validatePercentage(energyToBeAllocated, totalEnergyGenerated, percentageApplied);
+          const totalGeneration = balance.totalEnergyGeneratedMwh;
+          this.validatePercentage(energy, totalGeneration, percentageApplied);
 
           // 5 - Creates new Credit allocation
-          const newCreditAllocation = await this.creditAllocationRepository.create(
+          const created = await this.creditAllocationRepository.create(
             { ...data, percentageApplied },
             tx,
           );
@@ -70,12 +71,12 @@ export default class CreditAllocationService {
             year,
             month,
             {
-              totalEnergyAllocatedMwh: { increment: energyToBeAllocated },
-              avaliableEnergyMwh: { decrement: energyToBeAllocated },
+              totalEnergyAllocatedMwh: { increment: energy },
+              avaliableEnergyMwh: { decrement: energy },
             },
             tx,
           );
-          return newCreditAllocation;
+          return created;
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
@@ -97,16 +98,16 @@ export default class CreditAllocationService {
 
   public listCreditAllocations = async (page: number, limit: number) => {
     const skip = (page - 1) * limit;
-    const creditAllocations = await this.creditAllocationRepository.findAll(skip, limit);
-    return creditAllocations;
+    const allocations = await this.creditAllocationRepository.findAll(skip, limit);
+    return allocations;
   };
 
   public getCreditAllocationById = async (id: string) => {
-    const creditAllocationFound = await this.creditAllocationRepository.findById(id);
+    const allocation = await this.creditAllocationRepository.findById(id);
 
-    if (!creditAllocationFound) throw new NotFoundError('Credit allocation not found');
+    if (!allocation) throw new NotFoundError('Credit allocation not found');
 
-    return creditAllocationFound;
+    return allocation;
   };
 
   public deleteCreditAllocation = async (id: string) => {
@@ -138,7 +139,7 @@ export default class CreditAllocationService {
           }
 
           // 4 - delete and update data
-          const deletedAllocation = await this.creditAllocationRepository.delete(id, tx);
+          const deleted = await this.creditAllocationRepository.delete(id, tx);
           await this.monthlyDistributorBalanceRepository.update(
             balanceKey.distributorId,
             balanceKey.year,
@@ -149,7 +150,7 @@ export default class CreditAllocationService {
             },
             tx,
           );
-          return deletedAllocation;
+          return deleted;
         },
         // 5 - define DB Isolation level = Serializable
         // -> transactions that occur at the same time are treated as simultaneous transactions
@@ -179,11 +180,11 @@ export default class CreditAllocationService {
 
           // 2 - get the new or the same client company
           const clientCompanyId = data.clientCompanyId ?? allocation.clientCompanyId;
-          const clientCompany =
+          const company =
             clientCompanyId === allocation.clientCompanyId
               ? allocation.clientCompany
               : await this.clientCompanyRepository.findById(clientCompanyId, tx);
-          if (!clientCompany) throw new NotFoundError('Client company not found');
+          if (!company) throw new NotFoundError('Client company not found');
 
           const month = data.month ?? allocation.month;
           const year = data.year ?? allocation.year;
@@ -194,7 +195,7 @@ export default class CreditAllocationService {
             year: allocation.year,
             month: allocation.month,
           };
-          const newKey = { distributorId: clientCompany.distributorId, year, month };
+          const newKey = { distributorId: company.distributorId, year, month };
           const sameBalance =
             oldKey.distributorId === newKey.distributorId &&
             oldKey.year === newKey.year &&
@@ -238,7 +239,7 @@ export default class CreditAllocationService {
           // PATCH preserves omitted percentages; null requests the current company default.
           const percentageApplied =
             data.percentageApplied === null
-              ? clientCompany.allocationPercentage
+              ? company.allocationPercentage
               : (data.percentageApplied ?? allocation.percentageApplied);
           // Validate effective values against destination generation, including partial updates.
           this.validatePercentage(
@@ -246,7 +247,7 @@ export default class CreditAllocationService {
             targetBalance.totalEnergyGeneratedMwh,
             percentageApplied,
           );
-          const updatedAllocation = await this.creditAllocationRepository.update(
+          const updated = await this.creditAllocationRepository.update(
             id,
             { clientCompanyId, month, year, energyAllocatedMwh: newEnergy, percentageApplied },
             tx,
@@ -287,7 +288,7 @@ export default class CreditAllocationService {
               tx,
             );
           }
-          return updatedAllocation;
+          return updated;
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );

@@ -23,8 +23,10 @@ a suíte completa e permanente pertence à fase 2 abaixo.
 Estado atual: F01–F21 implementados e commitados, encerrando os lotes 1.1–1.5.
 F01/F16 foram commitados pelo responsável; as outras 19 correções têm commits individuais.
 Verificações e limitações estão em [progresso-fase1.md](progresso-fase1.md).
-Aguardar revisão e aceite do responsável. Não iniciar testes permanentes da fase 2 ou
-requisitos da fase 3 sem nova autorização após essa avaliação.
+Em 27/10/2026, o responsável informou que concluiu a revisão da fase 1 e publicou as
+alterações no GitHub. Autorizou implementar P01 e solicitou somente a análise do item 4
+sobre métodos privados de tratamento de erros. Não iniciar testes permanentes da fase 2
+ou requisitos da fase 3 sem nova autorização.
 
 ## 2. Memória das decisões de produto
 
@@ -145,9 +147,8 @@ nos cenários exercitados. Não considerar risco pendente como corrigido apenas 
 
 ### P01 — Padronização de variáveis após a revisão da fase 1
 
-Status: **a fazer**, solicitado pelo responsável em 25/10/2026. Executar logo após ele
-concluir a revisão da fase 1 e tratar os ajustes decorrentes, antes de iniciar a fase 2.
-Não executar durante a revisão em andamento.
+Status: **concluído em 27/10/2026**, após o responsável encerrar a revisão da fase 1 e
+autorizar a execução. Solicitado originalmente em 25/10/2026.
 
 - Revisar todos os módulos e endpoints existentes para uniformizar os nomes das variáveis
   locais equivalentes, incluindo os trechos que não receberam essa padronização na fase 1.
@@ -163,6 +164,20 @@ Não executar durante a revisão em andamento.
 Aceite: nomenclatura consistente entre operações equivalentes em todos os módulos,
 sem mudanças funcionais. Esta tarefa não inicia a suíte permanente nem os requisitos do MVP;
 a autorização de commits automáticos exclusiva da fase 1 não se estende a ela.
+
+Entrega: variáveis locais padronizadas em 14 arquivos dos sete módulos. Resultados de
+criação, exclusão e alteração usam `created`, `deleted` e `updated`; consultas usam nomes
+da entidade no contexto, como `generation`, `allocation`, `plant`, `company` e `user`.
+Listas, parâmetros validados e variáveis auxiliares equivalentes seguem o mesmo critério.
+Mantidos nomes distintos para origem/destino, energia anterior/nova e saldos históricos.
+As 18 propriedades de resposta associadas aos resultados foram preservadas explicitamente;
+a renomeação das variáveis não altera o contrato JSON. Comentários originais preservados.
+
+Verificação: comparação dos tokens executáveis confirmou somente as renomeações previstas
+e os aliases de resposta; os 49 blocos `catch` dos arquivos alterados permaneceram iguais.
+Tipos, build, lint e Biome dos 14 arquivos passaram. Os comandos globais `format:check`
+e `biome:check` apontam 29 diagnósticos de formatação em arquivos não alterados por P01.
+Não foi criada suíte permanente nem acessado o banco para esta refatoração.
 
 ### P02 — Proposta substituída pela revisão da F14
 
@@ -254,12 +269,12 @@ ainda precisam de definição. Não liberar a troca por simples remoção do blo
 
 ## 7. Próxima ação ao retomar
 
-Solicitar e aguardar revisão do código da fase 1, com base nos commits e nas evidências em
-[progresso-fase1.md](progresso-fase1.md). As implementações F01–F21 estão concluídas;
-as fases 2 e 3 não foram iniciadas. Tratar eventuais ajustes dessa revisão antes de avançar.
-Após a conclusão da revisão pelo responsável, executar P01 (padronização de variáveis)
-antes de iniciar a fase 2, que continua dependendo de autorização para prosseguir.
-P02 foi substituída pela revisão da F14; não executar sua proposta anterior de centralização.
+Revisão da fase 1 concluída pelo responsável e P01 implementada em 27/10/2026.
+O item 4 acrescentado à ordem de trabalho foi solicitado somente para análise: avaliar
+métodos privados `rethrowWriteError` por serviço, preservando tratamentos e mensagens
+específicos, sem reintroduzir o tradutor compartilhado removido na F14. Sua implementação
+depende de decisão posterior. A proposta histórica P02 permanece substituída; esta nova
+análise não autoriza executá-la automaticamente. As fases 2 e 3 não foram iniciadas.
 Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
 O banco existente não foi auditado nem migrado. R01/R02 e decisões D01–D03 continuam explícitos
 na auditoria; nenhuma correção de dados ou nova regra de produto foi aplicada por suposição.

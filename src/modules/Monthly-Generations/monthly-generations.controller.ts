@@ -11,14 +11,14 @@ import type MonthlyGenerationService from './monthly-generation.service.js';
 export default class MonthlyGenerationsController {
   constructor(private monthlyGenerationService: MonthlyGenerationService) {}
 
+  // Preserve response keys while using concise local result names.
   public createMonthlyGeneration = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = createMonthlyGenerationSchema.parse(req.body);
-      const newMonthlyGeneration =
-        await this.monthlyGenerationService.createMonthlyGeneration(validatedData);
+      const created = await this.monthlyGenerationService.createMonthlyGeneration(validatedData);
       return res.status(201).json({
         message: 'Monthly Generation created successfully!',
-        newMonthlyGeneration,
+        created,
       });
     } catch (error) {
       next(error);
@@ -28,11 +28,8 @@ export default class MonthlyGenerationsController {
   public listMonthlyGenerations = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = listMonthlyGenerationsSchema.parse(req.query);
-      const monthlyGenerations = await this.monthlyGenerationService.listMonthlyGenerations(
-        page,
-        limit,
-      );
-      return res.status(200).json(monthlyGenerations);
+      const generations = await this.monthlyGenerationService.listMonthlyGenerations(page, limit);
+      return res.status(200).json(generations);
     } catch (error) {
       next(error);
     }
@@ -44,11 +41,10 @@ export default class MonthlyGenerationsController {
     next: NextFunction,
   ) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const monthlyGenerationFound =
-        await this.monthlyGenerationService.getMonthlyGenerationById(id);
-      return res.status(200).json(monthlyGenerationFound);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const generation = await this.monthlyGenerationService.getMonthlyGenerationById(id);
+      return res.status(200).json(generation);
     } catch (error) {
       next(error);
     }
@@ -61,14 +57,13 @@ export default class MonthlyGenerationsController {
     next: NextFunction,
   ) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const monthlyGenerationDeleted =
-        await this.monthlyGenerationService.deleteMonthlyGeneration(id);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const deleted = await this.monthlyGenerationService.deleteMonthlyGeneration(id);
       // Deletion with a response body returns 200; reserve 201 for creation.
       return res.status(200).json({
         message: 'Monthly generation deleted successfully!',
-        monthlyGenerationDeleted,
+        deleted,
       });
     } catch (error) {
       next(error);
@@ -81,17 +76,17 @@ export default class MonthlyGenerationsController {
     next: NextFunction,
   ) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
       const validatedData = updateMonthlyGenerationSchema.parse(req.body);
-      const monthlyGenerationUpdated = await this.monthlyGenerationService.updateMonthlyGeneration(
+      const updated = await this.monthlyGenerationService.updateMonthlyGeneration(
         id,
         validatedData,
       );
       // Updates return 200 with the persisted generation.
       return res.status(200).json({
         message: 'Monthly Generation updated successfully!',
-        monthlyGenerationUpdated,
+        updated,
       });
     } catch (error) {
       next(error);

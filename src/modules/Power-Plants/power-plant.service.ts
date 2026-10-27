@@ -34,11 +34,11 @@ export default class PowerPlantService {
   };
 
   public getPowerPlantById = async (id: string) => {
-    const powerPlantFound = await this.powerPlantRepository.findById(id);
+    const plant = await this.powerPlantRepository.findById(id);
 
-    if (!powerPlantFound) throw new NotFoundError('Power Plant not found');
+    if (!plant) throw new NotFoundError('Power Plant not found');
 
-    return powerPlantFound;
+    return plant;
   };
 
   public deletePowerPlant = async (id: string) => {
@@ -63,7 +63,9 @@ export default class PowerPlantService {
 
   public updatePowerPlant = async (id: string, data: updatePowerPlantDTO) => {
     try {
-      const newData = Object.fromEntries(Object.entries(data).filter((e) => e[1] !== undefined));
+      const newData = Object.fromEntries(
+        Object.entries(data).filter((entry) => entry[1] !== undefined),
+      );
       return await db.$transaction(
         async (tx) => {
           const plant = await this.powerPlantRepository.findById(id, tx);

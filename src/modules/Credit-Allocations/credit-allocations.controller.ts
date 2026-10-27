@@ -10,14 +10,14 @@ import type CreditAllocationService from './credit-allocation.service.js';
 export default class CreditAllocationsController {
   constructor(private creditAllocationService: CreditAllocationService) {}
 
+  // Preserve response keys while using concise local result names.
   public createCreditAllocation = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = createCreditAllocationSchema.parse(req.body);
-      const newCreditAllocation =
-        await this.creditAllocationService.createCreditAllocation(validatedData);
+      const created = await this.creditAllocationService.createCreditAllocation(validatedData);
       return res.status(201).json({
         message: 'Credit allocation created succesfully!',
-        newCreditAllocation,
+        created,
       });
     } catch (error) {
       next(error);
@@ -27,11 +27,8 @@ export default class CreditAllocationsController {
   public listCreditAllocations = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = listCreditAllocationsSchema.parse(req.query);
-      const creditAlocations = await this.creditAllocationService.listCreditAllocations(
-        page,
-        limit,
-      );
-      return res.status(200).json(creditAlocations);
+      const allocations = await this.creditAllocationService.listCreditAllocations(page, limit);
+      return res.status(200).json(allocations);
     } catch (error) {
       next(error);
     }
@@ -39,10 +36,10 @@ export default class CreditAllocationsController {
 
   public getCreditAllocationById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const creditAllocationFound = await this.creditAllocationService.getCreditAllocationById(id);
-      return res.status(200).json(creditAllocationFound);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const allocation = await this.creditAllocationService.getCreditAllocationById(id);
+      return res.status(200).json(allocation);
     } catch (error) {
       next(error);
     }
@@ -50,12 +47,12 @@ export default class CreditAllocationsController {
 
   public deleteCreditAllocation = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const creditAllocationDeleted = await this.creditAllocationService.deleteCreditAllocation(id);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const deleted = await this.creditAllocationService.deleteCreditAllocation(id);
       return res.status(200).json({
         message: 'Credit allocation deleted successfully!',
-        creditAllocationDeleted,
+        deleted,
       });
     } catch (error) {
       next(error);
@@ -64,16 +61,13 @@ export default class CreditAllocationsController {
 
   public updateCreditAllocation = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
+      const validatedParams = uuidSchema.parse(req.params);
       const validatedData = updateCreditAllocationSchema.parse(req.body);
-      const { id } = idValidated;
-      const creditAllocationUpdated = await this.creditAllocationService.updateCreditAllocation(
-        id,
-        validatedData,
-      );
+      const { id } = validatedParams;
+      const updated = await this.creditAllocationService.updateCreditAllocation(id, validatedData);
       return res.status(200).json({
         message: 'Credit allocation updated successfully!',
-        creditAllocationUpdated,
+        updated,
       });
     } catch (error) {
       next(error);

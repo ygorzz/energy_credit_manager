@@ -19,24 +19,25 @@ export default class UsersController {
 
   public getUserById = async (req: Request<IdParams>, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const userFound = await this.userService.getUserById(id);
-      return res.status(200).json(userFound);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const user = await this.userService.getUserById(id);
+      return res.status(200).json(user);
     } catch (error) {
       next(error);
     }
   };
 
+  // Preserve response keys while using concise local result names.
   // types the Request with the IdParams type for id: string
   public deleteUser = async (req: Request<IdParams>, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
-      const userDeleted = await this.userService.deleteUser(id);
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
+      const deleted = await this.userService.deleteUser(id);
       return res.status(200).json({
         message: 'User deleted successfully!',
-        userDeleted,
+        deleted,
       });
     } catch (error) {
       next(error);
@@ -45,13 +46,13 @@ export default class UsersController {
 
   public updateUser = async (req: Request<IdParams>, res: Response, next: NextFunction) => {
     try {
-      const idValidated = uuidSchema.parse(req.params);
-      const { id } = idValidated;
+      const validatedParams = uuidSchema.parse(req.params);
+      const { id } = validatedParams;
       const validatedData = updateUserSchema.parse(req.body);
-      const userUpdated = await this.userService.updateUser(id, validatedData);
+      const updated = await this.userService.updateUser(id, validatedData);
       return res.status(200).json({
         message: 'User updated successfully!',
-        userUpdated,
+        updated,
       });
     } catch (error) {
       next(error);
