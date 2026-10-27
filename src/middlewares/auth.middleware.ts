@@ -58,3 +58,4 @@ export default async function auth<P>(req: Request<P>, res: Response, next: Next
     next(error);
   }
 }
+  
