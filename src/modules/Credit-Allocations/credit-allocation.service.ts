@@ -81,18 +81,7 @@ export default class CreditAllocationService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The energy data changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2003') {
-          throw new NotFoundError('Client company id not found in the database');
-        }
-        if (error.code === 'P2002') {
-          throw new ConflictError('Already exits a register with these data');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error, 'create');
     }
   };
 
@@ -157,16 +146,7 @@ export default class CreditAllocationService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The energy data changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError('Credit allocation or monthly distributor balance not found');
-        }
-        // serializable isolation level error
-      }
-      throw error;
+      this.rethrowWriteError(error, 'delete');
     }
   };
 
@@ -293,23 +273,37 @@ export default class CreditAllocationService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The energy data changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError('Credit allocation or monthly distributor balance not found');
-        }
-        if (error.code === 'P2003') {
-          throw new NotFoundError('Client company not found in the database');
-        }
-        if (error.code === 'P2002') {
-          throw new ConflictError('A credit allocation already exists for this company and period');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error, 'update');
     }
   };
+
+  // Preserve each allocation operation's error mapping without changing transaction behavior.
+  private rethrowWriteError(error: unknown, operation: 'create' | 'update' | 'delete'): never {
+    // serializable isolation level error
+    if (isTransactionConflict(error)) {
+      throw new ConflictError('The energy data changed concurrently. Please retry.');
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025' && operation !== 'create') {
+        throw new NotFoundError('Credit allocation or monthly distributor balance not found');
+      }
+      if (error.code === 'P2003' && operation !== 'delete') {
+        throw new NotFoundError(
+          operation === 'create'
+            ? 'Client company id not found in the database'
+            : 'Client company not found in the database',
+        );
+      }
+      if (error.code === 'P2002' && operation !== 'delete') {
+        throw new ConflictError(
+          operation === 'create'
+            ? 'Already exits a register with these data'
+            : 'A credit allocation already exists for this company and period',
+        );
+      }
+    }
+    throw error;
+  }
 
   private validateGeneration(total: Prisma.Decimal): void {
     // Require positive generation before division, including zero-energy allocations.

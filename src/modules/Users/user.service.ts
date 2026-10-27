@@ -31,16 +31,7 @@ export default class UserService {
     try {
       return await this.userRepository.delete(id);
     } catch (error) {
-      // A concurrent write can invalidate the deletion even after the user was found.
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The user changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError('User not found');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error, 'delete');
     }
   };
 
@@ -74,22 +65,34 @@ export default class UserService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The user or company changed concurrently. Please retry.');
+      this.rethrowWriteError(error, 'update');
+    }
+  };
+
+  // User updates and deletions retain their own persistence and concurrency responses.
+  private rethrowWriteError(error: unknown, operation: 'update' | 'delete'): never {
+    // A concurrent write can invalidate the deletion even after the user was found.
+    if (isTransactionConflict(error)) {
+      throw new ConflictError(
+        operation === 'delete'
+          ? 'The user changed concurrently. Please retry.'
+          : 'The user or company changed concurrently. Please retry.',
+      );
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') {
+        throw new NotFoundError('User not found');
       }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        // Updates must preserve email uniqueness and an existing company reference.
+      // Updates must preserve email uniqueness and an existing company reference.
+      if (operation === 'update') {
         if (error.code === 'P2002') {
           throw new ConflictError('Already exists a user with this email');
         }
         if (error.code === 'P2003') {
           throw new NotFoundError('Client company not found');
         }
-        if (error.code === 'P2025') {
-          throw new NotFoundError('User not found');
-        }
       }
-      throw error;
     }
-  };
+    throw error;
+  }
 }

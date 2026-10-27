@@ -12,19 +12,7 @@ export default class PowerPlantService {
     try {
       return await this.powerPlantRepository.create(data);
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The energy data changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ConflictError('Already exists a power plant with this name');
-        }
-        // A plant can only be created under an existing distributor.
-        if (error.code === 'P2003') {
-          throw new NotFoundError('Distributor not found in the database');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error, 'create');
     }
   };
 
@@ -45,19 +33,7 @@ export default class PowerPlantService {
     try {
       return await this.powerPlantRepository.delete(id);
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The energy data changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError('Power plant not found');
-        }
-        // Generation history prevents deleting the plant that owns it.
-        if (error.code === 'P2003') {
-          throw new ConflictError('Cannot delete a power plant with generation history');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error, 'delete');
     }
   };
 
@@ -85,21 +61,39 @@ export default class PowerPlantService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The energy data changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError('Power plant not found');
-        }
-        if (error.code === 'P2003') {
-          throw new NotFoundError('Distributor id not found in the database');
-        }
-        if (error.code === 'P2002') {
-          throw new ConflictError('Already exits a power plant with this name');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error, 'update');
     }
   };
+
+  // References and deletion dependencies require different responses for the same database code.
+  private rethrowWriteError(error: unknown, operation: 'create' | 'update' | 'delete'): never {
+    if (isTransactionConflict(error)) {
+      throw new ConflictError('The energy data changed concurrently. Please retry.');
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025' && operation !== 'create') {
+        throw new NotFoundError('Power plant not found');
+      }
+      if (error.code === 'P2003') {
+        // Generation history prevents deleting the plant that owns it.
+        if (operation === 'delete') {
+          throw new ConflictError('Cannot delete a power plant with generation history');
+        }
+        // A plant can only be created under an existing distributor.
+        throw new NotFoundError(
+          operation === 'create'
+            ? 'Distributor not found in the database'
+            : 'Distributor id not found in the database',
+        );
+      }
+      if (error.code === 'P2002' && operation !== 'delete') {
+        throw new ConflictError(
+          operation === 'create'
+            ? 'Already exists a power plant with this name'
+            : 'Already exits a power plant with this name',
+        );
+      }
+    }
+    throw error;
+  }
 }

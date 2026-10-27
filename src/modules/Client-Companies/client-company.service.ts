@@ -15,18 +15,7 @@ export default class ClientCompanyService {
 
       return await this.clientCompanyRepository.create(data);
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The energy data changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ConflictError('Already exists a client company with this CNPJ');
-        }
-        if (error.code === 'P2003') {
-          throw new NotFoundError('Distributor not found in the database');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error, 'create');
     }
   };
 
@@ -56,19 +45,7 @@ export default class ClientCompanyService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The energy data changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError('Client company not found');
-        }
-        // Allocation history prevents deleting the company that owns it.
-        if (error.code === 'P2003') {
-          throw new ConflictError('Cannot delete a client company with allocation history');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error, 'delete');
     }
   };
 
@@ -98,23 +75,36 @@ export default class ClientCompanyService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The energy data changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new NotFoundError('Client company not found');
-        }
-        if (error.code === 'P2003') {
-          throw new NotFoundError('Distributor id not found in the database');
-        }
-        if (error.code === 'P2002') {
-          throw new ConflictError('Already exists a client company with this CNPJ');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error, 'update');
     }
   };
+
+  // Keep company reference failures separate from dependencies that prevent deletion.
+  private rethrowWriteError(error: unknown, operation: 'create' | 'update' | 'delete'): never {
+    if (isTransactionConflict(error)) {
+      throw new ConflictError('The energy data changed concurrently. Please retry.');
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025' && operation !== 'create') {
+        throw new NotFoundError('Client company not found');
+      }
+      if (error.code === 'P2002' && operation !== 'delete') {
+        throw new ConflictError('Already exists a client company with this CNPJ');
+      }
+      if (error.code === 'P2003') {
+        // Allocation history prevents deleting the company that owns it.
+        if (operation === 'delete') {
+          throw new ConflictError('Cannot delete a client company with allocation history');
+        }
+        throw new NotFoundError(
+          operation === 'create'
+            ? 'Distributor not found in the database'
+            : 'Distributor id not found in the database',
+        );
+      }
+    }
+    throw error;
+  }
 }
 
 function cnpjValidation(cnpj: string): void {

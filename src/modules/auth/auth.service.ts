@@ -33,19 +33,7 @@ export default class AuthService {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
-      if (isTransactionConflict(error)) {
-        throw new ConflictError('The user or company changed concurrently. Please retry.');
-      }
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ConflictError('Already exists a user with this email');
-        }
-        // The company must still exist when the user is persisted.
-        if (error.code === 'P2003') {
-          throw new NotFoundError('Client company not found');
-        }
-      }
-      throw error;
+      this.rethrowWriteError(error);
     }
   };
 
@@ -66,4 +54,21 @@ export default class AuthService {
 
     return token;
   };
+
+  // Translate registration failures while preserving business and unexpected errors.
+  private rethrowWriteError(error: unknown): never {
+    if (isTransactionConflict(error)) {
+      throw new ConflictError('The user or company changed concurrently. Please retry.');
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        throw new ConflictError('Already exists a user with this email');
+      }
+      // The company must still exist when the user is persisted.
+      if (error.code === 'P2003') {
+        throw new NotFoundError('Client company not found');
+      }
+    }
+    throw error;
+  }
 }

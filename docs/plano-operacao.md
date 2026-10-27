@@ -8,12 +8,10 @@ Data: 24/10/2026. Prioridade definida pelo responsável pelo projeto.
 2. Corrigir os erros da API atual, preservando as regras de negócio já confirmadas.
 3. Após o responsável concluir a revisão da fase 1, padronizar os nomes das variáveis
    nos módulos e endpoints existentes, conforme a tarefa P01 abaixo.
-4. Analisar a possibilidade de abstrair o bloco de código dentro do catch nos services para uma função
-  'reThrowWriteError' em todos os services, conforme a versão antiga da P02. Essa abordagem apenas
-  abstrai todo o código do catch para uma função e não padroniza necessariamente todas as mensagens de erros, como
-  fazia a função deletada 'reThrowPersistenceError'.
-4. Implementar e executar testes automatizados para todas as rotas existentes.
-5. Somente depois implementar os novos requisitos do MVP.
+4. Extrair os tratamentos de escrita para métodos privados `rethrowWriteError` em cada
+   serviço, preservando mensagens e status por operação, conforme P03 abaixo.
+5. Implementar e executar testes automatizados para todas as rotas existentes.
+6. Somente depois implementar os novos requisitos do MVP.
 
 Não iniciar consumo mensal, dashboards, novos filtros ou endpoints do cliente enquanto
 as correções e a suíte da API existente não estiverem concluídas.
@@ -24,9 +22,9 @@ Estado atual: F01–F21 implementados e commitados, encerrando os lotes 1.1–1.
 F01/F16 foram commitados pelo responsável; as outras 19 correções têm commits individuais.
 Verificações e limitações estão em [progresso-fase1.md](progresso-fase1.md).
 Em 27/10/2026, o responsável informou que concluiu a revisão da fase 1 e publicou as
-alterações no GitHub. Autorizou implementar P01 e solicitou somente a análise do item 4
-sobre métodos privados de tratamento de erros. Não iniciar testes permanentes da fase 2
-ou requisitos da fase 3 sem nova autorização.
+alterações no GitHub. Após implementar P01 e analisar o item 4, autorizou também a extração
+dos tratamentos de escrita para métodos privados de cada serviço (P03). Não iniciar testes
+permanentes da fase 2 ou requisitos da fase 3 sem nova autorização.
 
 ## 2. Memória das decisões de produto
 
@@ -182,7 +180,7 @@ Não foi criada suíte permanente nem acessado o banco para esta refatoração.
 ### P02 — Proposta substituída pela revisão da F14
 
 Status: **substituída**, por decisão do responsável em 25/10/2026. A proposta anterior
-de centralizar tratamentos e extrair novos métodos `rethrowWriteError` não será executada.
+de centralizar tratamentos e extrair novos métodos não foi executada naquela etapa.
 O responsável solicitou a reimplementação da F14 durante a revisão, incorporada ao commit
 correspondente: remover `rethrowPersistenceError` e tratar os erros pertinentes diretamente
 nos `catch` dos serviços, com mensagens específicas de cada operação.
@@ -194,8 +192,36 @@ formatos de conflito. O método privado já existente em geração antecede a F1
 alterado nesta revisão. Não reintroduzir o tradutor compartilhado como refatoração futura.
 
 Verificações desta revisão constam em [progresso-fase1.md](progresso-fase1.md).
-Os mapeamentos pertinentes devem integrar a suíte permanente da fase 2. P01 continua pendente;
-esta revisão não autoriza iniciar fases posteriores.
+Os mapeamentos pertinentes devem integrar a suíte permanente da fase 2. P01 foi concluída
+posteriormente; a nova extração autorizada em 27/10/2026 está registrada em P03 e mantém
+os tratamentos dentro dos serviços, sem reintroduzir o tradutor compartilhado.
+
+### P03 — Métodos privados para os erros de escrita de cada serviço
+
+Status: **concluído em 27/10/2026**, após análise e autorização explícita do responsável.
+
+- Adicionado `rethrowWriteError` privado nos serviços de distribuidoras, usinas, empresas,
+  alocações, usuários e autenticação. Geração conserva seu método privado já existente.
+- Nos serviços com tratamentos diferentes entre operações, o método recebe `operation`.
+  Usuários aceita `update`/`delete`; os demais serviços cadastrais e alocações aceitam
+  `create`/`update`/`delete`. Em autenticação, somente o registro utiliza esse tratamento,
+  portanto seu método recebe apenas o erro.
+- Mantidos os códigos tratados por operação, as mensagens exatas e os status HTTP.
+  `P2003` em criação/alteração continua sendo distinguido das dependências de exclusão;
+  erros antes não traduzidos em determinada operação continuam sendo propagados.
+- Erros de negócio e desconhecidos preservam sua identidade. O detector compartilhado
+  de conflitos permanece; cada serviço decide sua resposta. Não foi recriado um helper
+  compartilhado para traduzir erros de persistência.
+- Comentários existentes foram movidos com os tratamentos e preservados. Adicionados
+  comentários curtos em inglês nos novos métodos. Regras de negócio, consultas e transações
+  permaneceram iguais; nenhuma alteração de mensagens foi incluída nessa extração.
+
+Verificação: 225 cenários de diagnóstico em memória sobre 15 operações, incluindo 210
+comparações com os tratamentos anteriores, passaram. Conferidas mensagens, classes/status,
+retornos de sucesso, dois formatos de conflito e propagação de erros de negócio/desconhecidos.
+Tipos, build, lint e Biome dos seis arquivos alterados passaram. Os comandos globais
+de formatação e Biome apontam 31 diagnósticos de formatação em arquivos não alterados
+nesta entrega. Não houve acesso ao banco nem criação da suíte permanente da fase 2.
 
 ## 5. Fase 2 — Testes automatizados de todas as rotas existentes
 
@@ -269,12 +295,13 @@ ainda precisam de definição. Não liberar a troca por simples remoção do blo
 
 ## 7. Próxima ação ao retomar
 
-Revisão da fase 1 concluída pelo responsável e P01 implementada em 27/10/2026.
-O item 4 acrescentado à ordem de trabalho foi solicitado somente para análise: avaliar
-métodos privados `rethrowWriteError` por serviço, preservando tratamentos e mensagens
-específicos, sem reintroduzir o tradutor compartilhado removido na F14. Sua implementação
-depende de decisão posterior. A proposta histórica P02 permanece substituída; esta nova
-análise não autoriza executá-la automaticamente. As fases 2 e 3 não foram iniciadas.
+Revisão da fase 1 concluída pelo responsável; P01 e P03 implementadas em 27/10/2026.
+Os sete serviços possuem seus próprios métodos privados de tratamento de escrita,
+preservando os tratamentos específicos por operação. A proposta histórica P02 permanece
+substituída; o tradutor compartilhado removido na F14 não foi reintroduzido.
+Apresentar a entrega ao responsável. As fases 2 e 3 não foram iniciadas e dependem de
+autorização para prosseguir; a autorização de commits automáticos exclusiva da fase 1
+não se aplica às refatorações posteriores.
 Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
 O banco existente não foi auditado nem migrado. R01/R02 e decisões D01–D03 continuam explícitos
 na auditoria; nenhuma correção de dados ou nova regra de produto foi aplicada por suposição.

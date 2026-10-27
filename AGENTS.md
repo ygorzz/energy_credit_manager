@@ -64,7 +64,7 @@ No test runner, `npm test` script, or coverage threshold is configured. Run type
 
 ## Commit & Pull Request Guidelines
 
-History uses English messages with `feat:`, `fix:`, and `refactor:` prefixes. Keep commits focused and imperative. PRs should explain behavior changes, link issues, list verification results, and identify migrations or API contract changes. Include request/response examples.
+Use conventional commits. History uses English messages with `feat:`, `fix:`, and `refactor:` prefixes. Keep commits focused and imperative. PRs should explain behavior changes, link issues, list verification results, and identify migrations or API contract changes. Include request/response examples.
 
 ## Security & Configuration
 
