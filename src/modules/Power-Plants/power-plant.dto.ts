@@ -30,15 +30,21 @@ export const createPowerPlantSchema = z.object({
   distributorId: z.uuid('Invalid distributor ID'),
 });
 
-export const updatePowerPlantSchema = createPowerPlantSchema.extend({
-  name: createPowerPlantSchema.shape.name.optional(),
-  state: createPowerPlantSchema.shape.state.optional(),
-  city: createPowerPlantSchema.shape.city.optional(),
-  sourceType: createPowerPlantSchema.shape.sourceType.optional(),
-  installedCapacityMw: createPowerPlantSchema.shape.installedCapacityMw.optional(),
-  status: createPowerPlantSchema.shape.status.optional(),
-  distributorId: createPowerPlantSchema.shape.distributorId.optional(),
-});
+// Reject PATCH bodies without any recognized field after parsing.
+export const updatePowerPlantSchema = createPowerPlantSchema
+  .extend({
+    name: createPowerPlantSchema.shape.name.optional(),
+    state: createPowerPlantSchema.shape.state.optional(),
+    city: createPowerPlantSchema.shape.city.optional(),
+    sourceType: createPowerPlantSchema.shape.sourceType.optional(),
+    installedCapacityMw: createPowerPlantSchema.shape.installedCapacityMw.optional(),
+    // Only creation defaults to ACTIVE; an omitted PATCH status preserves the stored value.
+    status: z.enum(PowerPlantStatus).optional(),
+    distributorId: createPowerPlantSchema.shape.distributorId.optional(),
+  })
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: 'At least one field must be provided for update',
+  });
 
 export const listPowerPlantsSchema = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),

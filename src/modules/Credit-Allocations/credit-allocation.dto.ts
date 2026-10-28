@@ -26,13 +26,18 @@ export const createCreditAllocationSchema = z.object({
   clientCompanyId: z.uuid('Invalid client company ID'),
 });
 
-export const updateCreditAllocationSchema = createCreditAllocationSchema.extend({
-  month: createCreditAllocationSchema.shape.month.optional(),
-  year: createCreditAllocationSchema.shape.year.optional(),
-  percentageApplied: createCreditAllocationSchema.shape.percentageApplied.optional(),
-  energyAllocatedMwh: createCreditAllocationSchema.shape.energyAllocatedMwh.optional(),
-  clientCompanyId: createCreditAllocationSchema.shape.clientCompanyId.optional(),
-});
+// Reject PATCH bodies without any recognized field after parsing.
+export const updateCreditAllocationSchema = createCreditAllocationSchema
+  .extend({
+    month: createCreditAllocationSchema.shape.month.optional(),
+    year: createCreditAllocationSchema.shape.year.optional(),
+    percentageApplied: createCreditAllocationSchema.shape.percentageApplied.optional(),
+    energyAllocatedMwh: createCreditAllocationSchema.shape.energyAllocatedMwh.optional(),
+    clientCompanyId: createCreditAllocationSchema.shape.clientCompanyId.optional(),
+  })
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: 'At least one field must be provided for update',
+  });
 
 export const listCreditAllocationsSchema = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),

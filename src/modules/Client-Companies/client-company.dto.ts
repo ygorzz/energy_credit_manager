@@ -23,12 +23,17 @@ export const createClientCompanySchema = z.object({
   distributorId: z.uuid(),
 });
 
-export const updateClientCompanySchema = createClientCompanySchema.extend({
-  name: createClientCompanySchema.shape.name.optional(),
-  cnpj: createClientCompanySchema.shape.cnpj.optional(),
-  allocationPercentage: createClientCompanySchema.shape.allocationPercentage.optional(),
-  distributorId: createClientCompanySchema.shape.distributorId.optional(),
-});
+// Reject PATCH bodies without any recognized field after parsing.
+export const updateClientCompanySchema = createClientCompanySchema
+  .extend({
+    name: createClientCompanySchema.shape.name.optional(),
+    cnpj: createClientCompanySchema.shape.cnpj.optional(),
+    allocationPercentage: createClientCompanySchema.shape.allocationPercentage.optional(),
+    distributorId: createClientCompanySchema.shape.distributorId.optional(),
+  })
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: 'At least one field must be provided for update',
+  });
 
 export const listClientCompaniesSchema = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),

@@ -23,8 +23,9 @@ F01/F16 foram commitados pelo responsável; as outras 19 correções têm commit
 Verificações e limitações estão em [progresso-fase1.md](progresso-fase1.md).
 Em 27/10/2026, o responsável informou que concluiu a revisão da fase 1 e publicou as
 alterações no GitHub. Após implementar P01 e analisar o item 4, autorizou também a extração
-dos tratamentos de escrita para métodos privados de cada serviço (P03). Não iniciar testes
-permanentes da fase 2 ou requisitos da fase 3 sem nova autorização.
+dos tratamentos de escrita para métodos privados de cada serviço (P03). Posteriormente,
+autorizou o pré-requisito da fase 2 descrito na seção 5. Essa entrega está implementada e
+aguarda sua revisão, sem commit e sem iniciar o lote 2.0. A fase 3 continua fora do escopo.
 
 ## 2. Memória das decisões de produto
 
@@ -54,6 +55,12 @@ Fonte de problemas atuais: [auditoria-tecnica.md](auditoria-tecnica.md).
   transferência de usina com histórico entre distribuidoras (EF01, seção 11 dos requisitos).
   Definir vigência e tratamento dos históricos, alocações e saldos antes de implementar.
   O bloqueio F02 permanece até esse fluxo existir; a sequência das fases continua igual.
+- Decisão confirmada para a fase 2: PATCH vazio deve retornar 400 nos seis módulos.
+  A entrada precisa conter ao menos um campo reconhecido com valor diferente de `undefined`
+  após o processamento pelo Zod. Valores `0` e `null` contam como informados quando
+  permitidos pelo campo; campos desconhecidos isolados não constituem atualização.
+- O PATCH de usinas deve preservar o status omitido. Somente a criação mantém o default
+  `ACTIVE`; esta correção foi explicitamente autorizada junto da rejeição de PATCH vazio.
 
 Esta é memória persistida no repositório. Novas sessões devem ler este plano e os documentos
 referenciados antes de retomar tarefas; não depender somente do histórico do chat.
@@ -225,21 +232,82 @@ nesta entrega. Não houve acesso ao banco nem criação da suíte permanente da 
 
 ## 5. Fase 2 — Testes automatizados de todas as rotas existentes
 
+### Sequência de execução e revisão
+
+1. Implementar o pré-requisito de validação e parar para revisão e validação do responsável.
+   Após sua aceitação, commitar essa entrega e iniciar o lote 2.0.
+2. Implementar o lote 2.0 e parar novamente para revisão e validação. Após a aceitação,
+   commitar esse lote e iniciar os lotes 2.1–2.7.
+3. Implementar os lotes 2.1–2.7 em sequência, sem revisão intermediária e sem commits
+   automáticos. Solicitar revisão conjunta somente ao finalizar todos; após a validação,
+   fazer commits focados por lote e iniciar o lote 2.8.
+4. Implementar o lote 2.8 somente depois dessa validação e apresentar a suíte completa
+   para revisão final. Não avançar para os requisitos do MVP automaticamente.
+
+Defeitos adicionais devem ser apresentados com reprodução, resultado esperado, resultado
+observado e efeito no banco. Aguardar avaliação antes de corrigir produção; não alterar
+expectativas dos testes para ocultar a falha. As correções de PATCH abaixo já foram autorizadas.
+
+| Lote | Entrega |
+| --- | --- |
+| Pré-requisito | Validação de PATCH vazio nos seis módulos e preservação do status omitido de usinas. |
+| 2.0 | Infraestrutura Vitest/Supertest, banco isolado, fixtures, servidor e regressões iniciais do pré-requisito. |
+| 2.1 | Login, registro e autenticação/autorização compartilhada. |
+| 2.2 | Quatro endpoints de usuários. |
+| 2.3 | Cinco endpoints de distribuidoras. |
+| 2.4 | Cinco endpoints de usinas. |
+| 2.5 | Cinco endpoints de empresas. |
+| 2.6 | Cinco endpoints de geração, saldos e precisão. |
+| 2.7 | Cinco endpoints de alocação, saldos, percentuais e arredondamento. |
+| 2.8 | Concorrência, contratos transversais, fluxo completo e GitHub Actions com PostgreSQL 18/Node 24. |
+
+### Pré-requisito — implementado, aguardando revisão
+
+- Os seis schemas de atualização exigem ao menos um valor diferente de `undefined` após
+  o processamento dos campos. `{}`, corpo ausente, somente campos desconhecidos e campos
+  conhecidos apenas com `undefined` são rejeitados; valores válidos `0`/`null` são preservados.
+- O refinamento retorna `ZodError`, tratado pelo middleware existente como 400, com
+  `message: 'Validation Error'` e uma issue `custom` na raiz com a mensagem
+  `At least one field must be provided for update`. Corpo ausente ou de tipo incorreto
+  também retorna 400, com as issues de tipo correspondentes.
+- O default `ACTIVE` foi removido somente do campo de atualização de status de usinas;
+  a criação mantém esse default. A omissão não acrescenta status à atualização enviada ao serviço.
+- Os controllers e a validação UUID nas 18 operações com `:id` foram preservados.
+  UUID inválido continua retornando 400, e UUID válido inexistente continua dependendo
+  da consulta para retornar 404. Erros de autenticação permanecem 401/403.
+- Comentários originais foram preservados; as novas regras receberam comentários curtos
+  em inglês. Nenhum endpoint, serviço, migração ou configuração de testes foi modificado.
+
+Verificação: 90 cenários de diagnóstico em memória passaram, exercitando os seis schemas,
+os controllers, o middleware de erros, os 18 caminhos de UUID inválido, atualizações parciais,
+normalização, campos desconhecidos, valores `0`/`null`, status explícito e default de criação.
+Entradas inválidas não chegaram aos serviços nesses cenários. Não houve acesso ao banco,
+requisições HTTP reais nem criação da suíte permanente; as regressões integradas com banco
+pertencem ao lote 2.0. Tipos, build, lint e Biome dos seis arquivos passaram. Os comandos
+globais de formatação e Biome apontam 25 diagnósticos em arquivos não alterados nesta entrega.
+
+Situação: **sem commit, aguardando revisão e validação do responsável**. O lote 2.0 não foi iniciado.
+
 ### Ferramentas e isolamento
 
-- Usar `node:test`, `node:assert/strict` e `tsx`, aproveitando o runtime e a dependência existentes.
-- Testes HTTP usam a aplicação Express em porta local efêmera e `fetch`, com encerramento
-  garantido do servidor e das conexões. Não importar `server.ts` para não fixar a porta 3000.
-- Criar comandos `test` para a suíte e `test:integration` para os casos com PostgreSQL.
-  A organização fica em `test/unit/` e `test/integration/`; `test/e2e/` vazio pode ser usado
-  para fluxos completos sem confundir fixtures com código de produção.
-- Testes de integração usam `TEST_DATABASE_URL` separado. Recusar ausência de configuração
-  ou destino igual ao banco da aplicação; confirmar destino isolado antes de limpeza/migrações.
+- Usar Vitest, Supertest e `@types/supertest` como dependências de desenvolvimento.
+  Essa decisão substitui a proposta anterior de `node:test`, `node:assert/strict` e `fetch`.
+- Usar ambiente Node, isolamento entre arquivos, execução sequencial e nenhuma repetição
+  automática de testes que falharem. Definir as variáveis de teste antes de importar a aplicação/Prisma.
+- Testes HTTP usam a aplicação Express em `127.0.0.1`, numa porta efêmera, aguardando
+  inicialização e garantindo encerramento do servidor e das conexões. Não importar `server.ts`.
+- Criar comandos `test`, `test:integration`, `test:watch` e `check:test`. Organizar por módulo
+  em `test/integration/`, com configuração TypeScript própria, fora do build de produção.
+- Usar o PostgreSQL 18 local com `TEST_DATABASE_URL` para um banco exclusivo chamado
+  `energy_credit_manager_test`. Recusar ausência de configuração ou destino equivalente ao
+  banco da aplicação, mesmo com credenciais diferentes; validar antes de qualquer limpeza/migração.
 - Aplicar as migrações em banco de testes vazio, criar fixtures explícitas por execução
-  e limpar somente os dados/ambiente de testes. Não executar seed administrativo do usuário.
+  e limpar somente as sete tabelas de negócio antes de cada teste, preservando `_prisma_migrations`.
+  Não executar seed administrativo do usuário. Impedir execuções simultâneas no mesmo banco.
 - Não substituir PostgreSQL por SQLite nem considerar mocks prova de transação/concorrência.
-- Fazer testes em sequência quando compartilharem banco/limitadores; isolar cenários de 429
-  por processo ou janela para evitar falsos resultados por contadores compartilhados.
+- Manter autenticação, serviços, repositórios e limitadores reais. Reiniciar os contadores
+  dos limitadores entre testes por `resetKey`; testar separadamente as respostas 429 nos
+  limites atuais: login 10, criação 20, consulta 60, exclusão 10 e atualização 20 por minuto.
 
 ### Cobertura mínima por rota
 
@@ -251,8 +319,9 @@ cenário de sucesso e de falha pertinentes; execução de uma única rota não c
 | Login e registro | Credenciais corretas/incorretas, situação inativa, e-mail repetido, empresa inválida e perfil proibido. |
 | Todas as protegidas | Token ausente/inválido/expirado, esquema incorreto, usuário removido/inativo e perfis permitidos/proibidos. |
 | GET de listas | Lista vazia/preenchida, paginação, limites inválidos e ordenação estável. |
-| GET por ID | Registro existente, UUID inválido e UUID válido inexistente. |
-| POST/PATCH cadastrais | Dados válidos, campos inválidos, unicidade, referências e bloqueios de vínculo com histórico. |
+| Todas as 18 rotas com `:id` | GET/PATCH/DELETE: registro existente, UUID inválido → 400 e UUID válido inexistente → 404. |
+| Todas as validações Zod de requisição | Corpo/parâmetros/query: obrigatórios, tipos, formatos, enums, limites e null inválidos → 400, conferindo `errors` e sem gravações indevidas. |
+| POST/PATCH cadastrais | Dados válidos, campos inválidos, unicidade, referências, bloqueios de histórico; seis PATCH vazios → 400 e omissão de status de usina preservada. |
 | DELETE cadastrais | Exclusão permitida, registro inexistente e dependência impeditiva com erro de domínio. |
 | Geração | Criar, alterar quantidade, trocar mês/ano/usina, excluir e conferir os saldos de origem/destino. |
 | Alocação | Número explícito, omitido/null, incompatibilidade, arredondamento, zero, duplicidade e falta de saldo. |
@@ -299,9 +368,11 @@ Revisão da fase 1 concluída pelo responsável; P01 e P03 implementadas em 27/1
 Os sete serviços possuem seus próprios métodos privados de tratamento de escrita,
 preservando os tratamentos específicos por operação. A proposta histórica P02 permanece
 substituída; o tradutor compartilhado removido na F14 não foi reintroduzido.
-Apresentar a entrega ao responsável. As fases 2 e 3 não foram iniciadas e dependem de
-autorização para prosseguir; a autorização de commits automáticos exclusiva da fase 1
-não se aplica às refatorações posteriores.
+O pré-requisito da fase 2 está implementado e verificado, sem commit. Aguardar sua revisão
+e validação antes de commitar e iniciar o lote 2.0. Depois, seguir os pontos de revisão
+definidos na seção 5, incluindo a revisão conjunta dos lotes 2.1–2.7 antes do lote 2.8.
+A autorização de commits automáticos exclusiva da fase 1 não se aplica a estas entregas.
 Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
-O banco existente não foi auditado nem migrado. R01/R02 e decisões D01–D03 continuam explícitos
-na auditoria; nenhuma correção de dados ou nova regra de produto foi aplicada por suposição.
+O banco existente não foi auditado nem migrado. A rejeição de PATCH vazio de D03 foi
+explicitamente definida e implementada neste pré-requisito; as demais questões D01–D03
+e riscos R01/R02 continuam explícitos na auditoria. Nenhuma correção de dados foi aplicada.

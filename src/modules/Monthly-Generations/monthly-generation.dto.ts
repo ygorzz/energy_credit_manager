@@ -12,12 +12,17 @@ export const createMonthlyGenerationSchema = z.object({
   powerPlantId: z.uuid(),
 });
 
-export const updateMonthlyGenerationSchema = createMonthlyGenerationSchema.extend({
-  month: createMonthlyGenerationSchema.shape.month.optional(),
-  year: createMonthlyGenerationSchema.shape.year.optional(),
-  energyGeneratedMwh: createMonthlyGenerationSchema.shape.energyGeneratedMwh.optional(),
-  powerPlantId: createMonthlyGenerationSchema.shape.powerPlantId.optional(),
-});
+// Reject PATCH bodies without any recognized field after parsing.
+export const updateMonthlyGenerationSchema = createMonthlyGenerationSchema
+  .extend({
+    month: createMonthlyGenerationSchema.shape.month.optional(),
+    year: createMonthlyGenerationSchema.shape.year.optional(),
+    energyGeneratedMwh: createMonthlyGenerationSchema.shape.energyGeneratedMwh.optional(),
+    powerPlantId: createMonthlyGenerationSchema.shape.powerPlantId.optional(),
+  })
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: 'At least one field must be provided for update',
+  });
 
 export const listMonthlyGenerationsSchema = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),

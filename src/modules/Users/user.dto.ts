@@ -27,7 +27,12 @@ export const registerUserSchema = userFieldsSchema
   });
 
 // PATCH must not reapply registration defaults and silently change role or status.
-export const updateUserSchema = userFieldsSchema.partial();
+// Reject PATCH bodies without any recognized field after parsing.
+export const updateUserSchema = userFieldsSchema
+  .partial()
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: 'At least one field must be provided for update',
+  });
 
 export const listUsersSchema = z.object({
   page: z.coerce.number().int().positive().min(1).default(1),
