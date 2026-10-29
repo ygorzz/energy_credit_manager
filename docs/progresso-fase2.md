@@ -118,3 +118,23 @@ início de 2.8. Os commits não autorizam a fase 3.
 Verificação: **330/330 testes aprovados** nos dois arquivos do lote. Tipos da aplicação
 e dos testes, build, lint e Biome dos arquivos alterados passaram. Lote concluído;
 commit: `test: cover authentication and route authorization`.
+
+### Lote 2.2 — usuários
+
+- Quatro rotas: lista com defaults/paginação/ordenação estável, leitura por ID, PATCH e
+  DELETE com retorno público e persistência conferida. ADMIN e ANALYST consultam; o
+  lote 2.1 confere os perfis e a autenticação em cada rota.
+- A lista inicial contém o próprio usuário autenticado: uma lista totalmente vazia de
+  usuários é incompatível com a autenticação atual. As demais listas admitem vazio.
+- IDs malformados (400), IDs válidos ausentes (404), paginação e campos Zod inválidos,
+  corpos vazios/desconhecidos e tipos de corpo inválidos. Primitivos JSON são recusados
+  pelo parser Express (400); arrays e objetos inválidos são recusados pelo Zod (400).
+- Omissão de perfil/status/vínculo/senha preserva o registro. Alteração de senha usa
+  bcrypt e autentica com as novas credenciais; nenhuma resposta expõe a senha/hash.
+- E-mail duplicado (409), empresa ausente (404), CLIENT sem vínculo (400), mudança conjunta
+  de perfil/empresa, promoção com desvinculação e exclusão repetida (404).
+- Contratos HTTP comuns extraídos somente em `test/support/route-contracts.ts`, sem
+  derivar casos de teste dos schemas da implementação. Rejeições conferem todo o banco.
+
+Verificação: **55/55 testes aprovados**; tipos da aplicação/testes, build, lint e Biome
+dos testes passaram. Commit: `test: cover user endpoints and shared request contracts`.

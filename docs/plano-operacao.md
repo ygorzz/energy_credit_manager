@@ -27,7 +27,7 @@ dos tratamentos de escrita para métodos privados de cada serviço (P03). Poster
 autorizou o pré-requisito da fase 2 descrito na seção 5. Essa entrega foi validada e commitada
 em `47c45d7`. O lote 2.0 foi implementado e teve seus commits autorizados pelo responsável
 em 28/10/2026, divididos entre infraestrutura e regressões de validação. O lote 2.1 foi
-verificado com 330 testes aprovados; os lotes 2.2–2.7 são os próximos. O acompanhamento
+verificado com 330 testes aprovados, e o 2.2 com 55; os lotes 2.3–2.7 são os próximos. O acompanhamento
 está em [progresso-fase2.md](progresso-fase2.md).
 A fase 3 continua fora do escopo.
 
