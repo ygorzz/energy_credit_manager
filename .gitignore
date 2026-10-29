@@ -5,6 +5,8 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.test.example
+.vitest/
 
 /src/db/generated/prisma
 

@@ -8,8 +8,12 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "check": "tsc --noEmit",
-    "lint": "biome lint src",
-    "lint:fix": "biome lint --write src",
+    "check:test": "tsc --project tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run test/integration",
+    "test:watch": "vitest",
+    "lint": "biome lint src test vitest.config.ts",
+    "lint:fix": "biome lint --write src test vitest.config.ts",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "biome:check": "biome check ."
@@ -25,9 +29,12 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.5.0",
     "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
     "prisma": "^7.10.0",
+    "supertest": "^7.3.1",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

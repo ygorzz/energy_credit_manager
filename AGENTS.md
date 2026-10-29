@@ -8,7 +8,7 @@ This Express 5 API manages energy generation and credit allocations using TypeSc
 - `src/modules/` groups features such as `Users` and `Power-Plants`. Follow routes → controller → service → repository, including credit allocations.
 - `src/middlewares/`, `src/errors/`, and `src/shared/schemas/` contain shared request handling, application errors, and validation.
 - `prisma/` contains the schema, migration history, and seed script. Prisma generates its client into `src/db/generated/prisma/`.
-- `dist/` contains compiled output. `test/e2e/` is currently empty; no automated test suite is configured.
+- `dist/` contains compiled output. `test/integration/` contains Vitest/Supertest tests; `test/support/` owns isolated database, HTTP server, authentication fixtures, and lifecycle helpers.
 
 ## Current Delivery Priorities
 
@@ -25,6 +25,11 @@ unrelated changes. Stop after Phase 1 and request the user's code review and app
 starting Phase 2 or any later work. This exception does not authorize automatic advancement
 or commits beyond Phase 1.
 
+Phase 2 uses the review gates in the operation plan: review the prerequisite first, then
+review batch 2.0 separately. Implement batches 2.1–2.7 without intermediate review, then
+request their joint acceptance before commits and batch 2.8. Stop after 2.8 for final review.
+Report newly discovered production defects before fixing them unless explicitly authorized.
+
 ## Delegated Questions
 
 Whenever the user asks to delegate a question to a subagent, provide the context needed
@@ -39,9 +44,12 @@ it does not authorize delegation unless the user requests it.
 - `npm ci`: install dependencies from the lockfile.
 - `npm run dev`: run the API with automatic reload through `tsx`.
 - `npm run check`: type-check without emitting files.
+- `npm run check:test`: type-check application, test helpers, tests, and Vitest configuration.
+- `npm test` / `npm run test:integration`: run integration tests once against the dedicated local PostgreSQL database.
+- `npm run test:watch`: rerun integration tests when files change.
 - `npm run build`: compile TypeScript into `dist/`.
 - `npm start`: run the compiled server after building.
-- `npm run lint`: lint `src/` with Biome; `npm run lint:fix` applies fixes.
+- `npm run lint`: lint application, tests, and Vitest configuration with Biome; `npm run lint:fix` applies fixes.
 - `npm run format:check`: check formatting; `npm run format` rewrites files.
 - `npm run biome:check`: check formatting, lint rules, and imports together.
 
@@ -60,7 +68,18 @@ or line-by-line narration. Preserve existing comment wording.
 
 ## Testing Guidelines
 
-No test runner, `npm test` script, or coverage threshold is configured. Run type, lint, formatting, and build checks before submitting. Manually verify affected endpoints, including validation failures and authorization. For energy calculations, verify monthly balances after create, update, and delete operations. Document verification steps in the PR.
+Use Vitest and Supertest with real PostgreSQL, authentication, services, repositories, and
+rate limiters. Configure `.env.test` from `.env.test.example`; `TEST_DATABASE_URL` must name
+the exclusive local database `energy_credit_manager_test`. Never use the application
+database, administrative seed, SQLite, or mocked persistence as integration evidence.
+The harness validates the target, holds a run lock, applies existing migrations, clears
+only business tables between cases, and closes HTTP/database connections. No coverage
+threshold is configured. See `test/README.md` for setup and the current batch's limits.
+
+Run application/test type checks, lint, formatting, build, and relevant integration tests
+before submitting. Include UUID/Zod failures, authorization, and unchanged database state
+after rejected writes. For energy operations, verify source/destination monthly balances
+after create, update, and delete. Document results and pre-existing failures in the PR.
 
 ## Commit & Pull Request Guidelines
 
@@ -69,3 +88,7 @@ Use conventional commits. History uses English messages with `feat:`, `fix:`, an
 ## Security & Configuration
 
 Configure `DATABASE_URL` and `JWT_SECRET` in a local `.env`; never commit credentials. Commit schema changes with their migrations. Regenerate the Prisma client after schema changes; do not edit or commit generated client files. Configure `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` locally before initial administrative seeding; see `.env.example`. Existing administrator credentials and status are preserved on subsequent runs.
+
+Keep `.env.test` untracked. Tests generate a fresh JWT secret per run and never fall back
+to application database credentials. Cleanup is destructive only inside the guarded test
+database; never bypass the destination checks or replace them with a reset of another database.
