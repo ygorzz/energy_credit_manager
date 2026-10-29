@@ -28,7 +28,7 @@ autorizou o pré-requisito da fase 2 descrito na seção 5. Essa entrega foi val
 em `47c45d7`. O lote 2.0 foi implementado e teve seus commits autorizados pelo responsável
 em 28/10/2026, divididos entre infraestrutura e regressões de validação. O lote 2.1 foi
 verificado com 330 testes aprovados, o 2.2 com 55, o 2.3 com 59 e o 2.4 com 101;
-o 2.5 com 91; os lotes 2.6–2.7 são os próximos. O acompanhamento
+o 2.5 com 91 e o 2.6 com 93; o lote 2.7 é o próximo. O acompanhamento
 está em [progresso-fase2.md](progresso-fase2.md).
 A fase 3 continua fora do escopo.
 

@@ -184,3 +184,23 @@ passaram. Commit: `test: cover power plant endpoints and historical ownership`.
 
 Verificação: **91/91 testes aprovados**; tipos da aplicação/testes, build, lint e Biome
 passaram. Commit: `test: cover client company endpoints and relationship rules`.
+
+### Lote 2.6 — geração mensal
+
+- Cinco rotas, contratos de lista/paginação/IDs e validação POST/PATCH de obrigatórios,
+  enums, UUIDs, números, null e limites de ano/energia; anos 2000/2100 e geração zero válidos.
+- Criação com saldo novo, soma de usinas na mesma distribuidora, duplicidade mensal (409),
+  usina inexistente (404), correção para cima/baixo/sem delta e retorno do registro persistido.
+- Movimentos entre meses, anos e usinas da mesma/outra distribuidora, criando ou somando
+  saldo destino; colisão mensal faz rollback. Origem e destino conferidos individualmente.
+- Geração não pode ser reduzida, movida ou excluída se faltar energia para créditos existentes.
+  Outra geração que cubra os créditos permite a remoção/movimentação. Exclusão retorna 200.
+- Decimal validado com soma 0,1 + 0,2 = 0,3 e correção/exclusão fracionária. Saldo ausente
+  é erro 404, sem escrita parcial. Rejeições preservam snapshots de todas as tabelas.
+- `expectEnergyIntegrity` recalcula somas a partir de gerações e alocações persistidas,
+  confere os totais de todos os saldos e exige disponibilidade não negativa.
+- D01 permanece aberta: alterar a geração conserva percentuais históricos, como a regra
+  atual; o teste não introduz recálculo retroativo. Nenhuma alteração em produção.
+
+Verificação final do lote: **93/93 testes aprovados**; tipos da aplicação/testes, build,
+lint e Biome passaram. Commit: `test: cover monthly generation balances and precision`.
