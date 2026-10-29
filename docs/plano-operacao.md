@@ -24,8 +24,11 @@ Verificações e limitações estão em [progresso-fase1.md](progresso-fase1.md)
 Em 27/10/2026, o responsável informou que concluiu a revisão da fase 1 e publicou as
 alterações no GitHub. Após implementar P01 e analisar o item 4, autorizou também a extração
 dos tratamentos de escrita para métodos privados de cada serviço (P03). Posteriormente,
-autorizou o pré-requisito da fase 2 descrito na seção 5. Essa entrega está implementada e
-aguarda sua revisão, sem commit e sem iniciar o lote 2.0. A fase 3 continua fora do escopo.
+autorizou o pré-requisito da fase 2 descrito na seção 5. Essa entrega foi validada e commitada
+em `47c45d7`. O lote 2.0 foi implementado e teve seus commits autorizados pelo responsável
+em 28/10/2026, divididos entre infraestrutura e regressões de validação. Os lotes 2.1–2.7
+ainda não foram iniciados. O acompanhamento está em [progresso-fase2.md](progresso-fase2.md).
+A fase 3 continua fora do escopo.
 
 ## 2. Memória das decisões de produto
 
@@ -261,7 +264,7 @@ expectativas dos testes para ocultar a falha. As correções de PATCH abaixo já
 | 2.7 | Cinco endpoints de alocação, saldos, percentuais e arredondamento. |
 | 2.8 | Concorrência, contratos transversais, fluxo completo e GitHub Actions com PostgreSQL 18/Node 24. |
 
-### Pré-requisito — implementado, aguardando revisão
+### Pré-requisito — validado e commitado
 
 - Os seis schemas de atualização exigem ao menos um valor diferente de `undefined` após
   o processamento dos campos. `{}`, corpo ausente, somente campos desconhecidos e campos
@@ -286,7 +289,22 @@ requisições HTTP reais nem criação da suíte permanente; as regressões inte
 pertencem ao lote 2.0. Tipos, build, lint e Biome dos seis arquivos passaram. Os comandos
 globais de formatação e Biome apontam 25 diagnósticos em arquivos não alterados nesta entrega.
 
-Situação: **sem commit, aguardando revisão e validação do responsável**. O lote 2.0 não foi iniciado.
+Situação: **validado e commitado pelo responsável em `47c45d7`**.
+
+### Lote 2.0 — concluído e commitado
+
+Infraestrutura Vitest/Supertest e regressões iniciais implementadas. As duas execuções
+completas passaram com 65 testes sobre HTTP/PostgreSQL reais, sem mocks da aplicação.
+As verificações de tipos, build e lint passaram; os arquivos novos/modificados passaram
+no Biome. Persistem 25 diagnósticos globais de formatação em arquivos não alterados.
+
+O banco exclusivo preservou 15 migrações e terminou vazio, sem conexões ou bloqueio pendente.
+Nenhum arquivo de produção em `src/` foi modificado. Detalhes, limitações e instruções de
+reexecução estão em [progresso-fase2.md](progresso-fase2.md) e [test/README.md](../test/README.md).
+
+Situação: **commits autorizados pelo responsável em 28/10/2026**, separados por finalidade.
+Os lotes 2.1–2.7 e 2.8 não foram iniciados. Alertas preexistentes de dependências foram registrados para
+avaliação separada, sem atualizações automáticas de produção.
 
 ### Ferramentas e isolamento
 
@@ -368,9 +386,11 @@ Revisão da fase 1 concluída pelo responsável; P01 e P03 implementadas em 27/1
 Os sete serviços possuem seus próprios métodos privados de tratamento de escrita,
 preservando os tratamentos específicos por operação. A proposta histórica P02 permanece
 substituída; o tradutor compartilhado removido na F14 não foi reintroduzido.
-O pré-requisito da fase 2 está implementado e verificado, sem commit. Aguardar sua revisão
-e validação antes de commitar e iniciar o lote 2.0. Depois, seguir os pontos de revisão
-definidos na seção 5, incluindo a revisão conjunta dos lotes 2.1–2.7 antes do lote 2.8.
+O pré-requisito da fase 2 foi validado e commitado em `47c45d7`. Os commits do lote 2.0 foram
+autorizados pelo responsável em 28/10/2026 e separados entre infraestrutura e regressões.
+A próxima implementação prevista são os lotes 2.1–2.7 em sequência; a solicitação atual
+ficou limitada aos commits do lote 2.0. Solicitar revisão conjunta dos lotes 2.1–2.7 antes
+dos respectivos commits e do lote 2.8, conforme a seção 5.
 A autorização de commits automáticos exclusiva da fase 1 não se aplica a estas entregas.
 Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
 O banco existente não foi auditado nem migrado. A rejeição de PATCH vazio de D03 foi
