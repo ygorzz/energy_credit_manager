@@ -28,7 +28,9 @@ or commits beyond Phase 1.
 Phase 2 uses the review gates in the operation plan: review the prerequisite first, then
 review batch 2.0 separately. Implement batches 2.1–2.7 sequentially, verify and commit
 each batch before starting the next, without intermediate review. Request their joint
-acceptance after batch 2.7 and before batch 2.8. Verify and commit batch 2.8, then stop for final review.
+acceptance after batch 2.7 and before batch 2.8. Batches 2.1–2.7 are already delivered.
+All new deliveries follow the branch and pull request workflow below, including batch 2.8.
+Stop after batch 2.8 for the user's final review; do not start Phase 3 automatically.
 Report newly discovered production defects before fixing them unless explicitly authorized.
 
 ## Delegated Questions
@@ -91,6 +93,27 @@ after create, update, and delete. Document results and pre-existing failures in 
 ## Commit & Pull Request Guidelines
 
 Use conventional commits. History uses English messages with `feat:`, `fix:`, and `refactor:` prefixes. Keep commits focused and imperative. PRs should explain behavior changes, link issues, list verification results, and identify migrations or API contract changes. Include request/response examples.
+
+### Required delivery workflow
+
+For every authorized delivery unit (request, block, batch, feature, or other agreed scope):
+
+1. Verify the repository state and current target branch on GitHub, then create a dedicated
+   branch for the delivery before committing its changes. Preserve unrelated local work.
+2. Implement the agreed scope with explanatory comments, run the appropriate checks, and
+   commit only the delivery's changes with focused English conventional commit messages.
+3. Push that branch and open a GitHub pull request against the verified target branch.
+   Use an English title and description covering the final behavior, validation, and limitations.
+4. Return the PR link and stop for the user's review, validation, and merge on GitHub,
+   outside the IDE workspace. Creating a branch or a local commit alone is not a complete delivery.
+5. Address requested revisions on the same branch and PR. Before dependent work resumes,
+   verify the PR's remote state and fetch the merged target branch; preserve local changes
+   and do not assume that an external review has already been merged.
+
+The user owns review, validation, and merge. Do not merge, enable auto-merge, or push delivery
+commits directly to `main` or another target branch. Existing phase gates still apply.
+This permanent workflow supersedes earlier delivery instructions that ended at a local
+commit or IDE review. It also applies to documentation and development-rule updates.
 
 ## Security & Configuration
 

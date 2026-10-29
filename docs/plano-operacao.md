@@ -237,6 +237,28 @@ nesta entrega. Não houve acesso ao banco nem criação da suíte permanente da 
 
 ## 5. Fase 2 — Testes automatizados de todas as rotas existentes
 
+### Fluxo permanente de entrega por branch e Pull Request
+
+Em 29/10/2026, o responsável definiu que cada entrega autorizada — pedido, bloco, lote,
+funcionalidade ou outro escopo combinado — deve terminar em uma branch própria publicada
+e um Pull Request no GitHub. Esta regra também se aplica a documentação e orientações
+de desenvolvimento, e substitui o encerramento somente em commit local ou revisão na IDE.
+
+1. Conferir o estado do repositório e a branch de destino no GitHub; criar uma branch
+   dedicada antes de commitar, preservando alterações locais não relacionadas.
+2. Implementar o escopo, comentar os blocos relevantes, verificar e fazer commits focados
+   em inglês somente com os arquivos da entrega.
+3. Publicar a branch e abrir um PR com título/descrição em inglês, comportamento final,
+   verificações realizadas e limitações. Retornar o link e parar para revisão.
+4. O responsável faz a revisão, validação e merge no GitHub, fora do workspace da IDE.
+   O agente não faz merge, não habilita auto-merge e não publica commits diretamente na main.
+5. Ajustes da mesma entrega ficam na mesma branch/PR. Antes de trabalho dependente,
+   verificar o estado remoto do PR e buscar a branch de destino após o merge, sem presumir
+   que a revisão externa já foi integrada e sem descartar alterações locais.
+
+Os pontos de aceite entre fases e lotes continuam válidos. A entrega desta orientação
+não inicia o lote 2.8 nem autoriza os requisitos da fase 3.
+
 ### Sequência de execução e revisão
 
 1. Implementar o pré-requisito de validação e parar para revisão e validação do responsável.
@@ -248,8 +270,9 @@ nesta entrega. Não houve acesso ao banco nem criação da suíte permanente da 
    cada lote, antes de iniciar o próximo. Solicitar revisão conjunta ao finalizar o lote
    2.7; somente após a validação iniciar o lote 2.8. Esta orientação substitui o adiamento
    dos commits até a revisão conjunta.
-4. Implementar o lote 2.8 somente depois dessa validação, verificar, commitar o lote e
-   apresentar a suíte completa para revisão final. Não avançar para os requisitos do MVP automaticamente.
+4. Implementar o lote 2.8 somente depois dessa validação, verificar e commitar em uma
+   branch própria, publicar e abrir um PR com a suíte completa para revisão final no
+   GitHub. O responsável faz o merge. Não avançar para os requisitos do MVP automaticamente.
 
 Defeitos adicionais devem ser apresentados com reprodução, resultado esperado, resultado
 observado e efeito no banco. Aguardar avaliação antes de corrigir produção; não alterar
@@ -399,6 +422,9 @@ fase 2; não autoriza iniciar a fase 3.
 Os lotes 2.1–2.7 estão concluídos, com 918 testes aprovados no conjunto de 2.0–2.7.
 Próxima ação: revisão e validação conjunta pelo responsável. Não iniciar 2.8 até essa
 validação. A matriz das 31 rotas está em [test/route-coverage.md](../test/route-coverage.md).
+Em 29/10/2026, o responsável informou que publicou também os comentários no GitHub e
+instituiu o fluxo de branch/PR acima. Aplicar esse fluxo desde a atualização das próprias
+orientações; revisão, validação e merge passam a acontecer no GitHub pelo responsável.
 Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
 O banco existente não foi auditado nem migrado. A rejeição de PATCH vazio de D03 foi
 explicitamente definida e implementada neste pré-requisito; as demais questões D01–D03
