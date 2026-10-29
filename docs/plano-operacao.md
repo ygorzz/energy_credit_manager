@@ -26,10 +26,10 @@ alterações no GitHub. Após implementar P01 e analisar o item 4, autorizou tam
 dos tratamentos de escrita para métodos privados de cada serviço (P03). Posteriormente,
 autorizou o pré-requisito da fase 2 descrito na seção 5. Essa entrega foi validada e commitada
 em `47c45d7`. O lote 2.0 foi implementado e teve seus commits autorizados pelo responsável
-em 28/10/2026, divididos entre infraestrutura e regressões de validação. O lote 2.1 foi
-verificado com 330 testes aprovados, o 2.2 com 55, o 2.3 com 59 e o 2.4 com 101;
-o 2.5 com 91 e o 2.6 com 93; o lote 2.7 é o próximo. O acompanhamento
-está em [progresso-fase2.md](progresso-fase2.md).
+em 28/10/2026, divididos entre infraestrutura e regressões de validação. Os lotes 2.1–2.7
+foram implementados e verificados, com um commit por lote, conforme a nova autorização.
+A suíte conjunta passou com 918 testes em 10 arquivos. Aguardar revisão conjunta antes
+de iniciar 2.8. O acompanhamento está em [progresso-fase2.md](progresso-fase2.md).
 A fase 3 continua fora do escopo.
 
 ## 2. Memória das decisões de produto
@@ -396,6 +396,9 @@ Em 28/10/2026, o responsável autorizou prosseguir com os lotes 2.1–2.7 e faze
 após a verificação de cada lote. Solicitar revisão conjunta ao final do lote 2.7, antes
 do lote 2.8, conforme a seção 5. A nova autorização de commits se aplica aos lotes da
 fase 2; não autoriza iniciar a fase 3.
+Os lotes 2.1–2.7 estão concluídos, com 918 testes aprovados no conjunto de 2.0–2.7.
+Próxima ação: revisão e validação conjunta pelo responsável. Não iniciar 2.8 até essa
+validação. A matriz das 31 rotas está em [test/route-coverage.md](../test/route-coverage.md).
 Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
 O banco existente não foi auditado nem migrado. A rejeição de PATCH vazio de D03 foi
 explicitamente definida e implementada neste pré-requisito; as demais questões D01–D03

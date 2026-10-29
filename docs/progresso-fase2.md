@@ -8,8 +8,8 @@ suas regressões com HTTP e PostgreSQL reais foram adicionadas no lote 2.0.
 
 ## Lote 2.0 — concluído e commitado
 
-Situação: **commits autorizados pelo responsável em 28/10/2026**, com divisão por
-finalidade. Os lotes 2.1–2.7 ainda não foram iniciados.
+Situação: **concluído nos commits `ff4d021` e `532c09b`**, autorizados pelo responsável
+em 28/10/2026, com divisão por finalidade. Os lotes seguintes estão registrados abaixo.
 
 ### Implementação
 
@@ -78,7 +78,7 @@ da porta 55439 nem desse diretório.
   `@prisma/config`, `body-parser`, `deepmerge-ts`, `fast-uri`, `ip-address`, `mysql2`,
   `prisma`, `proxy-addr`, `qs` e `zod`. Nenhum alerta foi corrigido automaticamente;
   atualizações de produção dependem de avaliação separada.
-- Cobertura completa por módulo permanece nos lotes 2.1–2.7. Concorrência coordenada,
+- A cobertura por módulo prevista foi entregue nos lotes 2.1–2.7 abaixo. Concorrência coordenada,
   limites 429 completos, fluxo completo e GitHub Actions permanecem no lote 2.8.
 
 ### Divisão dos commits
@@ -204,3 +204,58 @@ passaram. Commit: `test: cover client company endpoints and relationship rules`.
 
 Verificação final do lote: **93/93 testes aprovados**; tipos da aplicação/testes, build,
 lint e Biome passaram. Commit: `test: cover monthly generation balances and precision`.
+
+### Lote 2.7 — alocações
+
+- Cinco rotas com contratos de consulta/paginação/IDs e validações de corpo/campos de
+  POST/PATCH, incluindo percentuais, quantidade, ano, competência e UUID.
+- Criação com percentual explícito, omitido ou null, inclusive padrão zero. ADMIN e
+  ANALYST criam alocações; limites 0/100, quantidade manual e persistência verificados.
+- Base é a geração total mensal de todas as usinas da distribuidora, mesmo após alocações
+  anteriores. Percentuais são comparados com duas casas/HALF_UP, sem arredondar energia.
+- Falta de geração positiva (inclusive alocação zero), indisponibilidade, quantidade
+  incompatível, empresa inexistente e duplicidade não deixam escrita parcial.
+- PATCH valida valores efetivos: omissão preserva o percentual da alocação; null usa o
+  padrão atual da empresa. Alterações parciais incompatíveis são recusadas. A necessidade
+  de energia é o delta no mesmo saldo; alocação inalterada com saldo disponível zero é válida.
+- Mudanças de empresa/distribuidora/mês/ano conferem os saldos de origem/destino. Geração
+  destino diferente exige compatibilidade; colisão, saldo ausente/insuficiente e geração
+  zero são recusados. Exclusões de quantidade inteira, fracionária ou zero devolvem energia.
+- Fixtures deliberadamente inconsistentes confirmam 404/409 sem reparo automático para
+  saldo original ausente ou total alocado menor que o crédito. As demais operações
+  conferem integridade calculada a partir dos lançamentos; nenhuma alteração em produção.
+
+Verificação do lote: **124 testes aprovados** na execução conjunta. Tipos da aplicação/testes,
+build, lint e Biome passaram. Commit: `test: cover credit allocation rules and balance integrity`.
+
+## Revisão conjunta — aguardando validação
+
+Execução completa em Node **24.14.0**, Windows e PostgreSQL 18: **918/918 testes em 10 arquivos**,
+em aproximadamente 196 segundos. Sem mocks de persistência/autenticação/serviços e sem retries.
+
+| Lote | Testes | Commit |
+| --- | --- | --- |
+| 2.0 | 65 | `ff4d021`, `532c09b` |
+| 2.1 | 330 | `e7a3352` |
+| 2.2 | 55 | `f9d96bf` |
+| 2.3 | 59 | `e51929f` |
+| 2.4 | 101 | `800ddd7` |
+| 2.5 | 91 | `b061f83` |
+| 2.6 | 93 | `e55d2ff` |
+| 2.7 | 124 | `test: cover credit allocation rules and balance integrity` |
+
+O banco exclusivo terminou com **15 migrações preservadas, sete tabelas vazias, zero
+conexões remanescentes e lock liberado**. A instância descartável foi encerrada depois
+da verificação. Instruções para repetir estão na seção de ambiente acima.
+
+Tipos da aplicação/testes, build, lint e Biome dos arquivos do lote passaram.
+`format:check` e `biome:check` globais continuam falhando exclusivamente nos **25 arquivos
+preexistentes de formatação**, fora das alterações. Os 10 alertas anteriores de dependências
+não foram tratados nesta entrega. Nenhum arquivo de produção, migração ou dependência
+foi modificado nos lotes 2.1–2.7; as correções das fixtures foram descritas nos lotes pertinentes.
+
+A [matriz das 31 rotas](../test/route-coverage.md) distingue cenários funcionais entregues
+dos pontos ainda reservados para 2.8. Não considerar a fase 2 encerrada: concorrência
+coordenada, limites 429 completos, contratos HTTP transversais, fluxo completo e CI/Linux
+continuam pendentes. **Aguardar revisão conjunta antes de iniciar 2.8**. A fase 3 permanece
+fora do escopo e D01/D02 e os riscos históricos não foram resolvidos implicitamente.

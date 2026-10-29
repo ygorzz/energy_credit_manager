@@ -1,8 +1,8 @@
 # Testes de integração
 
-O lote 2.0 usa Vitest 5 e Supertest 7 para executar a aplicação Express real com PostgreSQL.
-Os testes de cada endpoint serão ampliados nos lotes 2.1–2.7; concorrência, contratos
-transversais completos e GitHub Actions pertencem ao lote 2.8.
+A suíte usa Vitest 5 e Supertest 7 para executar a aplicação Express real com PostgreSQL.
+Os lotes 2.1–2.7 acrescentam testes funcionais das 31 rotas à infraestrutura do lote 2.0.
+Concorrência coordenada, contratos transversais completos e GitHub Actions pertencem ao lote 2.8.
 
 ## Preparação local
 
@@ -28,6 +28,7 @@ Requisitos: Node 24, dependências instaladas com `npm ci` e PostgreSQL 18 em ex
 Não é necessário iniciar `npm run dev`. A suíte abre um servidor em `127.0.0.1` numa
 porta temporária e o encerra ao final. Também fecha as conexões e limpa os dados de teste.
 O PostgreSQL é um serviço externo: a suíte não inicia nem encerra a instância do usuário.
+Se o PowerShell bloquear `npm.ps1`, use `npm.cmd` e `npx.cmd` nos comandos equivalentes.
 
 ## Comandos
 
@@ -69,6 +70,26 @@ execute `npx prisma generate`. Não são executados seed, `migrate reset` ou `db
 - Preservação de status omitido nas usinas inativas/em manutenção e default ACTIVE na criação.
 - Atualizações válidas com zero e null, incluindo verificação dos saldos energéticos.
 
-Essas regressões iniciais não representam cobertura completa das 31 rotas. Novos casos
-devem conferir o contrato HTTP e a persistência, com resultados esperados explícitos.
-Defeitos novos de produção devem ser apresentados ao responsável antes de correções.
+Essas regressões iniciais são complementadas pelos testes por módulo descritos abaixo.
+
+## Cobertura dos lotes 2.1–2.7
+
+Veja a [matriz por rota](route-coverage.md) e o [acompanhamento da fase](../docs/progresso-fase2.md).
+
+- `auth.test.ts`: login/registro, defaults, senha, vínculo, unicidade e validações.
+- `access-control.test.ts`: autenticação nas 30 rotas protegidas e perfis proibidos;
+  perfil atual do banco prevalece sobre o perfil antigo do token.
+- `users.test.ts`, `distributors.test.ts`, `power-plants.test.ts` e `client-companies.test.ts`:
+  consultas, paginação, IDs, criação/alteração/exclusão e regras cadastrais pertinentes.
+- `monthly-generations.test.ts`: geração, movimentos, saldos de origem/destino e Decimal.
+- `credit-allocations.test.ts`: base de rateio, percentuais padrão/explícitos, arredondamento,
+  disponibilidade, correções e devolução de energia na exclusão.
+- `expectRejected` compara as sete tabelas antes/depois das rejeições. Os contratos comuns
+  em `route-contracts.ts` exercitam HTTP real e não importam schemas para derivar expectativas.
+- `expectEnergyIntegrity` confere saldos contra a soma dos lançamentos persistidos.
+  Casos de saldo danificado usam fixtures explicitamente inconsistentes para verificar
+  recusa sem reparo; esses casos não são apresentados como dados íntegros.
+
+Isso representa cobertura funcional por rota, sem promessa de 100% de linhas ou prova
+de concorrência. O aceite da fase 2 ainda depende de 2.8 e de revisão. Novos defeitos de
+produção devem ser apresentados ao responsável antes de correções.
