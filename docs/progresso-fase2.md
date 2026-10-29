@@ -153,3 +153,18 @@ Verificação: **59/59 testes aprovados**; tipos da aplicação/testes, build, l
 passaram. A primeira execução identificou nomes não normalizados nas fixtures; os nomes
 gerados agora seguem as maiúsculas da API. A expectativa de unicidade foi preservada.
 Commit: `test: cover distributor endpoints and deletion dependencies`.
+
+### Lote 2.4 — usinas
+
+- Cinco rotas com contratos de lista, paginação, IDs e validação POST/PATCH: campos
+  obrigatórios, tipos, null, limites de nome/cidade/capacidade, enums e referências UUID.
+- Criação SOLAR/HYDRO/WIND, normalização, capacidade decimal, status ACTIVE por padrão,
+  persistência e leitura do registro; referência inexistente (404) e nome repetido (409).
+- Atualização completa, troca de distribuidora sem histórico e manutenção da mesma
+  distribuidora com histórico. Mudança de distribuidora com geração histórica retorna
+  409 sem aplicar nem os outros campos enviados. As regressões de status estão no 2.0.
+- Exclusão livre (200), exclusão impedida pela geração (409) e saldos históricos intactos.
+  Sem mudanças em produção.
+
+Verificação: **101/101 testes aprovados**; tipos da aplicação/testes, build, lint e Biome
+passaram. Commit: `test: cover power plant endpoints and historical ownership`.
