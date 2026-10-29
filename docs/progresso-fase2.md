@@ -138,3 +138,18 @@ commit: `test: cover authentication and route authorization`.
 
 Verificação: **55/55 testes aprovados**; tipos da aplicação/testes, build, lint e Biome
 dos testes passaram. Commit: `test: cover user endpoints and shared request contracts`.
+
+### Lote 2.3 — distribuidoras
+
+- Cinco rotas com contratos de leitura, paginação e IDs; POST/PATCH cobrem campos
+  obrigatórios, tipo, null, nome vazio, espaços, tamanho e corpo inválido.
+- Criação/alteração normalizam o nome, respeitam os limites de 2/50 caracteres e
+  retornam dados persistidos; unicidade normalizada responde 409 em POST e PATCH.
+- Exclusão sem vínculos retorna 200 e os dados removidos. Usina, empresa e saldo mensal
+  são exercitados separadamente como dependências impeditivas (409).
+- Todas as rejeições conferem a preservação das sete tabelas. Sem alterações em produção.
+
+Verificação: **59/59 testes aprovados**; tipos da aplicação/testes, build, lint e Biome
+passaram. A primeira execução identificou nomes não normalizados nas fixtures; os nomes
+gerados agora seguem as maiúsculas da API. A expectativa de unicidade foi preservada.
+Commit: `test: cover distributor endpoints and deletion dependencies`.

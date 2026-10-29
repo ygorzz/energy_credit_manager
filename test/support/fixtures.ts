@@ -22,7 +22,10 @@ function uniqueCnpj() {
 }
 
 export function createDistributor(overrides: Partial<Prisma.DistributorUncheckedCreateInput> = {}) {
-  return db.distributor.create({ data: { name: `DISTRIBUTOR ${randomUUID()}`, ...overrides } });
+  // Fixture names follow the same uppercase normalization as cadastral API writes.
+  return db.distributor.create({
+    data: { name: `DISTRIBUTOR ${randomUUID()}`.toUpperCase(), ...overrides },
+  });
 }
 
 export function createCompany(
@@ -31,7 +34,7 @@ export function createCompany(
 ) {
   return db.clientCompany.create({
     data: {
-      name: `COMPANY ${randomUUID()}`,
+      name: `COMPANY ${randomUUID()}`.toUpperCase(),
       cnpj: uniqueCnpj(),
       allocationPercentage: 30,
       distributorId,
@@ -46,7 +49,7 @@ export function createPlant(
 ) {
   return db.powerPlant.create({
     data: {
-      name: `PLANT ${randomUUID()}`,
+      name: `PLANT ${randomUUID()}`.toUpperCase(),
       state: 'SP',
       city: 'Test city',
       sourceType: 'SOLAR',
