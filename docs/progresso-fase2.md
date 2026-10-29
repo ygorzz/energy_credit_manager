@@ -92,3 +92,29 @@ da porta 55439 nem desse diretório.
 Antes dos commits, tipos da aplicação/testes, build, lint e Biome dos arquivos do lote
 passaram novamente. O código dos testes permaneceu igual ao das duas execuções completas
 com 65 testes aprovados; a suíte não foi repetida apenas para dividir os commits.
+
+## Execução dos lotes 2.1–2.7
+
+Em 28/10/2026, o responsável autorizou um commit ao concluir e verificar cada lote,
+antes de iniciar o próximo. A revisão conjunta permanece ao final de 2.7 e bloqueia o
+início de 2.8. Os commits não autorizam a fase 3.
+
+### Lote 2.1 — autenticação e autorização
+
+- Login: token assinado com validade de uma hora e uso real em rota protegida; credenciais
+  incorretas, contas inativas/canceladas e entradas Zod inválidas.
+- Registro: três perfis, defaults CLIENT/ACTIVE, vínculo de empresa, senha com bcrypt,
+  resposta sem dados de senha, e-mail repetido (409), referência inexistente (404) e
+  formatos, campos obrigatórios, enums, limites e vínculo CLIENT inválidos (400).
+- Todas as 30 rotas protegidas: ausência de token, assinatura inválida, expiração,
+  esquema incorreto, claims inválidos, usuário removido/inativo/cancelado e CLIENT proibido.
+  As 17 operações exclusivas de ADMIN também rejeitam ANALYST.
+- Perfil atual consultado no banco, mesmo com token antigo; esquema Bearer sem distinção
+  de maiúsculas. Rejeições conferem snapshots das sete tabelas de negócio.
+- Ajustada somente a fixture para gravar todo o e-mail em maiúsculas, como a API faz.
+  A primeira execução identificou essa divergência nos três cenários de login; nenhuma
+  alteração de produção ou relaxamento das expectativas foi necessário.
+
+Verificação: **330/330 testes aprovados** nos dois arquivos do lote. Tipos da aplicação
+e dos testes, build, lint e Biome dos arquivos alterados passaram. Lote concluído;
+commit: `test: cover authentication and route authorization`.

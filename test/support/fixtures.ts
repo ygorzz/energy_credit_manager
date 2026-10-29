@@ -62,7 +62,8 @@ export async function createUser(overrides: Partial<Prisma.UserUncheckedCreateIn
   const user = await db.user.create({
     data: {
       name: 'Integration User',
-      email: `${randomUUID()}@EXAMPLE.COM`,
+      // Match the API's email normalization so fixture accounts can log in through HTTP.
+      email: `${randomUUID()}@example.com`.toUpperCase(),
       hashPassword: await passwordHash,
       role: 'ADMIN',
       status: 'ACTIVE',

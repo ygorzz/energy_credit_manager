@@ -26,8 +26,9 @@ starting Phase 2 or any later work. This exception does not authorize automatic 
 or commits beyond Phase 1.
 
 Phase 2 uses the review gates in the operation plan: review the prerequisite first, then
-review batch 2.0 separately. Implement batches 2.1–2.7 without intermediate review, then
-request their joint acceptance before commits and batch 2.8. Stop after 2.8 for final review.
+review batch 2.0 separately. Implement batches 2.1–2.7 sequentially, verify and commit
+each batch before starting the next, without intermediate review. Request their joint
+acceptance after batch 2.7 and before batch 2.8. Verify and commit batch 2.8, then stop for final review.
 Report newly discovered production defects before fixing them unless explicitly authorized.
 
 ## Delegated Questions

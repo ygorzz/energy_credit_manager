@@ -26,8 +26,9 @@ alterações no GitHub. Após implementar P01 e analisar o item 4, autorizou tam
 dos tratamentos de escrita para métodos privados de cada serviço (P03). Posteriormente,
 autorizou o pré-requisito da fase 2 descrito na seção 5. Essa entrega foi validada e commitada
 em `47c45d7`. O lote 2.0 foi implementado e teve seus commits autorizados pelo responsável
-em 28/10/2026, divididos entre infraestrutura e regressões de validação. Os lotes 2.1–2.7
-ainda não foram iniciados. O acompanhamento está em [progresso-fase2.md](progresso-fase2.md).
+em 28/10/2026, divididos entre infraestrutura e regressões de validação. O lote 2.1 foi
+verificado com 330 testes aprovados; os lotes 2.2–2.7 são os próximos. O acompanhamento
+está em [progresso-fase2.md](progresso-fase2.md).
 A fase 3 continua fora do escopo.
 
 ## 2. Memória das decisões de produto
@@ -241,11 +242,13 @@ nesta entrega. Não houve acesso ao banco nem criação da suíte permanente da 
    Após sua aceitação, commitar essa entrega e iniciar o lote 2.0.
 2. Implementar o lote 2.0 e parar novamente para revisão e validação. Após a aceitação,
    commitar esse lote e iniciar os lotes 2.1–2.7.
-3. Implementar os lotes 2.1–2.7 em sequência, sem revisão intermediária e sem commits
-   automáticos. Solicitar revisão conjunta somente ao finalizar todos; após a validação,
-   fazer commits focados por lote e iniciar o lote 2.8.
-4. Implementar o lote 2.8 somente depois dessa validação e apresentar a suíte completa
-   para revisão final. Não avançar para os requisitos do MVP automaticamente.
+3. Implementar os lotes 2.1–2.7 em sequência, sem revisão intermediária. Por orientação do
+   responsável em 28/10/2026, verificar e fazer um commit focado em inglês ao concluir
+   cada lote, antes de iniciar o próximo. Solicitar revisão conjunta ao finalizar o lote
+   2.7; somente após a validação iniciar o lote 2.8. Esta orientação substitui o adiamento
+   dos commits até a revisão conjunta.
+4. Implementar o lote 2.8 somente depois dessa validação, verificar, commitar o lote e
+   apresentar a suíte completa para revisão final. Não avançar para os requisitos do MVP automaticamente.
 
 Defeitos adicionais devem ser apresentados com reprodução, resultado esperado, resultado
 observado e efeito no banco. Aguardar avaliação antes de corrigir produção; não alterar
@@ -303,7 +306,7 @@ Nenhum arquivo de produção em `src/` foi modificado. Detalhes, limitações e 
 reexecução estão em [progresso-fase2.md](progresso-fase2.md) e [test/README.md](../test/README.md).
 
 Situação: **commits autorizados pelo responsável em 28/10/2026**, separados por finalidade.
-Os lotes 2.1–2.7 e 2.8 não foram iniciados. Alertas preexistentes de dependências foram registrados para
+Os resultados dos lotes seguintes estão no acompanhamento da fase. Alertas preexistentes de dependências foram registrados para
 avaliação separada, sem atualizações automáticas de produção.
 
 ### Ferramentas e isolamento
@@ -388,10 +391,10 @@ preservando os tratamentos específicos por operação. A proposta histórica P0
 substituída; o tradutor compartilhado removido na F14 não foi reintroduzido.
 O pré-requisito da fase 2 foi validado e commitado em `47c45d7`. Os commits do lote 2.0 foram
 autorizados pelo responsável em 28/10/2026 e separados entre infraestrutura e regressões.
-A próxima implementação prevista são os lotes 2.1–2.7 em sequência; a solicitação atual
-ficou limitada aos commits do lote 2.0. Solicitar revisão conjunta dos lotes 2.1–2.7 antes
-dos respectivos commits e do lote 2.8, conforme a seção 5.
-A autorização de commits automáticos exclusiva da fase 1 não se aplica a estas entregas.
+Em 28/10/2026, o responsável autorizou prosseguir com os lotes 2.1–2.7 e fazer um commit
+após a verificação de cada lote. Solicitar revisão conjunta ao final do lote 2.7, antes
+do lote 2.8, conforme a seção 5. A nova autorização de commits se aplica aos lotes da
+fase 2; não autoriza iniciar a fase 3.
 Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
 O banco existente não foi auditado nem migrado. A rejeição de PATCH vazio de D03 foi
 explicitamente definida e implementada neste pré-requisito; as demais questões D01–D03
