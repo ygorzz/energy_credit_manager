@@ -29,6 +29,7 @@ const routes = [
   ]),
 ] as { method: 'get' | 'post' | 'patch' | 'delete'; path: string; analyst: boolean }[];
 
+// Missing resource IDs are intentional: authentication and authorization must reject first.
 describe.each(routes)('$method $path access', ({ method, path, analyst }) => {
   it.each([
     'missing',
@@ -72,6 +73,7 @@ describe.each(routes)('$method $path access', ({ method, path, analyst }) => {
     });
 });
 
+// A valid signature alone is insufficient; claims and the account's current role must remain valid.
 describe('JWT payload and current database role', () => {
   it.each([
     { role: 'ADMIN' },

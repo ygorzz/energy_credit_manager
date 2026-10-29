@@ -33,6 +33,7 @@ describeWriteValidation({
   ],
 });
 
+// Names must remain unique after normalization, and linked records must survive rejected deletion.
 describe('Distributor writes', () => {
   it.each(['Ab', 'x'.repeat(50)])(
     'creates and reads a normalized name at a valid boundary %#',

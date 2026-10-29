@@ -5,6 +5,7 @@ import { parse } from 'dotenv';
 export const TEST_DATABASE_NAME = 'energy_credit_manager_test';
 export const TEST_LOCK_KEY = 20261027;
 
+// Compare database destinations independently of credentials and loopback address spelling.
 function databaseIdentity(value: string): string {
   const url = new URL(value);
   const hostname = url.hostname.replace(/^\[|\]$/g, '').toLowerCase();
@@ -61,10 +62,12 @@ export function validateTestDatabaseUrl(
   return url.toString();
 }
 
+// Read local configuration without installing application credentials into the process environment.
 function readEnvironmentFile(file: string): Record<string, string> {
   return existsSync(file) ? parse(readFileSync(file)) : {};
 }
 
+// Prefer explicit test configuration and generate a fresh signing secret for each run.
 export function loadTestEnvironment() {
   const application = readEnvironmentFile('.env');
   const test = readEnvironmentFile('.env.test');

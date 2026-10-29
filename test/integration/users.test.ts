@@ -47,6 +47,7 @@ describeWriteValidation({
   ],
 });
 
+// Validate the effective role/company pair while preserving omitted fields and private credentials.
 describe('User update and deletion', () => {
   it('preserves omitted role/status/password/company and never exposes password fields', async () => {
     const auth = await createUser();

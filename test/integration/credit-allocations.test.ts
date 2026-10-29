@@ -64,6 +64,7 @@ describeWriteValidation({
   ],
 });
 
+// Creation resolves the default percentage and checks the manually supplied quantity against it.
 describe('POST /credit-allocations business rules', () => {
   it.each([{}, { percentageApplied: null }, { percentageApplied: 30 }])(
     'accepts omitted, null or explicit percentage %#',
@@ -279,6 +280,7 @@ describe('POST /credit-allocations business rules', () => {
   });
 });
 
+// One balance receives only the delta; moves between periods or distributors adjust both balances.
 describe('PATCH /credit-allocations effective values and movements', () => {
   it('rejects an increase whose delta exceeds the remaining shared availability', async () => {
     const graph = await createEnergyGraph();
@@ -569,6 +571,7 @@ describe('PATCH /credit-allocations effective values and movements', () => {
   });
 });
 
+// Deletion returns energy; missing or inconsistent source balances prevent the operation.
 describe('Allocation deletion and damaged source data', () => {
   it.each([30, 0.3, 0])('deletes energy %s and restores exact availability', async (amount) => {
     const graph = await createEnergyGraph();

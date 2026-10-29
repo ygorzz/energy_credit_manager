@@ -7,6 +7,7 @@ import { TEST_DATABASE_NAME, TEST_LOCK_KEY, validateTestDatabaseUrl } from './en
 
 const require = createRequire(import.meta.url);
 
+// Prepare the guarded database once per run and retain its lock until every test finishes.
 export default async function setup(project: TestProject) {
   const { testDatabaseUrl, applicationDatabaseUrl } = project.config.provide;
   const databaseUrl = validateTestDatabaseUrl(testDatabaseUrl, applicationDatabaseUrl);
@@ -14,6 +15,7 @@ export default async function setup(project: TestProject) {
   let locked = false;
   try {
     await connection.connect();
+    // Confirm the connected database before any migration or table cleanup can run.
     const destination = await connection.query<{ database: string }>(
       'SELECT current_database() AS database',
     );
@@ -27,6 +29,7 @@ export default async function setup(project: TestProject) {
     );
     locked = result.rows[0]?.locked === true;
     if (!locked) throw new Error('Another integration test run is already using this database.');
+    // Reproduce the checked-in schema without administrative seed data or database resets.
     for (const args of [['generate'], ['migrate', 'deploy']]) {
       try {
         const cli = join(dirname(require.resolve('prisma/package.json')), 'build', 'index.js');
@@ -46,6 +49,7 @@ export default async function setup(project: TestProject) {
       }
     }
   } catch (error) {
+    // Closing the session also releases a lock acquired before a setup failure.
     await connection.end();
     throw error;
   }

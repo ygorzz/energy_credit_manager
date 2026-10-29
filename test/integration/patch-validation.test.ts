@@ -3,6 +3,7 @@ import { db, snapshotDatabase } from '../support/database.js';
 import { createEnergyGraph } from '../support/fixtures.js';
 import { api } from '../support/server.js';
 
+// Run the same prerequisite regressions against all six independently validated PATCH endpoints.
 const cases = [
   { resource: 'users', field: 'user', invalid: { name: 123 } },
   { resource: 'distributors', field: 'distributor', invalid: { name: 123 } },
@@ -73,6 +74,7 @@ describe.each(cases)('PATCH /$resource/:id prerequisite', ({ resource, field, in
   );
 });
 
+// Omitted values preserve existing state; permitted zero and null values still count as updates.
 describe('Valid partial updates', () => {
   it.each(['INACTIVE', 'MAINTENANCE'] as const)(
     'preserves omitted plant status %s',

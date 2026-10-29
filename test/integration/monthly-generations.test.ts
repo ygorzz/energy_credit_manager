@@ -58,6 +58,7 @@ describeWriteValidation({
   ],
 });
 
+// Generation records must reconcile with source and destination balances after every write.
 describe('Monthly generation writes and balances', () => {
   it.each([0, 0.1, 100])(
     'creates generation %s and its monthly balance atomically',

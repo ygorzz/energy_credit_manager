@@ -19,6 +19,7 @@ export function describeReadContract({ path, seed, patch, includesActor = false 
       const auth = await createUser();
       const response = await api().get(path).auth(auth.token, { type: 'bearer' });
       expect(response.status).toBe(200);
+      // Authentication itself creates a user, so only the users list starts with one record.
       expect(response.body.map((row: RecordId) => row.id)).toEqual(
         includesActor ? [auth.user.id] : [],
       );
@@ -124,6 +125,7 @@ type WriteContract = {
   methods?: ('post' | 'patch')[];
 };
 
+// Register invalid field, body and required-field scenarios for each module's HTTP writes.
 export function describeWriteValidation({
   path,
   prepare,
@@ -137,6 +139,7 @@ export function describeWriteValidation({
       const pending = api()
         [method](method === 'post' ? path : `${path}/${fixture.id}`)
         .auth(fixture.token, { type: 'bearer' });
+      // POST needs the other required fields; PATCH must validate the supplied partial body alone.
       await expectValidation(
         pending.send(method === 'post' ? { ...fixture.body, ...override } : override),
         Object.keys(override)[0],

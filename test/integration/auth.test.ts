@@ -21,6 +21,7 @@ const registration = {
   companyId: null,
 };
 
+// Exercise real password verification and the resulting token through the protected API.
 describe('POST /auth/login', () => {
   it('returns a signed one-hour token and accepts it on a protected route', async () => {
     const { user } = await createUser();
@@ -79,6 +80,7 @@ describe('POST /auth/login', () => {
   });
 });
 
+// Registration must preserve company-link rules while returning only public user fields.
 describe('POST /auth/register', () => {
   it.each(['ADMIN', 'ANALYST', 'CLIENT'] as const)(
     'creates a %s account without exposing password data',

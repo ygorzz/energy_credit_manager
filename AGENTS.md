@@ -67,6 +67,12 @@ and significant implementation changes, including Phase 1 corrections and all fu
 implementations. Summarize the rule or purpose of the block without long explanations
 or line-by-line narration. Preserve existing comment wording.
 
+Add comments as implementation progresses, rather than leaving documentation until the
+end. This is a permanent rule across the project, including application code, tests,
+helpers, and configuration. Explain the purpose of key files, nontrivial functions,
+business rules, and important blocks where intent is not obvious. Keep comments brief,
+in English, and focused on intent, constraints, or decisions; avoid restating clear code.
+
 ## Testing Guidelines
 
 Use Vitest and Supertest with real PostgreSQL, authentication, services, repositories, and

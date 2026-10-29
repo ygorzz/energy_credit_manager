@@ -7,6 +7,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['test/integration/**/*.test.ts'],
+    // Sequential isolated files share one guarded database without competing cleanup operations.
     pool: 'forks',
     isolate: true,
     fileParallelism: false,

@@ -6,8 +6,10 @@ import type { Prisma } from '../../src/db/generated/prisma/client.js';
 import { db } from './database.js';
 
 export const TEST_PASSWORD = 'IntegrationPassword123';
+// Reuse a real bcrypt hash within this worker without paying its cost for every fixture.
 const passwordHash = bcrypt.hash(TEST_PASSWORD, 10);
 
+// Generate both CNPJ check digits so unrelated tests start with valid company data.
 function uniqueCnpj() {
   let digits = String(randomInt(100_000_000_000, 1_000_000_000_000));
   for (const weights of [
@@ -28,6 +30,7 @@ export function createDistributor(overrides: Partial<Prisma.DistributorUnchecked
   });
 }
 
+// Link a company to its distributor; overrides let each scenario set its own allocation default.
 export function createCompany(
   distributorId: string,
   overrides: Partial<Prisma.ClientCompanyUncheckedCreateInput> = {},
@@ -43,6 +46,7 @@ export function createCompany(
   });
 }
 
+// Create an independent plant without using the endpoint whose behavior will be tested.
 export function createPlant(
   distributorId: string,
   overrides: Partial<Prisma.PowerPlantUncheckedCreateInput> = {},
@@ -61,6 +65,7 @@ export function createPlant(
   });
 }
 
+// Persist the account and sign a real token for authentication against the database.
 export async function createUser(overrides: Partial<Prisma.UserUncheckedCreateInput> = {}) {
   const user = await db.user.create({
     data: {

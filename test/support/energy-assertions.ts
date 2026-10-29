@@ -2,6 +2,7 @@ import { expect } from 'vitest';
 import { type Months, Prisma } from '../../src/db/generated/prisma/client.js';
 import { db } from './database.js';
 
+// Expected values are generated, allocated and available MWh, compared as exact decimal strings.
 export async function expectBalance(
   distributorId: string,
   expected: [string, string, string],
@@ -30,6 +31,7 @@ export async function expectEnergyIntegrity() {
   const keys = new Set(
     balances.map((balance) => key(balance.distributorId, balance.month, balance.year)),
   );
+  // Every energy record must have a corresponding monthly distributor balance.
   for (const generation of generations)
     expect(
       keys.has(key(generation.powerPlant.distributorId, generation.month, generation.year)),

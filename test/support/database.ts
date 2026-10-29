@@ -4,6 +4,7 @@ import { TEST_DATABASE_NAME, validateTestDatabaseUrl } from './environment.js';
 
 export { db };
 
+// Prevent worker configuration drift from redirecting queries or cleanup to another database.
 export function assertTestEnvironment() {
   const expected = inject('testDatabaseUrl');
   validateTestDatabaseUrl(expected, inject('applicationDatabaseUrl'));
@@ -12,6 +13,7 @@ export function assertTestEnvironment() {
   }
 }
 
+// Check PostgreSQL's actual destination in addition to validating the configured URL.
 export async function verifyDatabaseConnection() {
   assertTestEnvironment();
   const result = await db.$queryRaw<{ database: string }[]>`
@@ -31,6 +33,7 @@ export async function clearDatabase() {
   `;
 }
 
+// Stable ordering makes whole-database comparisons detect rejected writes without row-order noise.
 export async function snapshotDatabase() {
   const orderBy = { id: 'asc' } as const;
   const [users, companies, plants, distributors, generations, allocations, balances] =

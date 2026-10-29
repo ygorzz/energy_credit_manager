@@ -8,6 +8,7 @@ export async function expectRejected(
   status: number,
   message?: string,
 ) {
+  // Supertest sends its lazy request only after the baseline snapshot has been captured.
   const before = await snapshotDatabase();
   const response = await pending;
   expect(response.status).toBe(status);
@@ -17,6 +18,7 @@ export async function expectRejected(
   return response;
 }
 
+// Validate the shared Zod response and optional issue path, not just the HTTP status.
 export async function expectValidation(pending: PromiseLike<Response>, field?: string) {
   const response = await expectRejected(pending, 400, 'Validation Error');
   expect(response.body.errors).toBeInstanceOf(Array);

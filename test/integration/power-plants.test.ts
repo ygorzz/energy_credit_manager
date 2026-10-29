@@ -67,6 +67,7 @@ describeWriteValidation({
   ],
 });
 
+// Cadastral edits must preserve generation ownership and the plant's existing operational state.
 describe('Power plant writes', () => {
   it.each(['SOLAR', 'HYDRO', 'WIND'])(
     'creates and reads a %s plant with ACTIVE default and decimal capacity',

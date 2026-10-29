@@ -8,6 +8,7 @@ import { createDistributor, createUser } from '../support/fixtures.js';
 import { clientKey, resetRateLimits } from '../support/rate-limits.js';
 import { api } from '../support/server.js';
 
+// Verify the harness safeguards before relying on its HTTP and persistence evidence.
 describe('Integration infrastructure', () => {
   it.each([
     ['missing URL', undefined],

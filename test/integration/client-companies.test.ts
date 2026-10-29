@@ -59,6 +59,7 @@ describeWriteValidation({
   ],
 });
 
+// Distinguish CNPJ format, check digits and uniqueness while protecting company relationships.
 describe('Client company writes', () => {
   it.each([0, 100])(
     'creates and reads a company at percentage boundary %s',
@@ -203,6 +204,7 @@ describe('Client company writes', () => {
     expect(response.body.deleted).toEqual(company);
     expect(await db.clientCompany.findUnique({ where: { id: company.id } })).toBeNull();
   });
+  // Non-client links are optional; deleting their company must preserve these user accounts.
   it.each(['ADMIN', 'ANALYST'] as const)(
     'unlinks optional %s users when deleting a company',
     async (role) => {
