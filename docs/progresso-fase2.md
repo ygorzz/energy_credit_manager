@@ -168,3 +168,19 @@ Commit: `test: cover distributor endpoints and deletion dependencies`.
 
 Verificação: **101/101 testes aprovados**; tipos da aplicação/testes, build, lint e Biome
 passaram. Commit: `test: cover power plant endpoints and historical ownership`.
+
+### Lote 2.5 — empresas clientes
+
+- Cinco rotas com leitura/paginação/IDs, campos obrigatórios e validações POST/PATCH.
+  Percentual cadastral inteiro entre 0/100; tipos, null, frações e limites inválidos são 400.
+- CNPJ com/sem máscara, normalização, dois dígitos verificadores e sequências repetidas;
+  formato inválido é Zod 400, algoritmo inválido é erro de negócio 400 e duplicidade é 409.
+- Referência de distribuidora ausente (404); alteração de todos os campos sem histórico;
+  troca de distribuidora com alocações bloqueada (409), sem mudanças parciais.
+- Alterar o padrão da empresa não reescreve créditos ou saldos históricos. Exclusão
+  livre retorna 200; CLIENT vinculado e alocações impedem exclusão (409). Vínculos
+  opcionais de ADMIN/ANALYST são anulados na exclusão permitida da empresa.
+- Rejeições preservam as sete tabelas; nenhuma alteração de produção foi necessária.
+
+Verificação: **91/91 testes aprovados**; tipos da aplicação/testes, build, lint e Biome
+passaram. Commit: `test: cover client company endpoints and relationship rules`.
