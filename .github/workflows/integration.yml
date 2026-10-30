@@ -1,0 +1,86 @@
+name: API integration
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: energy_test
+          POSTGRES_PASSWORD: integration_only
+          POSTGRES_DB: energy_credit_manager_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U energy_test -d energy_credit_manager_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      # These credentials belong only to the disposable service created for this job.
+      TEST_DATABASE_URL: postgresql://energy_test:integration_only@127.0.0.1:5432/energy_credit_manager_test
+    steps:
+      - name: Check out the delivery
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Generate the Prisma client explicitly
+        run: npx prisma generate
+        env:
+          # Only this CLI step uses DATABASE_URL; Vitest independently validates TEST_DATABASE_URL.
+          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
+      - name: Check application and test types
+        run: |
+          npm run check
+          npm run check:test
+      - name: Build on Linux
+        run: npm run build
+      - name: Lint application and tests
+        run: npm run lint
+      - name: Check test infrastructure formatting and imports
+        run: npx biome check test vitest.config.ts tsconfig.test.json package.json
+      - name: Check every changed supported file
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # Preserve filename boundaries and enforce formatting even when a legacy file is edited.
+          mapfile -d '' changed < <(git diff --name-only -z --diff-filter=ACMR "$BASE_SHA" HEAD)
+          if ((${#changed[@]})); then
+            npx biome check --files-ignore-unknown=true --no-errors-on-unmatched -- "${changed[@]}"
+          fi
+      - name: Report existing repository formatting debt
+        id: legacy-format
+        # The existing 25 unchanged files are reported; changed files remain strictly checked above.
+        continue-on-error: true
+        run: npm run format:check -- --reporter=summary
+      - name: Annotate formatting debt
+        if: steps.legacy-format.outcome == 'failure'
+        run: |
+          echo '::warning::Full-repository formatting has existing debt. Changed files and test infrastructure are checked strictly in separate steps.'
+      - name: Run integration tests against migrated PostgreSQL
+        # The harness applies migrations without seed/reset and generates a fresh JWT secret.
+        run: npm run test:integration
