@@ -1,8 +1,8 @@
 # Testes de integração
 
 A suíte usa Vitest 5 e Supertest 7 para executar a aplicação Express real com PostgreSQL.
-Os lotes 2.1–2.7 acrescentam testes funcionais das 31 rotas à infraestrutura do lote 2.0.
-O lote 2.8 acrescenta concorrência coordenada, contratos transversais, fluxo completo e CI em Linux.
+Ela verifica os contratos das 31 rotas, autenticação, autorização e integridade dos saldos.
+Também cobre concorrência coordenada, contratos HTTP, fluxo completo e execução de CI em Linux.
 
 ## Preparação local
 
@@ -59,7 +59,7 @@ execute `npx prisma generate`. Não são executados seed, `migrate reset` ou `db
   reais são reiniciados entre testes pela API `resetKey`, sem desativar o rate limiting.
 - Não há mocks de autenticação, serviços, repositórios ou banco.
 
-## Cobertura inicial do lote 2.0
+## Validação de entrada e isolamento
 
 - Recusa de destinos inseguros, lock exclusivo, limpeza e preservação das migrações.
 - Requisição sem token e consulta autenticada a lista vazia.
@@ -70,11 +70,11 @@ execute `npx prisma generate`. Não são executados seed, `migrate reset` ou `db
 - Preservação de status omitido nas usinas inativas/em manutenção e default ACTIVE na criação.
 - Atualizações válidas com zero e null, incluindo verificação dos saldos energéticos.
 
-Essas regressões iniciais são complementadas pelos testes por módulo descritos abaixo.
+Esses contratos de entrada e isolamento são exercitados junto aos testes por módulo.
 
-## Cobertura dos lotes 2.1–2.7
+## Cobertura por módulo
 
-Veja a [matriz por rota](route-coverage.md) e o [acompanhamento da fase](../docs/progresso-fase2.md).
+Veja a [matriz por rota](route-coverage.md) para os cenários de sucesso e falha de cada endpoint.
 
 - `auth.test.ts`: login/registro, defaults, senha, vínculo, unicidade e validações.
 - `access-control.test.ts`: autenticação nas 30 rotas protegidas e perfis proibidos;
@@ -91,10 +91,9 @@ Veja a [matriz por rota](route-coverage.md) e o [acompanhamento da fase](../docs
   recusa sem reparo; esses casos não são apresentados como dados íntegros.
 
 Essa é a cobertura funcional por rota, sem promessa de 100% de linhas. Os testes de
-concorrência e contratos transversais ficam separados abaixo. Novos defeitos de produção
-devem ser apresentados ao responsável antes de correções.
+concorrência e contratos transversais estão descritos abaixo.
 
-## Lote 2.8 — concorrência, HTTP e fluxo completo
+## Concorrência, contratos HTTP e fluxo completo
 
 - `concurrency.test.ts`: duas alocações disputando disponibilidade; redução/exclusão de
   geração versus alocação; duas correções da mesma geração. Uma sessão auxiliar segura
@@ -123,17 +122,16 @@ aguarda as requisições terminarem antes da limpeza. Não execute outra suíte 
 
 ## GitHub Actions
 
-`.github/workflows/integration.yml` executa em PRs, pushes na `main` e disparos manuais:
+`.github/workflows/ci.yml` executa em PRs, pushes na `main` e disparos manuais:
 
 1. Checkout novo em Ubuntu 24.04, Node 24 e `npm ci`.
 2. Cliente Prisma gerado explicitamente, tipos da aplicação/testes, build e lint.
 3. Biome rigoroso nos testes/configuração e em todos os arquivos suportados alterados no PR.
-4. Relatório global de formatação como aviso: existem 25 arquivos preexistentes fora das
-   alterações. A dívida global não bloqueia o job, mas arquivos editados são verificados
-   rigorosamente, inclusive quando forem arquivos legados.
+4. Relatório global de formatação como aviso. Problemas no restante do repositório não
+   bloqueiam o job por essa verificação, mas arquivos editados são verificados rigorosamente.
 5. Toda a suíte contra um PostgreSQL 18 descartável novo, com banco reservado, migrações
    reais, sem seed administrativo e com segredo JWT novo gerado pelo harness.
 
 O job usa somente `TEST_DATABASE_URL`; `DATABASE_URL` fica restrita ao passo de geração
 do cliente. As credenciais fixas do workflow pertencem apenas ao serviço descartável de CI.
-O aceite final da fase continua dependendo da revisão e do merge do responsável no GitHub.
+Os resultados e logs de cada verificação ficam disponíveis na execução do workflow no GitHub Actions.
