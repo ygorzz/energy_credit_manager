@@ -63,12 +63,14 @@ in English, and focused on intent, constraints, or decisions; avoid restating cl
 
 ## Documentation Guidelines
 
-Markdown files outside `docs/`, including this `AGENTS.md`, must explain the current feature,
-behavior, setup, usage, and limitations without requiring implementation-history context.
+Markdown files in subdirectories outside `docs/`, such as `test/README.md`, must explain the
+current feature, behavior, setup, usage, and limitations without implementation-history context.
 Do not refer to implementation batches, phases, audit-finding IDs, or delivery chronology
 in those explanations. Describe the concrete rule or behavior instead of its tracking label.
-Keep planning, progress, audit findings, and approval milestones in `docs/`. Link to the
-operation plan for delivery instructions instead of repeating its tracking details here.
+Keep detailed planning, progress, audit findings, and approval milestones in `docs/`.
+Markdown files directly in the repository root, such as this `AGENTS.md`, may reference
+implementation batches, phases, findings, and milestones.
+This root-level exception does not extend to other subdirectories outside `docs/`.
 Review new and edited Markdown files for this rule before submitting a delivery.
 
 ## Testing Guidelines
