@@ -85,6 +85,12 @@ The harness validates the target, holds a run lock, applies existing migrations,
 only business tables between cases, and closes HTTP/database connections. No coverage
 threshold is configured. See `test/README.md` for setup and the current batch's limits.
 
+Concurrency tests must observe overlapping PostgreSQL transactions before releasing the
+test gate; starting concurrent promises alone is not evidence of overlap. Test-only failure
+triggers belong exclusively to the guarded test database and must be removed in `finally`.
+CI runs on Ubuntu with Node 24/PostgreSQL 18. Test infrastructure and changed supported
+files are strictly checked by Biome; the existing global formatting debt is reported separately.
+
 Run application/test type checks, lint, formatting, build, and relevant integration tests
 before submitting. Include UUID/Zod failures, authorization, and unchanged database state
 after rejected writes. For energy operations, verify source/destination monthly balances

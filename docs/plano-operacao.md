@@ -28,8 +28,9 @@ autorizou o pré-requisito da fase 2 descrito na seção 5. Essa entrega foi val
 em `47c45d7`. O lote 2.0 foi implementado e teve seus commits autorizados pelo responsável
 em 28/10/2026, divididos entre infraestrutura e regressões de validação. Os lotes 2.1–2.7
 foram implementados e verificados, com um commit por lote, conforme a nova autorização.
-A suíte conjunta passou com 918 testes em 10 arquivos. Aguardar revisão conjunta antes
-de iniciar 2.8. O acompanhamento está em [progresso-fase2.md](progresso-fase2.md).
+A suíte conjunta de 2.0–2.7 passou com 918 testes em 10 arquivos. Em 29/10/2026, o responsável
+autorizou a implementação de 2.8, que será entregue por PR e depende de revisão final
+antes da fase 3. O acompanhamento está em [progresso-fase2.md](progresso-fase2.md).
 A fase 3 continua fora do escopo.
 
 ## 2. Memória das decisões de produto
@@ -291,6 +292,29 @@ expectativas dos testes para ocultar a falha. As correções de PATCH abaixo já
 | 2.7 | Cinco endpoints de alocação, saldos, percentuais e arredondamento. |
 | 2.8 | Concorrência, contratos transversais, fluxo completo e GitHub Actions com PostgreSQL 18/Node 24. |
 
+### Lote 2.8 — autorizado e implementado em branch própria
+
+O responsável autorizou este lote em 29/10/2026. O PR #1 das orientações foi integrado
+antes da criação de `test/phase-2-8-concurrency-and-ci`, baseada na main atualizada.
+
+- Quatro testes confirmam sobreposição real com `pg_blocking_pids` e bloqueio de linha
+  do saldo: duas alocações, redução/exclusão de geração versus alocação e duas correções
+  da mesma geração. O perdedor responde 409 e os lançamentos/saldos ficam íntegros.
+- Trinta testes cobrem 13 endpoints de escrita com JSON malformado/corpo excessivo,
+  encodings não suportados, erro 500 sanitizado e rollback provocado por trigger de teste.
+- Sete testes exercitam as quotas reais 10/20/60/10/20, cabeçalhos, 429, compartilhamento
+  entre recursos e tentativas sem autenticação, sem relógios ou stores simulados.
+- Um teste percorre o fluxo mensal completo por HTTP, desde o login até correções,
+  movimentação entre meses e exclusões elegíveis, preservando os saldos históricos zero.
+- GitHub Actions executa checkout novo, npm ci, geração Prisma, tipos/build/lint/Biome
+  e toda a suíte em Ubuntu/Node 24/PostgreSQL 18. Arquivos alterados são verificados
+  rigorosamente; a dívida global dos 25 arquivos de formatação é reportada como aviso.
+
+Os 42 testes novos passaram em verificações direcionadas. A execução completa local passou
+com 960 testes em 14 arquivos; o resultado remoto de CI é registrado na entrega/PR.
+Nenhum endpoint, regra de negócio, schema ou migração de produção foi alterado.
+Abrir PR e aguardar revisão final do responsável; não iniciar a fase 3 automaticamente.
+
 ### Pré-requisito — validado e commitado
 
 - Os seis schemas de atualização exigem ao menos um valor diferente de `undefined` após
@@ -420,12 +444,15 @@ após a verificação de cada lote. Solicitar revisão conjunta ao final do lote
 do lote 2.8, conforme a seção 5. A nova autorização de commits se aplica aos lotes da
 fase 2; não autoriza iniciar a fase 3.
 Os lotes 2.1–2.7 estão concluídos, com 918 testes aprovados no conjunto de 2.0–2.7.
-Próxima ação: revisão e validação conjunta pelo responsável. Não iniciar 2.8 até essa
-validação. A matriz das 31 rotas está em [test/route-coverage.md](../test/route-coverage.md).
+Em 29/10/2026, o responsável autorizou prosseguir com 2.8. O lote foi implementado na
+branch `test/phase-2-8-concurrency-and-ci`, com 42 novos testes e GitHub Actions.
+Próxima ação: entregar o PR com as verificações e aguardar revisão final, validação e
+merge pelo responsável. A matriz está em [test/route-coverage.md](../test/route-coverage.md).
 Em 29/10/2026, o responsável informou que publicou também os comentários no GitHub e
 instituiu o fluxo de branch/PR acima. Aplicar esse fluxo desde a atualização das próprias
 orientações; revisão, validação e merge passam a acontecer no GitHub pelo responsável.
-Build Linux permanece pendente por indisponibilidade do runtime adequado no ambiente atual.
+Build Linux e checkout novo são verificados pelo workflow do lote 2.8; consultar o resultado
+remoto do job no PR antes do aceite final. Os problemas globais de formatação continuam explícitos.
 O banco existente não foi auditado nem migrado. A rejeição de PATCH vazio de D03 foi
 explicitamente definida e implementada neste pré-requisito; as demais questões D01–D03
 e riscos R01/R02 continuam explícitos na auditoria. Nenhuma correção de dados foi aplicada.

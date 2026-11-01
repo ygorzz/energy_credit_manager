@@ -2,7 +2,7 @@
 
 A suíte usa Vitest 5 e Supertest 7 para executar a aplicação Express real com PostgreSQL.
 Os lotes 2.1–2.7 acrescentam testes funcionais das 31 rotas à infraestrutura do lote 2.0.
-Concorrência coordenada, contratos transversais completos e GitHub Actions pertencem ao lote 2.8.
+O lote 2.8 acrescenta concorrência coordenada, contratos transversais, fluxo completo e CI em Linux.
 
 ## Preparação local
 
@@ -90,6 +90,50 @@ Veja a [matriz por rota](route-coverage.md) e o [acompanhamento da fase](../docs
   Casos de saldo danificado usam fixtures explicitamente inconsistentes para verificar
   recusa sem reparo; esses casos não são apresentados como dados íntegros.
 
-Isso representa cobertura funcional por rota, sem promessa de 100% de linhas ou prova
-de concorrência. O aceite da fase 2 ainda depende de 2.8 e de revisão. Novos defeitos de
-produção devem ser apresentados ao responsável antes de correções.
+Essa é a cobertura funcional por rota, sem promessa de 100% de linhas. Os testes de
+concorrência e contratos transversais ficam separados abaixo. Novos defeitos de produção
+devem ser apresentados ao responsável antes de correções.
+
+## Lote 2.8 — concorrência, HTTP e fluxo completo
+
+- `concurrency.test.ts`: duas alocações disputando disponibilidade; redução/exclusão de
+  geração versus alocação; duas correções da mesma geração. Uma sessão auxiliar segura
+  a linha do saldo e consulta `pg_blocking_pids` até confirmar duas transações bloqueadas,
+  incluindo bloqueios indiretos. Só então libera o gate. Não se presume sobreposição
+  apenas por iniciar duas promises, e não há retry automático para esconder conflitos.
+- `postgres.ts`: conexões auxiliares validam o banco efetivo. Um trigger temporário de
+  teste rejeita aumentos do total alocado para comprovar rollback após escritas anteriores,
+  inclusive após debitar o saldo de origem durante uma movimentação. O bloco `finally`
+  remove trigger/função e fecha a conexão; nada é adicionado às migrações de produção.
+- `http-contracts.test.ts`: JSON malformado (400) e corpo acima do limite real (413) nos
+  13 endpoints de escrita, encoding/charset não suportados (415), erro inesperado (500)
+  sem exposição de detalhes e rollback real. Apenas o logger é observado com spy;
+  autenticação, serviços, repositórios e PostgreSQL permanecem reais.
+- `rate-limits.test.ts`: quotas reais 10/20/60/10/20 por minuto, cabeçalhos, próximo pedido
+  com 429, contador compartilhado entre recursos e banco inalterado no bloqueio. Login
+  incorreto e GET sem token também consomem quota. Sem relógio falso ou store substituído;
+  o teste usa `resetKey` para isolamento, sem aguardar a expiração natural de um minuto.
+- `energy-workflow.test.ts`: somente o primeiro ADMIN vem de fixture. Login, cadastros,
+  usuários, geração, alocação por ANALYST, consultas, correção/movimentação e exclusões
+  acontecem por HTTP. Saldos históricos zero continuam impedindo excluir a distribuidora,
+  e CLIENT continua sem acesso às rotas administrativas atuais.
+
+O gate de concorrência tem prazo de três segundos para comprovar os bloqueios e sempre
+aguarda as requisições terminarem antes da limpeza. Não execute outra suíte no mesmo banco.
+
+## GitHub Actions
+
+`.github/workflows/integration.yml` executa em PRs, pushes na `main` e disparos manuais:
+
+1. Checkout novo em Ubuntu 24.04, Node 24 e `npm ci`.
+2. Cliente Prisma gerado explicitamente, tipos da aplicação/testes, build e lint.
+3. Biome rigoroso nos testes/configuração e em todos os arquivos suportados alterados no PR.
+4. Relatório global de formatação como aviso: existem 25 arquivos preexistentes fora das
+   alterações. A dívida global não bloqueia o job, mas arquivos editados são verificados
+   rigorosamente, inclusive quando forem arquivos legados.
+5. Toda a suíte contra um PostgreSQL 18 descartável novo, com banco reservado, migrações
+   reais, sem seed administrativo e com segredo JWT novo gerado pelo harness.
+
+O job usa somente `TEST_DATABASE_URL`; `DATABASE_URL` fica restrita ao passo de geração
+do cliente. As credenciais fixas do workflow pertencem apenas ao serviço descartável de CI.
+O aceite final da fase continua dependendo da revisão e do merge do responsável no GitHub.

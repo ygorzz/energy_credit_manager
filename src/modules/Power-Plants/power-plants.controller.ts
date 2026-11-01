@@ -16,9 +16,7 @@ export default class PowerPlantsController {
     try {
       const validatedData = createPowerPlantSchema.parse(req.body);
       const created = await this.powerPlantService.createPowerPlant(validatedData);
-      return res
-        .status(201)
-        .json({ message: 'Power Plant created successfully!', created });
+      return res.status(201).json({ message: 'Power Plant created successfully!', created });
     } catch (error) {
       next(error);
     }

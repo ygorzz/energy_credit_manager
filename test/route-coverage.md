@@ -1,4 +1,4 @@
-# Matriz funcional das 31 rotas — lotes 2.1–2.7
+# Matriz funcional das 31 rotas — lotes 2.1–2.8
 
 As respostas abaixo são verificadas por HTTP com PostgreSQL real. `access-control.test.ts`
 acrescenta 401/403 a todas as 30 rotas protegidas e confere ausência de alterações no banco.
@@ -40,8 +40,18 @@ inexistente (404) e preservação das sete tabelas em rejeições.
 | PATCH /credit-allocations/:id | 200, delta/movimentos/percentual | 400, 404, 409 | credit-allocations.test.ts |
 | DELETE /credit-allocations/:id | 200, energia devolvida | 400, 404, 409 por saldo inconsistente | credit-allocations.test.ts |
 
-Os testes não prometem cada código de erro de infraestrutura em cada operação. Conflitos
-coordenados entre transações, limites 429 completos, contratos HTTP transversais, fluxo
-completo e CI/Linux permanecem em 2.8, que exige revisão prévia dos lotes 2.1–2.7.
+## Contratos transversais do lote 2.8
+
+| Grupo | Evidência |
+| --- | --- |
+| Concorrência | `concurrency.test.ts`: 4 disputas com bloqueios observados no PostgreSQL, um sucesso e um 409, sem escrita parcial ou combinação de deltas obsoletos. |
+| HTTP de escrita | `http-contracts.test.ts`: 400 por JSON malformado e 413 por corpo excessivo nos 13 POST/PATCH; 415 por encoding/charset e 500 sanitizado por falha real de persistência. |
+| Rollback | `http-contracts.test.ts`: trigger de teste falha após criar alocação ou após atualizar o registro e debitar a origem de um movimento; todas as tabelas preservadas. |
+| Rate limiting | `rate-limits.test.ts`: quotas 10/20/60/10/20, pedido seguinte 429, Retry-After, compartilhamento entre recursos e contagem de tentativas sem autenticação. |
+| Fluxo completo | `energy-workflow.test.ts`: do login aos lançamentos, movimento entre meses, correção e exclusões permitidas, incluindo perfis e integridade dos saldos. |
+| CI/Linux | `.github/workflows/integration.yml`: checkout novo, npm ci, geração Prisma, tipos/build/lint/formatação e suíte com PostgreSQL 18 em Ubuntu/Node 24. Resultado remoto consultado no PR da entrega. |
+
+Os testes não prometem cada erro de infraestrutura em cada operação nem todas as
+intercalações possíveis de concorrência. O aceite final da fase 2 exige revisão no GitHub.
 Decisões de produto pendentes, como recálculo de percentuais históricos (D01), não foram
 resolvidas implicitamente pelos testes.

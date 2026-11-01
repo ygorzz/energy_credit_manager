@@ -228,7 +228,7 @@ lint e Biome passaram. Commit: `test: cover monthly generation balances and prec
 Verificação do lote: **124 testes aprovados** na execução conjunta. Tipos da aplicação/testes,
 build, lint e Biome passaram. Commit: `test: cover credit allocation rules and balance integrity`.
 
-## Revisão conjunta — aguardando validação
+## Revisão conjunta dos lotes 2.1–2.7 — continuidade autorizada
 
 Execução completa em Node **24.14.0**, Windows e PostgreSQL 18: **918/918 testes em 10 arquivos**,
 em aproximadamente 196 segundos. Sem mocks de persistência/autenticação/serviços e sem retries.
@@ -254,8 +254,48 @@ preexistentes de formatação**, fora das alterações. Os 10 alertas anteriores
 não foram tratados nesta entrega. Nenhum arquivo de produção, migração ou dependência
 foi modificado nos lotes 2.1–2.7; as correções das fixtures foram descritas nos lotes pertinentes.
 
-A [matriz das 31 rotas](../test/route-coverage.md) distingue cenários funcionais entregues
-dos pontos ainda reservados para 2.8. Não considerar a fase 2 encerrada: concorrência
-coordenada, limites 429 completos, contratos HTTP transversais, fluxo completo e CI/Linux
-continuam pendentes. **Aguardar revisão conjunta antes de iniciar 2.8**. A fase 3 permanece
-fora do escopo e D01/D02 e os riscos históricos não foram resolvidos implicitamente.
+A [matriz das 31 rotas](../test/route-coverage.md) distingue cenários por rota e transversais.
+Em 29/10/2026, o responsável autorizou implementar 2.8, liberando a continuidade da fase.
+O aceite final ainda depende da entrega desse lote e da revisão no GitHub. A fase 3 permanece
+fora do escopo, e D01/D02 e os riscos históricos não foram resolvidos implicitamente.
+
+## Lote 2.8 — implementação e revisão final por PR
+
+Branch: `test/phase-2-8-concurrency-and-ci`, criada após confirmar o merge do PR #1 e
+atualizar a referência da main. Entrega autorizada em 29/10/2026.
+
+| Grupo | Casos novos | Evidência |
+| --- | --- | --- |
+| Concorrência | 4 | Transações bloqueadas observadas no PostgreSQL antes da liberação; um sucesso/um 409, sem oversubscription nem deltas obsoletos. |
+| HTTP e rollback | 30 | JSON 400/corpo 413 em 13 escritas, encoding/charset 415 e falha real tardia de persistência 500, sanitizada e com rollback completo. |
+| Rate limiting | 7 | Limites reais, cabeçalhos, 429 após a quota, contador compartilhado, reset de isolamento e tentativas sem autenticação. |
+| Fluxo mensal | 1 | Login, cadastros/usuários, geração, alocação por ANALYST, consultas, movimento, correção e exclusões por HTTP. |
+
+Os 42 testes novos passaram em execuções direcionadas. A sessão auxiliar de concorrência
+mantém um lock de linha e confirma bloqueadores diretos/indiretos por `pg_blocking_pids`,
+sem alterar os serviços ou simular transações. As duas operações terminam antes da limpeza.
+
+O trigger de falha é criado apenas no banco de testes e removido em `finally`; comprova
+rollback após inserir uma alocação e após debitar a origem de um movimento. O spy observa
+somente o logger: autenticação, serviços, repositórios e persistência continuam reais.
+Nenhum detalhe privado de corpo, query string ou erro PostgreSQL aparece na resposta/log.
+
+O workflow `API integration` roda em PR/main e disparos manuais, usando Ubuntu 24.04,
+Node 24 e um PostgreSQL 18 novo. Executa npm ci, geração explícita do cliente, tipos,
+build Linux, lint e integração com migrações reais, sem seed/reset e sem retries.
+Biome é bloqueante para a infraestrutura de testes e todos os arquivos suportados alterados
+no PR; o relatório global de formatação permanece não bloqueante por causa da dívida
+preexistente dos 25 arquivos. Esses problemas não foram corrigidos ou ocultados neste lote.
+
+O resultado da suíte completa e o job remoto são apresentados no PR. A fase 2 fica
+**aguardando revisão final, validação e merge do responsável**. A fase 3 não foi iniciada.
+
+Verificação local final: **960/960 testes em 14 arquivos**, em 183 segundos, com Node
+24.14.0/Windows/PostgreSQL 18. Tipos da aplicação/testes, build, lint, Biome dos arquivos
+da entrega e validação estrutural do YAML passaram. Os comandos globais de formatação
+e Biome continuam apontando exclusivamente os mesmos 25 arquivos anteriores.
+
+Após a suíte: 15 migrações preservadas, sete tabelas vazias, zero conexões, zero trigger
+ou função temporária de teste e lock liberado. A instância descartável local foi encerrada.
+O banco da aplicação não foi utilizado. A execução em Linux é verificada no job do PR;
+o resultado remoto integra a descrição da entrega, sem presumir sucesso antes da execução.
