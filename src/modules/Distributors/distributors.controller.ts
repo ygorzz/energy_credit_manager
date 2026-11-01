@@ -16,9 +16,7 @@ export default class DistributorsController {
     try {
       const validatedData = createDistributorSchema.parse(req.body);
       const created = await this.distributorService.createDistributor(validatedData);
-      return res
-        .status(201)
-        .json({ message: 'Distributor created successfully!', created });
+      return res.status(201).json({ message: 'Distributor created successfully!', created });
     } catch (error) {
       next(error);
     }
