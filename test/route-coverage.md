@@ -1,8 +1,9 @@
-# Matriz funcional das 31 rotas — lotes 2.1–2.8
+# Matriz funcional das 31 rotas
 
 As respostas abaixo são verificadas por HTTP com PostgreSQL real. `access-control.test.ts`
 acrescenta 401/403 a todas as 30 rotas protegidas e confere ausência de alterações no banco.
-`patch-validation.test.ts` preserva as regressões do pré-requisito (incluindo status de usina).
+`patch-validation.test.ts` verifica a rejeição de PATCH vazio e preserva o status de usina
+quando esse campo é omitido na atualização.
 Os contratos de cada módulo conferem Zod 400, paginação, UUID inválido (400), UUID válido
 inexistente (404) e preservação das sete tabelas em rejeições.
 
@@ -40,7 +41,7 @@ inexistente (404) e preservação das sete tabelas em rejeições.
 | PATCH /credit-allocations/:id | 200, delta/movimentos/percentual | 400, 404, 409 | credit-allocations.test.ts |
 | DELETE /credit-allocations/:id | 200, energia devolvida | 400, 404, 409 por saldo inconsistente | credit-allocations.test.ts |
 
-## Contratos transversais do lote 2.8
+## Concorrência, contratos HTTP e fluxo completo
 
 | Grupo | Evidência |
 | --- | --- |
@@ -49,9 +50,9 @@ inexistente (404) e preservação das sete tabelas em rejeições.
 | Rollback | `http-contracts.test.ts`: trigger de teste falha após criar alocação ou após atualizar o registro e debitar a origem de um movimento; todas as tabelas preservadas. |
 | Rate limiting | `rate-limits.test.ts`: quotas 10/20/60/10/20, pedido seguinte 429, Retry-After, compartilhamento entre recursos e contagem de tentativas sem autenticação. |
 | Fluxo completo | `energy-workflow.test.ts`: do login aos lançamentos, movimento entre meses, correção e exclusões permitidas, incluindo perfis e integridade dos saldos. |
-| CI/Linux | `.github/workflows/integration.yml`: checkout novo, npm ci, geração Prisma, tipos/build/lint/formatação e suíte com PostgreSQL 18 em Ubuntu/Node 24. Resultado remoto consultado no PR da entrega. |
+| CI/Linux | `.github/workflows/ci.yml`: checkout novo, npm ci, geração Prisma, tipos/build/lint/formatação e suíte com PostgreSQL 18 em Ubuntu/Node 24. |
 
 Os testes não prometem cada erro de infraestrutura em cada operação nem todas as
-intercalações possíveis de concorrência. O aceite final da fase 2 exige revisão no GitHub.
-Decisões de produto pendentes, como recálculo de percentuais históricos (D01), não foram
-resolvidas implicitamente pelos testes.
+intercalações possíveis de concorrência. Esta matriz descreve os comportamentos verificados;
+ela não define uma política de recálculo dos percentuais de alocações existentes quando
+a geração usada como base é alterada.

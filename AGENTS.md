@@ -10,27 +10,13 @@ This Express 5 API manages energy generation and credit allocations using TypeSc
 - `prisma/` contains the schema, migration history, and seed script. Prisma generates its client into `src/db/generated/prisma/`.
 - `dist/` contains compiled output. `test/integration/` contains Vitest/Supertest tests; `test/support/` owns isolated database, HTTP server, authentication fixtures, and lifecycle helpers.
 
-## Current Delivery Priorities
+## Delivery Scope and Approvals
 
-Follow `docs/plano-operacao.md` for the persistent delivery sequence and product decisions.
-First fix the existing API issues recorded in `docs/auditoria-tecnica.md`, then implement
-and pass automated tests for all 31 existing routes. Only afterward implement the approved
-MVP requirements preserved in `docs/requisitos-mvp.md`. Do not introduce new MVP features
-while the correction and existing-route testing phases remain incomplete.
-
-During Phase 1 only, execute batches sequentially and address one finding at a time.
-After verifying each finding, commit its changes with a focused English message and continue
-without requesting intermediate review or acceptance. Do not combine findings or include
-unrelated changes. Stop after Phase 1 and request the user's code review and approval before
-starting Phase 2 or any later work. This exception does not authorize automatic advancement
-or commits beyond Phase 1.
-
-Phase 2 uses the review gates in the operation plan: review the prerequisite first, then
-review batch 2.0 separately. Implement batches 2.1–2.7 sequentially, verify and commit
-each batch before starting the next, without intermediate review. Request their joint
-acceptance after batch 2.7 and before batch 2.8. Batches 2.1–2.7 are already delivered.
-All new deliveries follow the branch and pull request workflow below, including batch 2.8.
-Stop after batch 2.8 for the user's final review; do not start Phase 3 automatically.
+Read `docs/plano-operacao.md` before resuming development. It is authoritative for delivery
+order, product decisions, authorized scope, and required review and approval gates.
+Follow its sequencing and commit rules together with the branch and pull request workflow
+below. Do not start new features or advance beyond the scope authorized by that plan.
+The approved product requirements are kept locally in `docs/requisitos-mvp.md`.
 Report newly discovered production defects before fixing them unless explicitly authorized.
 
 ## Delegated Questions
@@ -65,8 +51,8 @@ Follow existing feature directory names and kebab-case filenames such as `power-
 Preserve existing code comments. Delete a comment only when its associated code block is
 also deleted; move it with the corresponding block during refactoring. Write new code
 comments and commit messages in English. Add short comments to the main business rules
-and significant implementation changes, including Phase 1 corrections and all future
-implementations. Summarize the rule or purpose of the block without long explanations
+and significant implementation changes, including corrections, refactoring, and new
+features. Summarize the rule or purpose of the block without long explanations
 or line-by-line narration. Preserve existing comment wording.
 
 Add comments as implementation progresses, rather than leaving documentation until the
@@ -74,6 +60,16 @@ end. This is a permanent rule across the project, including application code, te
 helpers, and configuration. Explain the purpose of key files, nontrivial functions,
 business rules, and important blocks where intent is not obvious. Keep comments brief,
 in English, and focused on intent, constraints, or decisions; avoid restating clear code.
+
+## Documentation Guidelines
+
+Markdown files outside `docs/`, including this `AGENTS.md`, must explain the current feature,
+behavior, setup, usage, and limitations without requiring implementation-history context.
+Do not refer to implementation batches, phases, audit-finding IDs, or delivery chronology
+in those explanations. Describe the concrete rule or behavior instead of its tracking label.
+Keep planning, progress, audit findings, and approval milestones in `docs/`. Link to the
+operation plan for delivery instructions instead of repeating its tracking details here.
+Review new and edited Markdown files for this rule before submitting a delivery.
 
 ## Testing Guidelines
 
@@ -83,7 +79,7 @@ the exclusive local database `energy_credit_manager_test`. Never use the applica
 database, administrative seed, SQLite, or mocked persistence as integration evidence.
 The harness validates the target, holds a run lock, applies existing migrations, clears
 only business tables between cases, and closes HTTP/database connections. No coverage
-threshold is configured. See `test/README.md` for setup and the current batch's limits.
+threshold is configured. See `test/README.md` for setup, isolation safeguards, and coverage limits.
 
 Concurrency tests must observe overlapping PostgreSQL transactions before releasing the
 test gate; starting concurrent promises alone is not evidence of overlap. Test-only failure
@@ -102,7 +98,7 @@ Use conventional commits. History uses English messages with `feat:`, `fix:`, an
 
 ### Required delivery workflow
 
-For every authorized delivery unit (request, block, batch, feature, or other agreed scope):
+For every authorized delivery (request, feature, documentation update, or other agreed scope):
 
 1. Verify the repository state and current target branch on GitHub, then create a dedicated
    branch for the delivery before committing its changes. Preserve unrelated local work.
@@ -117,9 +113,9 @@ For every authorized delivery unit (request, block, batch, feature, or other agr
    and do not assume that an external review has already been merged.
 
 The user owns review, validation, and merge. Do not merge, enable auto-merge, or push delivery
-commits directly to `main` or another target branch. Existing phase gates still apply.
-This permanent workflow supersedes earlier delivery instructions that ended at a local
-commit or IDE review. It also applies to documentation and development-rule updates.
+commits directly to `main` or another target branch. The approval requirements in
+`docs/plano-operacao.md` still apply. Follow this workflow for documentation and
+development-rule updates as well.
 
 ## Security & Configuration
 
